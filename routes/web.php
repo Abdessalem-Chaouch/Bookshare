@@ -4,9 +4,13 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\UsersController;
+
 use App\Http\Controllers\ProfilController;
 
-// Front Office Routes
+use App\Http\Controllers\CategoryController;
+
+
+// Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', function () {
     return view('FrontOffice.Accueil');
 })->name('accueil');
@@ -74,6 +78,13 @@ Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions')
     });
 
     // ========================
+    // 🔒 Routes réservées VISITEUR uniquement
+    // ========================
+    Route::middleware(['role:visiteur'])->group(function () {
+        // Dashboard Visiteur (si nécessaire)
+    });
+
+    // ========================
     // 🔒 Routes accessibles ADMIN + AUTEUR
     // ========================
     Route::middleware(['role:admin,auteur'])->group(function () {
@@ -82,8 +93,9 @@ Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions')
         Route::get('/listeLivre', fn() => view('BackOffice.livre.listeLivre'))->name('listeLivre');
 
         // Categorie Management
-        Route::get('/AjouterCategorie', fn() => view('BackOffice.categorieLivre.ajouterCategorie'))->name('AjouterCategorie');
-        Route::get('/listeCategorie', fn() => view('BackOffice.categorieLivre.listeCategorie'))->name('listeCategorie');
+        Route::resource('categories', CategoryController::class);
+        Route::get('/AjouterCategorie', [CategoryController::class, 'create'])->name('AjouterCategorie');
+        Route::get('/listeCategorie', [CategoryController::class, 'index'])->name('listeCategorie');
         Route::get('/borrows', fn() => view('BackOffice.Borrows.Borrows'))->name('borrows');
     });
 });
