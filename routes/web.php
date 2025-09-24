@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\CategoryController;
 
-// Front Office Routes
+// Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', function () {
     return view('FrontOffice.Accueil');
 })->name('accueil');
@@ -67,6 +67,13 @@ Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions')
     Route::middleware(['role:auteur'])->group(function () {
         // Dashboard Auteur
         Route::get('/dashboardAuteur', fn() => view('BackOffice.dashboardAuteur'))->name('dashboardAuteur');
+    });
+
+    // ========================
+    // 🔒 Routes réservées VISITEUR uniquement
+    // ========================
+    Route::middleware(['role:visiteur'])->group(function () {
+        // Dashboard Visiteur (si nécessaire)
     });
 
     // ========================

@@ -39,6 +39,12 @@
 								<i class="icon icon-user"></i>&nbsp;&nbsp;&nbsp;<span>{{ Auth::user()->name }}</span>
 							</a>
 
+							@if(Auth::user()->role === 'auteur')
+							<a href="{{ route('dashboardAuteur') }}" class="user-account for-buy">
+								<i class="icon icon-settings"></i>&nbsp;&nbsp;&nbsp;<span>Dashboard</span>
+							</a>
+							@endif
+
 							<form method="POST" action="{{ route('logout') }}" style="display: inline;">
 								@csrf
 								<a href="{{ route('logout') }}"

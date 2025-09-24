@@ -28,18 +28,14 @@ public function store(LoginRequest $request): RedirectResponse
 
         $request->session()->regenerate();
 
-        // 🔑 Vérifier le rôle de l'utilisateur
+        // Redirection selon le rôle
         $user = Auth::user();
-
+        
         if ($user->role === 'admin') {
             return redirect()->route('dashboardAdmin');
         }
-
-        if ($user->role === 'auteur') {
-            return redirect()->route('dashboardAuteur');
-        }
-
-        // Si ce n'est ni admin ni auteur -> utilisateur classique
+        
+        // Visiteurs et auteurs vont au front office
         return redirect()->route('accueil');
     }
 
