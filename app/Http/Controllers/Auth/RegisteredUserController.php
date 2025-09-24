@@ -39,9 +39,11 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'photo_profil' => $request->file('photo_profil') 
-            ? file_get_contents($request->file('photo_profil')->getRealPath()) 
+          'photo_profil' => $request->hasFile('photo_profil')
+            ? $request->file('photo_profil')->store('photos', 'public')
             : null,
+
+
             'role' => 'user', 
         ]);
 

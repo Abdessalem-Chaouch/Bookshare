@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-
-
+use App\Models\User;
+use App\Http\Controllers\UsersController;
 
 // Front Office Routes
 Route::get('/', function () {
@@ -42,9 +42,18 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/listeMagasin', fn() => view('BackOffice.magasin.listeMagasin'))->name('listeMagasin');
 
         // Utilisateur Management
-        Route::get('/AjouterUtilisateur', fn() => view('BackOffice.utilisateur.ajouterUtilisateur'))->name('AjouterUtilisateur');
-        Route::get('/listeUtilisateur', fn() => view('BackOffice.utilisateur.listeUtilisateur'))->name('listeUtilisateur');
-        Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
+
+       Route::get('/AjouterUtilisateur', [UsersController::class, 'createUser'])->name('AjouterUtilisateur');
+       Route::post('/AjouterUtilisateur', [UsersController::class, 'addUser'])->name('AjouterUtilisateur.add');
+       Route::delete('/listeUtilisateur/{user}', [UsersController::class, 'delete'])->name('users.delete');
+       Route::get('/EditUser/{user}', [UsersController::class, 'editUser'])->name('users.edit');
+       Route::put('/EditUser/{user}', [UsersController::class, 'updateUser'])->name('users.update');
+       Route::get('/listeUtilisateur', function () {
+            $users = User::all(); // Fetch all users
+            return view('BackOffice.utilisateur.listeUtilisateur', compact('users'));
+        })->name('listeUtilisateur');
+      
+Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
 
 
 
