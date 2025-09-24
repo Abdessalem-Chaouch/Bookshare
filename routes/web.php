@@ -4,7 +4,11 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\UsersController;
+
+use App\Http\Controllers\ProfilController;
+
 use App\Http\Controllers\CategoryController;
+
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', function () {
@@ -22,6 +26,10 @@ Route::get('/aboutus', function () {
     return view('FrontOffice.Aboutus.AboutPage');
 })->name('aboutus');
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
+    Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
+});
 // ========================
 // 🔒 Routes du Back Office
 // ========================
