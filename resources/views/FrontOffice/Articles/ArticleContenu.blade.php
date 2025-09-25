@@ -26,6 +26,12 @@
 
 							<div class="post-item">
 								<div class="meta-date">{{ $blog->created_at->format('M d, Y') }}</div>
+
+								<!-- Affichage de la catégorie -->
+								<div class="meta-category text-muted mb-1">
+									{{ $blog->category->name ?? 'N/A' }}
+								</div>
+
 								<h3>
 									<a href="{{ route('articleDetail', $blog->id) }}">
 										{{ \Illuminate\Support\Str::limit($blog->title, 50, '...') }}
@@ -49,8 +55,6 @@
 										<a href="#"><i class="icon icon-behance-square"></i></a>
 									</div>
 								</div>
-
-								<!--links-element-->
 							</div>
 						</article>
 					</div>

@@ -4,9 +4,8 @@
 <div class="content-wrapper">
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Forms/</span> Modifier blog </h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Forms /</span> Modifier blog </h4>
 
-        <!-- Basic Layout & Basic with Icons -->
         <div class="row">
             <div class="col-xxl">
                 <div class="card mb-4">
@@ -31,8 +30,7 @@
                                             class="form-control @error('title') is-invalid @enderror"
                                             id="title"
                                             placeholder="Titre du blog"
-                                            value="{{ old('title', $blog->title) }}"
-                                            >
+                                            value="{{ old('title', $blog->title) }}">
                                     </div>
                                     @error('title')
                                         <small class="text-danger">{{ $message }}</small>
@@ -43,18 +41,35 @@
                             <!-- Contenu -->
                             <div class="row mb-3">
                                 <label class="col-sm-2 form-label" for="content">Contenu</label>
-                                <div class="col-sm-10 ">
-                                    <div class="input-group input-group-merge ">
+                                <div class="col-sm-10">
+                                    <div class="input-group input-group-merge">
                                         <span class="input-group-text"><i class="bx bx-comment"></i></span>
                                         <textarea
                                             name="content"
                                             class="form-control @error('content') is-invalid @enderror"
                                             id="content"
                                             placeholder="Écrivez le contenu du blog..."
-                                            rows="2"
-                                            >{{ old('content', $blog->content) }}</textarea>
+                                            rows="5">{{ old('content', $blog->content) }}</textarea>
                                     </div>
                                     @error('content')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Catégorie -->
+                            <div class="row mb-3">
+                                <label class="col-sm-2 form-label" for="category_id">Catégorie</label>
+                                <div class="col-sm-10">
+                                    <select name="category_id" class="form-select @error('category_id') is-invalid @enderror" id="category_id">
+                                        <option value="">-- Sélectionner une catégorie --</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}" {{ (old('category_id', $blog->category_id) == $category->id) ? 'selected' : '' }}>
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('category_id')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
@@ -83,13 +98,11 @@
                             </div>
 
                         </form>
-                        <!-- /Formulaire -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- / Content -->
     <div class="content-backdrop fade"></div>
 </div>
 

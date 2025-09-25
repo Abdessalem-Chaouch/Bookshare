@@ -18,14 +18,17 @@
                         <article class="column" data-aos="fade-up">
                             <figure>
                                 @if($blog->image)
-                                    <img src="{{ asset('uploads/' . $blog->image) }}" alt="{{ $blog->title }}" class="post-image w-100">
+                                <img src="{{ asset('uploads/' . $blog->image) }}" alt="{{ $blog->title }}" class="post-image w-100">
                                 @else
-                                    <img src="images/default-post.jpg" alt="default" class="post-image w-100">
+                                <img src="images/default-post.jpg" alt="default" class="post-image w-100">
                                 @endif
                             </figure>
 
                             <div class="post-item mt-4">
                                 <div class="meta-date mb-2">{{ $blog->created_at->format('M d, Y') }}</div>
+                                <div class="meta-category text-muted mb-2">
+                                    Catégorie : {{ $blog->category->name ?? 'N/A' }}
+                                </div>
                                 <h3 class="mb-3">{{ $blog->title }}</h3>
 
                                 <p>{{ $blog->content }}</p>
@@ -46,23 +49,38 @@
 
                                     <ul class="list-unstyled">
                                         <li class="mb-3">
-                                            <strong>John Doe</strong> 
+                                            <strong>John Doe</strong>
                                             <span class="text-muted">(Sep 20, 2025 10:30)</span>
                                             <p>Great article! Really helped me understand the topic.</p>
                                         </li>
                                         <li class="mb-3">
-                                            <strong>Jane Smith</strong> 
+                                            <strong>Jane Smith</strong>
                                             <span class="text-muted">(Sep 21, 2025 14:12)</span>
                                             <p>Very informative. Thanks for sharing!</p>
                                         </li>
                                         <li class="mb-3">
-                                            <strong>Anonymous</strong> 
+                                            <strong>Anonymous</strong>
                                             <span class="text-muted">(Sep 22, 2025 08:45)</span>
                                             <p>I enjoyed reading this. Looking forward to more posts.</p>
                                         </li>
                                     </ul>
-                                </div>
+                                    <!-- ✅ Formulaire d'ajout de commentaire -->
+                                    <div class="add-comment mt-5">
 
+                                        <form action="#" method="POST">
+                                            @csrf
+
+                                            <div class="mb-3">
+                                                <label for="comment" class="form-label">Your Comment</label>
+                                                <textarea id="comment" name="comment" class="form-control" rows="4" placeholder="Write your comment..."></textarea>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-send"></i> Post Comment
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </article>
                     </div>
