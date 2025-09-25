@@ -61,7 +61,7 @@ class LivreController extends Controller
 
     public function edit(Livre $livre)
     {
-        $categories = Categorie::all();
+        $categories = Category::all();
         return view('livres.edit', compact('livre','categories'));
     }
 

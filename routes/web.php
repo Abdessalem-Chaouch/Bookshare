@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AccueilController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
@@ -11,16 +13,17 @@ use App\Http\Controllers\CategoryController;
 
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
-Route::get('/', function () {
-    return view('FrontOffice.Accueil');
-})->name('accueil');
+
+Route::get('/', [AccueilController::class, 'index'])->name('accueil');
+
 Route::get('/livres', function () {
     return view('FrontOffice.Livres.LivrePage');
 })->name('livres');
 
-Route::get('/articles', function () {
-    return view('FrontOffice.Articles.ArticlePage');
-})->name('articles');
+Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles');
+
+Route::get('/article/{id}', [BlogController::class, 'show'])->name('articleDetail');
+
 
 Route::get('/aboutus', function () {
     return view('FrontOffice.Aboutus.AboutPage');
@@ -43,8 +46,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboardAdmin', fn() => view('BackOffice.dashboardAdmin'))->name('dashboardAdmin');
 
         // Blog Management
-        Route::get('/AjouterBlog', fn() => view('BackOffice.blog.ajouterBlog'))->name('AjouterBlog');
-        Route::get('/listeBlog', fn() => view('BackOffice.blog.listeBlog'))->name('listeBlog');
+
+        Route::get('/listeBlog', [BlogController::class, 'index'])->name('listeBlog');
+        Route::get('/AjouterBlog', [BlogController::class, 'create'])->name('AjouterBlog');
+        Route::post('/AjouterBlog', [BlogController::class, 'store'])->name('AjouterBlog.store');
+        Route::get('/EditBlog/{blog}', [BlogController::class, 'edit'])->name('blogs.edit');
+        Route::put('/EditBlog/{blog}', [BlogController::class, 'update'])->name('blogs.update');
+        Route::delete('/DeleteBlog/{blog}', [BlogController::class, 'destroy'])->name('blogs.delete');
 
         // Magasin Management
         Route::get('/AjouterMagasin', fn() => view('BackOffice.magasin.ajouterMagasin'))->name('AjouterMagasin');
@@ -52,21 +60,17 @@ Route::middleware(['auth'])->group(function () {
 
         // Utilisateur Management
 
-       Route::get('/AjouterUtilisateur', [UsersController::class, 'createUser'])->name('AjouterUtilisateur');
-       Route::post('/AjouterUtilisateur', [UsersController::class, 'addUser'])->name('AjouterUtilisateur.add');
-       Route::delete('/listeUtilisateur/{user}', [UsersController::class, 'delete'])->name('users.delete');
-       Route::get('/EditUser/{user}', [UsersController::class, 'editUser'])->name('users.edit');
-       Route::put('/EditUser/{user}', [UsersController::class, 'updateUser'])->name('users.update');
-       Route::get('/listeUtilisateur', function () {
+        Route::get('/AjouterUtilisateur', [UsersController::class, 'createUser'])->name('AjouterUtilisateur');
+        Route::post('/AjouterUtilisateur', [UsersController::class, 'addUser'])->name('AjouterUtilisateur.add');
+        Route::delete('/listeUtilisateur/{user}', [UsersController::class, 'delete'])->name('users.delete');
+        Route::get('/EditUser/{user}', [UsersController::class, 'editUser'])->name('users.edit');
+        Route::put('/EditUser/{user}', [UsersController::class, 'updateUser'])->name('users.update');
+        Route::get('/listeUtilisateur', function () {
             $users = User::all(); // Fetch all users
             return view('BackOffice.utilisateur.listeUtilisateur', compact('users'));
         })->name('listeUtilisateur');
-      
-Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
 
-
-
-
+        Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
     });
 
     // ========================

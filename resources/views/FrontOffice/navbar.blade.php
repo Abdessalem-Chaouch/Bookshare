@@ -141,7 +141,7 @@
                 <div class="col-md-2">
                     <div class="main-logo">
                         <a href="{{ route('accueil') }}" class="logo-link d-flex align-items-center">
-                            <img src="assets/img/libroLogo.png" alt="logo" style="width:50px; height:60px; margin-right:10px;">
+                            <img src="{{asset('assets/img/libroLogo.png')}}" alt="logo" style="width:50px; height:60px; margin-right:10px;">
                             <span class="logo-text">LibroLink</span>
                         </a>
                     </div>
