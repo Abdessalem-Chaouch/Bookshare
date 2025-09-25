@@ -40,11 +40,13 @@
 								<div class="links-element d-flex align-items-center justify-content-between">
 									<!-- Icônes like et chat -->
 									<div class="icons d-flex align-items-center">
-										<a href="#" class="me-3">
+										<a href="javascript:void(0)" class="like-btn me-3" data-blog="{{ $blog->id }}">
 											<i class="bi bi-hand-thumbs-up"></i>
+											<span class="like-count">{{ $blog->likes->count() }}</span>
 										</a>
-										<a href="#">
+										<a href="{{ route('articleDetail', $blog->id) }}" class="me-3">
 											<i class="bi bi-chat-dots"></i>
+											<span>{{ $blog->comments->count() }}</span>
 										</a>
 									</div>
 
@@ -73,3 +75,28 @@
 		</div>
 	</div>
 </section>
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		document.querySelectorAll('.like-btn').forEach(function(button) {
+			button.addEventListener('click', function(e) {
+				e.preventDefault();
+				const blogId = this.dataset.blog;
+				const likeCount = this.querySelector('.like-count');
+
+				fetch(`/blogs/${blogId}/like`, {
+						method: 'POST',
+						headers: {
+							'X-CSRF-TOKEN': '{{ csrf_token() }}',
+							'Accept': 'application/json',
+							'Content-Type': 'application/json'
+						},
+					})
+					.then(response => response.json())
+					.then(data => {
+						likeCount.textContent = data.likes_count;
+					})
+					.catch(error => console.error('Erreur:', error));
+			});
+		});
+	});
+</script>
