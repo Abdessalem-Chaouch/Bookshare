@@ -19,7 +19,7 @@
                     <div class="right-element">
 						
                         <a href="#" class="cart for-buy">
-                            <i class="icon icon-clipboard"></i><span>Cart</span>
+                            <i class="icon icon-clipboard"></i>&nbsp;&nbsp;&nbsp;<span>Cart</span>
                         </a>
 
                         @guest

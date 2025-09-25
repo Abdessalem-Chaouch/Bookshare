@@ -2,13 +2,10 @@
 @section('content')
 
 <div class="content-wrapper">
-    <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Forms /</span> Ajouter Blog</h4>
 
-        <!-- Basic Layout & Basic with Icons -->
         <div class="row">
-            <!-- Basic with Icons -->
             <div class="col-xxl">
                 <div class="card mb-4">
                     <div class="card-header d-flex align-items-center justify-content-between">
@@ -16,8 +13,6 @@
                         <small class="text-muted float-end">Formulaire de création</small>
                     </div>
                     <div class="card-body">
-
-                        <!-- Formulaire -->
 
                         <form action="{{ route('AjouterBlog.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
@@ -34,7 +29,7 @@
                                             class="form-control @error('title') is-invalid @enderror"
                                             placeholder="Titre du blog"
                                             value="{{ old('title') }}"
-                                            >
+                                        >
                                     </div>
                                     @error('title')
                                         <small class="text-danger">{{ $message }}</small>
@@ -53,9 +48,27 @@
                                             class="form-control @error('content') is-invalid @enderror"
                                             placeholder="Écrivez le contenu du blog..."
                                             rows="5"
-                                            >{{ old('content') }}</textarea>
+                                        >{{ old('content') }}</textarea>
                                     </div>
                                     @error('content')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Catégorie -->
+                            <div class="row mb-3">
+                                <label class="col-sm-2 form-label">Catégorie</label>
+                                <div class="col-sm-10">
+                                    <select name="category_id" class="form-select @error('category_id') is-invalid @enderror">
+                                        <option value="">-- Sélectionnez une catégorie --</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('category_id')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
@@ -81,14 +94,12 @@
                             </div>
 
                         </form>
-                        <!-- /Formulaire -->
 
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- / Content -->
     <div class="content-backdrop fade"></div>
 </div>
 
