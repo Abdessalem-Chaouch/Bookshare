@@ -11,7 +11,8 @@ use App\Http\Controllers\UsersController;
 use App\Http\Controllers\ProfilController;
 
 use App\Http\Controllers\CategoryController;
-
+use App\Http\Controllers\CommentsController;
+use App\Http\Controllers\LikesController;
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 
@@ -115,6 +116,18 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/borrows', fn() => view('BackOffice.Borrows.Borrows'))->name('borrows');
     });
 });
+// Likes et comments 
+// web.php
+Route::post('/blogs/{blog}/like', [LikesController::class, 'toggle'])->name('blogs.like')->middleware('auth');
+
+// Ajouter un commentaire
+Route::post('/blogs/{blog}/comment', [CommentsController::class, 'store'])->name('comments.store')->middleware('auth');
+
+// Modifier un commentaire
+Route::put('/comments/{comment}', [CommentsController::class, 'update'])->name('comments.update')->middleware('auth');
+
+// Supprimer un commentaire
+Route::delete('/comments/{comment}', [CommentsController::class, 'destroy'])->name('comments.destroy')->middleware('auth');
 
 Route::get('/admin', function () {
     return view('dashboard');
