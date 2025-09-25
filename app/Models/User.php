@@ -47,7 +47,7 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-      public function isAdmin()
+    public function isAdmin()
     {
         return $this->role === 'admin';
     }
@@ -56,8 +56,12 @@ class User extends Authenticatable
     {
         return $this->role === 'user';
     }
-        public function isAuteur()
+    public function isAuteur()
     {
-        return $this->role === 'auteur'; 
+        return $this->role === 'auteur';
+    }
+    public function blogs()
+    {
+        return $this->hasMany(Blog::class);
     }
 }

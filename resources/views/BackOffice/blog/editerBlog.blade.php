@@ -4,27 +4,24 @@
 <div class="content-wrapper">
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Forms /</span> Ajouter Blog</h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Forms/</span> Modifier blog </h4>
 
         <!-- Basic Layout & Basic with Icons -->
         <div class="row">
-            <!-- Basic with Icons -->
             <div class="col-xxl">
                 <div class="card mb-4">
                     <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="mb-0">Nouveau Blog</h5>
-                        <small class="text-muted float-end">Formulaire de création</small>
+                        <h5 class="mb-0">Modifier le blog</h5>
+                        <small class="text-muted float-end">Formulaire d'édition</small>
                     </div>
                     <div class="card-body">
-
-                        <!-- Formulaire -->
-
-                        <form action="{{ route('AjouterBlog.store') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('blogs.update', $blog->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
+                            @method('PUT')
 
                             <!-- Titre -->
                             <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label">Titre</label>
+                                <label class="col-sm-2 col-form-label" for="title">Titre</label>
                                 <div class="col-sm-10">
                                     <div class="input-group input-group-merge">
                                         <span class="input-group-text"><i class="bx bx-book"></i></span>
@@ -32,8 +29,9 @@
                                             type="text"
                                             name="title"
                                             class="form-control @error('title') is-invalid @enderror"
+                                            id="title"
                                             placeholder="Titre du blog"
-                                            value="{{ old('title') }}"
+                                            value="{{ old('title', $blog->title) }}"
                                             >
                                     </div>
                                     @error('title')
@@ -44,16 +42,17 @@
 
                             <!-- Contenu -->
                             <div class="row mb-3">
-                                <label class="col-sm-2 form-label">Contenu</label>
-                                <div class="col-sm-10">
-                                    <div class="input-group input-group-merge">
+                                <label class="col-sm-2 form-label" for="content">Contenu</label>
+                                <div class="col-sm-10 ">
+                                    <div class="input-group input-group-merge ">
                                         <span class="input-group-text"><i class="bx bx-comment"></i></span>
                                         <textarea
                                             name="content"
                                             class="form-control @error('content') is-invalid @enderror"
+                                            id="content"
                                             placeholder="Écrivez le contenu du blog..."
-                                            rows="5"
-                                            >{{ old('content') }}</textarea>
+                                            rows="2"
+                                            >{{ old('content', $blog->content) }}</textarea>
                                     </div>
                                     @error('content')
                                         <small class="text-danger">{{ $message }}</small>
@@ -63,9 +62,12 @@
 
                             <!-- Image -->
                             <div class="row mb-3">
-                                <label class="col-sm-2 form-label">Image</label>
+                                <label class="col-sm-2 form-label" for="image">Image</label>
                                 <div class="col-sm-10">
-                                    <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept=".jpg,.jpeg,.png,.gif">
+                                    @if($blog->image)
+                                        <img src="{{ asset('uploads/' . $blog->image) }}" alt="Image blog" class="rounded mb-2" width="100">
+                                    @endif
+                                    <input type="file" name="image" class="form-control" id="image">
                                     @error('image')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
@@ -75,14 +77,13 @@
                             <!-- Bouton -->
                             <div class="row justify-content-end">
                                 <div class="col-sm-10">
-                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
                                     <a href="{{ route('listeBlog') }}" class="btn btn-secondary">Annuler</a>
                                 </div>
                             </div>
 
                         </form>
                         <!-- /Formulaire -->
-
                     </div>
                 </div>
             </div>

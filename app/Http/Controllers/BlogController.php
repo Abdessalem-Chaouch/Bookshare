@@ -1,0 +1,99 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Blog;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class BlogController extends Controller
+{
+    public function index()
+    {
+        $blogs = Blog::latest()->get();
+        return view('BackOffice.blog.listeBlog', compact('blogs'));
+    }
+    public function indexFront()
+    {
+        $blogs = Blog::latest()->get();
+        return view('FrontOffice.Articles.ArticlePage', compact('blogs'));
+    }
+    public function create()
+    {
+        return view('BackOffice.blog.ajouterBlog');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title'   => 'required|max:255',
+            'content' => 'required',
+            'image'   => 'required|image|mimes:jpg,jpeg,png,gif|max:2048',
+        ]);
+
+        $imageName = time() . '.' . $request->image->extension();
+        $request->image->move(public_path('uploads'), $imageName);
+
+        Blog::create([
+            'title'   => $request->title,
+            'content' => $request->content,
+            'image'   => $imageName,
+            'user_id' => Auth::id(),
+        ]);
+
+        return redirect()->route('listeBlog')->with('success', 'Blog créé avec succès ✅');
+    }
+
+
+    public function edit(Blog $blog)
+    {
+        if ($blog->user_id !== Auth::id()) {
+            abort(403);
+        }
+        return view('BackOffice.blog.editerBlog', compact('blog'));
+    }
+
+    public function update(Request $request, Blog $blog)
+    {
+        if ($blog->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'title'   => 'required|max:255',
+            'content' => 'required',
+            'image'   => 'required|image|mimes:jpg,jpeg,png,gif|max:2048',
+        ]);
+
+        $imageName = time() . '.' . $request->image->extension();
+        $request->image->move(public_path('uploads'), $imageName);
+
+        $blog->update([
+            'title'   => $request->title,
+            'content' => $request->content,
+            'image'   => $imageName,
+        ]);
+
+        return redirect()->route('listeBlog')->with('success', 'Blog mis à jour avec succès ');
+    }
+
+    public function destroy(Blog $blog)
+    {
+        if ($blog->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $blog->delete();
+        return redirect()->route('listeBlog')->with('error', 'Blog supprimé avec succès ');
+    }
+
+    public function show($id)
+    {
+        $blog = Blog::findOrFail($id);
+
+        return view('FrontOffice.Articles.DetailArticle', compact('blog'));
+    }
+
+
+
+}
