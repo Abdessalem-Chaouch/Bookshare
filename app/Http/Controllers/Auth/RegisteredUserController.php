@@ -33,24 +33,24 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => ['required', 'in:visiteur,auteur'],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-          'photo_profil' => $request->hasFile('photo_profil')
-            ? $request->file('photo_profil')->store('photos', 'public')
-            : null,
-
-
-            'role' => 'user', 
+            'photo_profil' => $request->hasFile('photo_profil')
+                ? $request->file('photo_profil')->store('photos', 'public')
+                : null,
+            'role' => $request->role,
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
+        // Redirection vers le front office pour tous
         return redirect(route('accueil', absolute: false));
     }
 }

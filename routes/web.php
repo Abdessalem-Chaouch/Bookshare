@@ -1,27 +1,39 @@
 <?php
 
+use App\Http\Controllers\AccueilController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CategoryBlogController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\UsersController;
+
+use App\Http\Controllers\ProfilController;
+
 use App\Http\Controllers\CategoryController;
 
-// Front Office Routes
-Route::get('/', function () {
-    return view('FrontOffice.Accueil');
-})->name('accueil');
+
+// Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
+
+Route::get('/', [AccueilController::class, 'index'])->name('accueil');
+
 Route::get('/livres', function () {
     return view('FrontOffice.Livres.LivrePage');
 })->name('livres');
 
-Route::get('/articles', function () {
-    return view('FrontOffice.Articles.ArticlePage');
-})->name('articles');
+Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles');
+
+Route::get('/article/{id}', [BlogController::class, 'show'])->name('articleDetail');
+
 
 Route::get('/aboutus', function () {
     return view('FrontOffice.Aboutus.AboutPage');
 })->name('aboutus');
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
+    Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
+});
 // ========================
 // 🔒 Routes du Back Office
 // ========================
@@ -33,10 +45,26 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin'])->group(function () {
         // DashboardAdmin
         Route::get('/dashboardAdmin', fn() => view('BackOffice.dashboardAdmin'))->name('dashboardAdmin');
+        //Category blog Management
+
+        Route::get('categoryBlog', [CategoryBlogController::class, 'index'])->name('categoryBlog.index');
+        Route::get('categoryBlog/create', [CategoryBlogController::class, 'create'])->name('categoryBlog.create');
+        Route::post('categoryBlog', [CategoryBlogController::class, 'store'])->name('categoryBlog.store');
+        Route::get('categoryBlog/{categoryBlog}/edit', [CategoryBlogController::class, 'edit'])->name('categoryBlog.edit');
+        Route::put('categoryBlog/{categoryBlog}', [CategoryBlogController::class, 'update'])->name('categoryBlog.update');
+        Route::delete('categoryBlog/{categoryBlog}', [CategoryBlogController::class, 'destroy'])->name('categoryBlog.destroy');
+        Route::get('categoryBlog/{categoryBlog}', [CategoryBlogController::class, 'show'])->name('categoryBlog.show');
+
+
 
         // Blog Management
-        Route::get('/AjouterBlog', fn() => view('BackOffice.blog.ajouterBlog'))->name('AjouterBlog');
-        Route::get('/listeBlog', fn() => view('BackOffice.blog.listeBlog'))->name('listeBlog');
+
+        Route::get('/listeBlog', [BlogController::class, 'index'])->name('listeBlog');
+        Route::get('/AjouterBlog', [BlogController::class, 'create'])->name('AjouterBlog');
+        Route::post('/AjouterBlog', [BlogController::class, 'store'])->name('AjouterBlog.store');
+        Route::get('/EditBlog/{blog}', [BlogController::class, 'edit'])->name('blogs.edit');
+        Route::put('/EditBlog/{blog}', [BlogController::class, 'update'])->name('blogs.update');
+        Route::delete('/DeleteBlog/{blog}', [BlogController::class, 'destroy'])->name('blogs.delete');
 
         // Magasin Management
         Route::get('/AjouterMagasin', fn() => view('BackOffice.magasin.ajouterMagasin'))->name('AjouterMagasin');
@@ -44,21 +72,17 @@ Route::middleware(['auth'])->group(function () {
 
         // Utilisateur Management
 
-       Route::get('/AjouterUtilisateur', [UsersController::class, 'createUser'])->name('AjouterUtilisateur');
-       Route::post('/AjouterUtilisateur', [UsersController::class, 'addUser'])->name('AjouterUtilisateur.add');
-       Route::delete('/listeUtilisateur/{user}', [UsersController::class, 'delete'])->name('users.delete');
-       Route::get('/EditUser/{user}', [UsersController::class, 'editUser'])->name('users.edit');
-       Route::put('/EditUser/{user}', [UsersController::class, 'updateUser'])->name('users.update');
-       Route::get('/listeUtilisateur', function () {
+        Route::get('/AjouterUtilisateur', [UsersController::class, 'createUser'])->name('AjouterUtilisateur');
+        Route::post('/AjouterUtilisateur', [UsersController::class, 'addUser'])->name('AjouterUtilisateur.add');
+        Route::delete('/listeUtilisateur/{user}', [UsersController::class, 'delete'])->name('users.delete');
+        Route::get('/EditUser/{user}', [UsersController::class, 'editUser'])->name('users.edit');
+        Route::put('/EditUser/{user}', [UsersController::class, 'updateUser'])->name('users.update');
+        Route::get('/listeUtilisateur', function () {
             $users = User::all(); // Fetch all users
             return view('BackOffice.utilisateur.listeUtilisateur', compact('users'));
         })->name('listeUtilisateur');
-      
-Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
 
-
-
-
+        Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
     });
 
     // ========================
@@ -67,6 +91,13 @@ Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions')
     Route::middleware(['role:auteur'])->group(function () {
         // Dashboard Auteur
         Route::get('/dashboardAuteur', fn() => view('BackOffice.dashboardAuteur'))->name('dashboardAuteur');
+    });
+
+    // ========================
+    // 🔒 Routes réservées VISITEUR uniquement
+    // ========================
+    Route::middleware(['role:visiteur'])->group(function () {
+        // Dashboard Visiteur (si nécessaire)
     });
 
     // ========================
