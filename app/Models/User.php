@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'photo_profil',
         'role',
+        'facebook_id',
     ];
 
     /**

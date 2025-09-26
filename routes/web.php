@@ -22,10 +22,6 @@ Route::get('/nos-categories', [FrontOfficeController::class, 'categories'])->nam
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\LikesController;
 
-// Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
-
-Route::get('/', [AccueilController::class, 'index'])->name('accueil');
-
 
 Route::get('/livres', function () {
     return view('FrontOffice.Livres.LivrePage');
@@ -47,7 +43,7 @@ Route::middleware(['auth'])->group(function () {
 // ========================
 // 🔒 Routes du Back Office
 // ========================
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'dashboard.access'])->group(function () {
 
     // ========================
     // 🔒 Routes réservées ADMIN uniquement
@@ -144,12 +140,18 @@ Route::get('/admin', function () {
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'dashboard.access'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Facebook Login Routes
+Route::get('/auth/facebook', [App\Http\Controllers\FacebookAuthController::class, 'redirectToFacebook'])->name('facebook.login');
+Route::get('/auth/facebook/callback', [App\Http\Controllers\FacebookAuthController::class, 'handleFacebookCallback'])->name('facebook.callback');
+Route::get('/auth/facebook/select-role', [App\Http\Controllers\FacebookAuthController::class, 'showRoleSelection'])->name('facebook.select-role');
+Route::post('/auth/facebook/role', [App\Http\Controllers\FacebookAuthController::class, 'handleRoleSelection'])->name('facebook.role');
 
 require __DIR__ . '/auth.php';
