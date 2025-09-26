@@ -11,12 +11,12 @@
             <div class="col-md-12" style="position: relative;">
                 
                 <div class="home-categories-slider" style="overflow: hidden; position: relative;">
-                    <button class="prev-home-cat" style="position: absolute; left: -50px; top: 50%; z-index: 10; background: rgba(0,0,0,0.7); color: white; border: none; padding: 15px; border-radius: 50%; cursor: pointer; transform: translateY(-50%);">
+                    <button class="prev-home-cat" style="position: absolute; left: 10px; top: 50%; z-index: 10; background: rgba(0,0,0,0.7); color: white; border: none; padding: 15px; border-radius: 50%; cursor: pointer; transform: translateY(-50%);">
                         <i class="icon icon-arrow-left"></i>
                     </button>
                     
                     <div class="home-categories-track" style="display: flex; transition: transform 0.3s ease;">
-                        @foreach($categories as $category)
+                        @foreach($categories ?? [] as $category)
                         <div class="home-category-slide" style="min-width: 300px; margin: 0 15px;">
                             <div class="product-item">
                                 <figure class="product-style" style="position: relative; overflow: hidden;">
@@ -40,7 +40,7 @@
                         @endforeach
                     </div>
                     
-                    <button class="next-home-cat" style="position: absolute; right: -50px; top: 50%; z-index: 10; background: rgba(0,0,0,0.7); color: white; border: none; padding: 15px; border-radius: 50%; cursor: pointer; transform: translateY(-50%);">
+                    <button class="next-home-cat" style="position: absolute; right: 10px; top: 50%; z-index: 10; background: rgba(0,0,0,0.7); color: white; border: none; padding: 15px; border-radius: 50%; cursor: pointer; transform: translateY(-50%);">
                         <i class="icon icon-arrow-right"></i>
                     </button>
                 </div>
@@ -62,6 +62,7 @@
 }
 </style>
 
+@if(isset($categories) && count($categories) > 0)
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const homeTrack = document.querySelector('.home-categories-track');
@@ -88,3 +89,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+@endif
