@@ -80,11 +80,19 @@
 									<span class="ms-2">{{ Auth::user()->name }}</span>
 								</a>
 
+
+									<li class="menu-item">
+										<a href="{{ route('front.categories') }}" class="nav-link">Catégories</a>
+									</li>
+									<li class="menu-item">
+										<a href="{{ route('livres') }}" class="nav-link">Livres</a>
+
 								<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
 									<li>
 										<a class="dropdown-item" href="{{ route('profil.index') }}">
 											<i class="bi bi-person"></i> Profil
 										</a>
+
 									</li>
 									<li>
 										<a class="dropdown-item" href="{{ route('profil.index') }}">
