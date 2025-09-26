@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('user', function (Blueprint $table) {
-             Schema::rename('utilisateurs', 'user');
-        });
+     Schema::table('blogs', function (Blueprint $table) {
+        $table->foreignId('category_id')->nullable()->constrained('category_blogs')->onDelete('set null');
+    });
     }
 
     /**
@@ -21,8 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('user', function (Blueprint $table) {
-             Schema::rename('user', 'utilisateurs');
+        Schema::table('blogs', function (Blueprint $table) {
+        $table->dropForeign(['category_id']);
+        $table->dropColumn('category_id');  
         });
     }
 };

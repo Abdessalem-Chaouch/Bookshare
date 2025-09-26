@@ -47,17 +47,29 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-      public function isAdmin()
+    public function isAdmin()
     {
         return $this->role === 'admin';
     }
-
     public function isUser()
     {
         return $this->role === 'user';
     }
-        public function isAuteur()
+    public function isAuteur()
     {
-        return $this->role === 'auteur'; 
+        return $this->role === 'auteur';
+    }
+    public function blogs()
+    {
+        return $this->hasMany(Blog::class);
+    }
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 }
