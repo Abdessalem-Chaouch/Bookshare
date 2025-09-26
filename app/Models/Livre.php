@@ -14,7 +14,7 @@ class Livre extends Model
 
     protected $fillable = [
         'titre','auteur','description','isbn','photo_couverture',
-        'categorie_id','disponibilite','stock','pdf_contenu','date_ajout'
+        'categorie_id','disponibilite','stock','pdf_contenu','date_ajout','prix'
     ];
 
     protected $casts = [
