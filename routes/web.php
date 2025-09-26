@@ -8,12 +8,12 @@ use App\Http\Controllers\UsersController;
 use App\Http\Controllers\ProfilController;
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\FrontOfficeController;
 
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
-Route::get('/', function () {
-    return view('FrontOffice.Accueil');
-})->name('accueil');
+Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
+Route::get('/nos-categories', [FrontOfficeController::class, 'categories'])->name('front.categories');
 Route::get('/livres', function () {
     return view('FrontOffice.Livres.LivrePage');
 })->name('livres');

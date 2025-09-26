@@ -98,6 +98,9 @@
 									<li class="menu-item active"><a href="{{ route('accueil') }}">Home</a></li>
 
 									<li class="menu-item">
+										<a href="{{ route('front.categories') }}" class="nav-link">Catégories</a>
+									</li>
+									<li class="menu-item">
 										<a href="{{ route('livres') }}" class="nav-link">Livres</a>
 									</li>
 									<li class="menu-item">
