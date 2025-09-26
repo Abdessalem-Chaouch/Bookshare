@@ -16,6 +16,41 @@
         </div>
     @endif
 
+    <!-- Recherche avancée -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ route('categories.index') }}" class="search-form" id="searchForm">
+                <div class="row align-items-end">
+                    <div class="col-md-6">
+                        <div class="search-input-wrapper position-relative">
+                            <i class="bx bx-search position-absolute" style="left: 15px; top: 50%; transform: translateY(-50%); color: #999;"></i>
+                            <input type="text" name="search" value="{{ request('search') }}" 
+                                   placeholder="Rechercher une catégorie..." 
+                                   class="form-control ps-5" id="searchInput">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="search_type" class="form-select">
+                            <option value="name" {{ request('search_type', 'name') == 'name' ? 'selected' : '' }}>📖 Nom</option>
+                            <option value="description" {{ request('search_type') == 'description' ? 'selected' : '' }}>📝 Description</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="sort" class="form-select">
+                            <option value="asc" {{ request('sort', 'asc') == 'asc' ? 'selected' : '' }}>🔤 A-Z</option>
+                            <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>🔤 Z-A</option>
+                        </select>
+                    </div>
+                </div>
+                @if(request()->hasAny(['search', 'sort']))
+                    <div class="mt-3 text-center">
+                        <span class="badge bg-primary">{{ $categories->count() }} résultat(s)</span>
+                    </div>
+                @endif
+            </form>
+        </div>
+    </div>
+
     <div class="card">
         <h5 class="card-header">Catégories</h5>
         <div class="table-responsive text-nowrap">
@@ -88,5 +123,27 @@
         </div>
     </div>
 </div>
+
+<script>
+let searchTimeout;
+document.getElementById('searchInput').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        if (this.value === '') {
+            window.location.href = '{{ route("categories.index") }}';
+        } else {
+            document.getElementById('searchForm').submit();
+        }
+    }, 500);
+});
+
+document.querySelector('select[name="sort"]').addEventListener('change', function() {
+    document.getElementById('searchForm').submit();
+});
+
+document.querySelector('select[name="search_type"]').addEventListener('change', function() {
+    document.getElementById('searchForm').submit();
+});
+</script>
 
 @endsection

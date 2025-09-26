@@ -8,9 +8,25 @@ use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::all();
+        $query = Category::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $searchType = $request->get('search_type', 'name');
+            
+            if ($searchType == 'name') {
+                $query->where('name', 'LIKE', "%{$search}%");
+            } else {
+                $query->where('description', 'LIKE', "%{$search}%");
+            }
+        }
+
+        $sortOrder = $request->get('sort', 'asc');
+        $query->orderBy('name', $sortOrder);
+
+        $categories = $query->get();
         return view('BackOffice.categorieLivre.listeCategorie', compact('categories'));
     }
 
