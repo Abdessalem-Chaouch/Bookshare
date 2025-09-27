@@ -154,4 +154,10 @@ Route::get('/auth/facebook/callback', [App\Http\Controllers\FacebookAuthControll
 Route::get('/auth/facebook/select-role', [App\Http\Controllers\FacebookAuthController::class, 'showRoleSelection'])->name('facebook.select-role');
 Route::post('/auth/facebook/role', [App\Http\Controllers\FacebookAuthController::class, 'handleRoleSelection'])->name('facebook.role');
 
+// Google Login Routes
+Route::get('/auth/google', [App\Http\Controllers\GoogleAuthController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/auth/google/callback', [App\Http\Controllers\GoogleAuthController::class, 'handleGoogleCallback'])->name('google.callback');
+Route::get('/auth/google/select-role', [App\Http\Controllers\GoogleAuthController::class, 'showRoleSelection'])->name('google.select-role');
+Route::post('/auth/google/role', [App\Http\Controllers\GoogleAuthController::class, 'handleRoleSelection'])->name('google.role');
+
 require __DIR__ . '/auth.php';
