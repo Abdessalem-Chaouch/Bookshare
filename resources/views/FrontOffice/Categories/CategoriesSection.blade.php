@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const homeNextBtn = document.querySelector('.next-home-cat');
     const slideWidth = 330;
     let homeCurrentPosition = 0;
-    const homeMaxSlides = {{ count($categories) }};
+    const homeMaxSlides = {{ count($categories ?? []) }};
     const homeVisibleSlides = Math.floor(window.innerWidth / slideWidth);
     const homeMaxPosition = -(homeMaxSlides - homeVisibleSlides) * slideWidth;
 
