@@ -56,7 +56,7 @@ class StoreController extends Controller
     public function show(string $id)
     {
         $store = Store::findOrFail($id);
-        return view('store.show', compact('store'));
+        return view('FrontOffice.Stores.Show', compact('store'));
     }
 
     /**
@@ -96,4 +96,11 @@ class StoreController extends Controller
 
         return redirect()->route('listeMagasin')->with('success', 'Item supprimé avec succès !');
     }
+
+    public function indexFront()
+    {
+        $stores = Store::all();
+        return view('FrontOffice.Stores.StorePage', compact('stores'));
+    }
+    
 }

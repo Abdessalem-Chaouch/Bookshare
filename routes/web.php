@@ -32,6 +32,8 @@ Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles')
 
 Route::get('/article/{id}', [BlogController::class, 'show'])->name('articleDetail');
 
+Route::get('/stores', [StoreController::class, 'indexFront'])->name('stores');
+Route::get('/stores/{id}', [StoreController::class, 'show'])->name('stores.show');
 
 Route::get('/aboutus', function () {
     return view('FrontOffice.Aboutus.AboutPage');
@@ -78,6 +80,7 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         Route::post('/AjouterMagasin', [App\Http\Controllers\StoreController::class, 'store'])->name('AjouterMagasin');
         Route::get('/listeMagasin', [StoreController::class, 'index'])->name('listeMagasin');
         Route::resource('stores', StoreController::class)->except(['create','index','store']);
+        
         // Utilisateur Management
 
         Route::get('/AjouterUtilisateur', [UsersController::class, 'createUser'])->name('AjouterUtilisateur');

@@ -8,7 +8,7 @@
     </div>
 
     <div class="card">
-        <h5 class="card-header">Stores Inventory</h5>
+        <h5 class="card-header">Stores list</h5>
         <div class="table-responsive text-nowrap">
             <table class="table">
                 <thead>
