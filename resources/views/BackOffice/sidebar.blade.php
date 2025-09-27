@@ -1,12 +1,12 @@
 <!-- Menu -->
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
-        <a href="{{ route('dashboardAdmin') }}" class="app-brand-link">
+        <a class="app-brand-link">
 
-              <span class="app-brand-logo demo">
-                <img alt="icon"  src="../assets/img/libroLogo.png" style="width:40px; height:40px; margin-right:10px;" >
-              </span>
-              <span class="app-brand-text demo menu-text fw-bolder ms-2">LibroLink</span>
+            <span class="app-brand-logo demo">
+                <img alt="icon" src="{{asset('assets/img/libroLogo.png')}}" style="width:40px; height:40px; margin-right:10px;">
+            </span>
+            <span class="app-brand-text demo menu-text fw-bolder ms-2">LibroLink</span>
 
         </a>
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -69,7 +69,7 @@
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Stores Managements</span></li>
         <li class="menu-item {{ request()->routeIs('AjouterMagasin', 'listeMagasin') ? 'open active' : '' }}">
             <a href="javascript:void(0)" class="menu-link menu-toggle">
-                 <i class="menu-icon tf-icons bx bx-store"></i>
+                <i class="menu-icon tf-icons bx bx-store"></i>
                 <div data-i18n="User interface">Stores</div>
             </a>
             <ul class="menu-sub">
@@ -88,9 +88,27 @@
 
         <!-- Gestion des Blogs -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Blogs Managements</span></li>
+                <li class="menu-item {{ request()->routeIs('categoryBlog.create', 'categoryBlog.index') ? 'open active' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-copy"></i>
+                <div data-i18n="Form Elements">Category Blogs</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('categoryBlog.create') ? 'active' : '' }}">
+                    <a href="{{ route('categoryBlog.create') }}" class="menu-link">
+                        <div data-i18n="Basic Inputs">Add Category Blog</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('categoryBlog.index') ? 'active' : '' }}">
+                    <a href="{{ route('categoryBlog.index') }}" class="menu-link">
+                        <div data-i18n="Input groups">Category Blog List</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
         <li class="menu-item {{ request()->routeIs('AjouterBlog', 'listeBlog') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                 <i class="menu-icon tf-icons bx bx-news"></i>
+                <i class="menu-icon tf-icons bx bx-news"></i>
                 <div data-i18n="Form Elements">Blogs</div>
             </a>
             <ul class="menu-sub">
@@ -114,7 +132,7 @@
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Books Managements</span></li>
         <li class="menu-item {{ request()->routeIs('AjouterCategorie', 'listeCategorie') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                  <i class="menu-icon tf-icons bx bx-category"></i>
+                <i class="menu-icon tf-icons bx bx-category"></i>
                 <div data-i18n="Misc">Categories</div>
             </a>
             <ul class="menu-sub">
@@ -133,7 +151,7 @@
         <!-- Gestion des livres -->
         <li class="menu-item {{ request()->routeIs('AjouterLivre', 'listeLivre') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-               <i class="menu-icon tf-icons bx bx-book"></i>
+                <i class="menu-icon tf-icons bx bx-book"></i>
                 <div data-i18n="Account Settings">Books</div>
             </a>
             <ul class="menu-sub">
@@ -147,8 +165,8 @@
                         <div data-i18n="Notifications">Books List</div>
                     </a>
                 </li>
-                    
-              
+
+
 
 
             </ul>
@@ -157,12 +175,12 @@
 
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Payments</span></li>
 
-            <li class="menu-item {{ request()->routeIs('transaction') ? 'active' : '' }}">
-                        <a href="{{ route('transactions') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-money"></i>
-                            <div data-i18n="Account Settings">Transactions</div>
-                        </a>
-                </li>
+        <li class="menu-item {{ request()->routeIs('transaction') ? 'active' : '' }}">
+            <a href="{{ route('transactions') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-money"></i>
+                <div data-i18n="Account Settings">Transactions</div>
+            </a>
+        </li>
 
         @endif
     </ul>

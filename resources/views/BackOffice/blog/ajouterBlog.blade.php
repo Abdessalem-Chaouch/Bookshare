@@ -1,114 +1,106 @@
 @extends('baseB')
 @section('content')
 
-
 <div class="content-wrapper">
-    <!-- Content -->
-
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Forms/</span> Ajouter Blog</h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Forms /</span> Ajouter Blog</h4>
 
-        <!-- Basic Layout & Basic with Icons -->
         <div class="row">
-            <!-- Basic with Icons -->
             <div class="col-xxl">
                 <div class="card mb-4">
                     <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="mb-0">Basic with Icons</h5>
-                        <small class="text-muted float-end">Merged input group</small>
+                        <h5 class="mb-0">Nouveau Blog</h5>
+                        <small class="text-muted float-end">Formulaire de création</small>
                     </div>
                     <div class="card-body">
-                        <form>
+
+                        <form action="{{ route('AjouterBlog.store') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+
+                            <!-- Titre -->
                             <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Name</label>
+                                <label class="col-sm-2 col-form-label">Titre</label>
                                 <div class="col-sm-10">
                                     <div class="input-group input-group-merge">
-                                        <span id="basic-icon-default-fullname2" class="input-group-text"><i class="bx bx-user"></i></span>
+                                        <span class="input-group-text"><i class="bx bx-book"></i></span>
                                         <input
                                             type="text"
-                                            class="form-control"
-                                            id="basic-icon-default-fullname"
-                                            placeholder="John Doe"
-                                            aria-label="John Doe"
-                                            aria-describedby="basic-icon-default-fullname2" />
+                                            name="title"
+                                            class="form-control @error('title') is-invalid @enderror"
+                                            placeholder="Titre du blog"
+                                            value="{{ old('title') }}"
+                                        >
                                     </div>
+                                    @error('title')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
                                 </div>
                             </div>
+
+                            <!-- Contenu -->
                             <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Company</label>
+                                <label class="col-sm-2 form-label">Contenu</label>
                                 <div class="col-sm-10">
                                     <div class="input-group input-group-merge">
-                                        <span id="basic-icon-default-company2" class="input-group-text"><i class="bx bx-buildings"></i></span>
-                                        <input
-                                            type="text"
-                                            id="basic-icon-default-company"
-                                            class="form-control"
-                                            placeholder="ACME Inc."
-                                            aria-label="ACME Inc."
-                                            aria-describedby="basic-icon-default-company2" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label" for="basic-icon-default-email">Email</label>
-                                <div class="col-sm-10">
-                                    <div class="input-group input-group-merge">
-                                        <span class="input-group-text"><i class="bx bx-envelope"></i></span>
-                                        <input
-                                            type="text"
-                                            id="basic-icon-default-email"
-                                            class="form-control"
-                                            placeholder="john.doe"
-                                            aria-label="john.doe"
-                                            aria-describedby="basic-icon-default-email2" />
-                                        <span id="basic-icon-default-email2" class="input-group-text">@example.com</span>
-                                    </div>
-                                    <div class="form-text">You can use letters, numbers & periods</div>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label class="col-sm-2 form-label" for="basic-icon-default-phone">Phone No</label>
-                                <div class="col-sm-10">
-                                    <div class="input-group input-group-merge">
-                                        <span id="basic-icon-default-phone2" class="input-group-text"><i class="bx bx-phone"></i></span>
-                                        <input
-                                            type="text"
-                                            id="basic-icon-default-phone"
-                                            class="form-control phone-mask"
-                                            placeholder="658 799 8941"
-                                            aria-label="658 799 8941"
-                                            aria-describedby="basic-icon-default-phone2" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label class="col-sm-2 form-label" for="basic-icon-default-message">Message</label>
-                                <div class="col-sm-10">
-                                    <div class="input-group input-group-merge">
-                                        <span id="basic-icon-default-message2" class="input-group-text"><i class="bx bx-comment"></i></span>
+                                        <span class="input-group-text"><i class="bx bx-comment"></i></span>
                                         <textarea
-                                            id="basic-icon-default-message"
-                                            class="form-control"
-                                            placeholder="Hi, Do you have a moment to talk Joe?"
-                                            aria-label="Hi, Do you have a moment to talk Joe?"
-                                            aria-describedby="basic-icon-default-message2"></textarea>
+                                            name="content"
+                                            class="form-control @error('content') is-invalid @enderror"
+                                            placeholder="Écrivez le contenu du blog..."
+                                            rows="5"
+                                        >{{ old('content') }}</textarea>
                                     </div>
+                                    @error('content')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
                                 </div>
                             </div>
+
+                            <!-- Catégorie -->
+                            <div class="row mb-3">
+                                <label class="col-sm-2 form-label">Catégorie</label>
+                                <div class="col-sm-10">
+                                    <select name="category_id" class="form-select @error('category_id') is-invalid @enderror">
+                                        <option value="">-- Sélectionnez une catégorie --</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('category_id')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Image -->
+                            <div class="row mb-3">
+                                <label class="col-sm-2 form-label">Image</label>
+                                <div class="col-sm-10">
+                                    <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept=".jpg,.jpeg,.png,.gif">
+                                    @error('image')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Bouton -->
                             <div class="row justify-content-end">
                                 <div class="col-sm-10">
-                                    <button type="submit" class="btn btn-primary">Send</button>
+                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                    <a href="{{ route('listeBlog') }}" class="btn btn-secondary">Annuler</a>
                                 </div>
                             </div>
+
                         </form>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- / Content -->
     <div class="content-backdrop fade"></div>
 </div>
-
 
 @endsection

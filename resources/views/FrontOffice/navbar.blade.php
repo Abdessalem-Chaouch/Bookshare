@@ -17,9 +17,9 @@
                 <!-- Partie droite -->
                 <div class="col-md-6">
                     <div class="right-element">
-						
+
                         <a href="#" class="cart for-buy">
-                            <i class="icon icon-clipboard"></i><span>Cart</span>
+                            <i class="icon icon-clipboard"></i>&nbsp;&nbsp;&nbsp;<span>Cart</span>
                         </a>
 
                         @guest
@@ -35,8 +35,8 @@
 							<div class="nav-item dropdown d-inline-block align-items-center">
 								<a class="nav-link dropdown-toggle align-items-center" href="#" id="profileDropdown"
 								role="button" data-bs-toggle="dropdown" aria-expanded="false">
-									<img src="{{ auth()->user()->photo_profil 
-												? asset('storage/' . auth()->user()->photo_profil) 
+									<img src="{{ auth()->user()->photo_profil
+												? asset('storage/' . auth()->user()->photo_profil)
 												: asset('images/default-avatar.jpg') }}"
 										alt="Profile"
 										class="rounded-circle"
@@ -71,8 +71,8 @@
 							<div class="nav-item dropdown d-inline-block align-items-center">
 								<a class="nav-link dropdown-toggle align-items-center" href="#" id="profileDropdown"
 								role="button" data-bs-toggle="dropdown" aria-expanded="false">
-									<img src="{{ auth()->user()->photo_profil 
-												? asset('storage/' . auth()->user()->photo_profil) 
+									<img src="{{ auth()->user()->photo_profil
+												? asset('storage/' . auth()->user()->photo_profil)
 												: asset('images/default-avatar.jpg') }}"
 										alt="Profile"
 										class="rounded-circle"
@@ -141,7 +141,7 @@
                 <div class="col-md-2">
                     <div class="main-logo">
                         <a href="{{ route('accueil') }}" class="logo-link d-flex align-items-center">
-                            <img src="assets/img/libroLogo.png" alt="logo" style="width:50px; height:60px; margin-right:10px;">
+                            <img src="{{asset('assets/img/libroLogo.png')}}" alt="logo" style="width:50px; height:60px; margin-right:10px;">
                             <span class="logo-text">LibroLink</span>
                         </a>
                     </div>
@@ -153,7 +153,12 @@
                         <div class="main-menu stellarnav">
                             <ul class="menu-list">
                                 <li class="menu-item active"><a href="{{ route('accueil') }}">Home</a></li>
+
+                                <li class="menu-item active"><a href="{{ route('livresf') }}">Books</a></li>
+
+                                <li class="menu-item"><a href="{{ route('front.categories') }}" class="nav-link">Categories</a></li>
                                 <li class="menu-item"><a href="{{ route('livres') }}" class="nav-link">Livres</a></li>
+
                                 <li class="menu-item"><a href="{{ route('articles') }}" class="nav-link">Articles</a></li>
                                 <li class="menu-item"><a href="{{ route('aboutus') }}" class="nav-link">About us</a></li>
                             </ul>
