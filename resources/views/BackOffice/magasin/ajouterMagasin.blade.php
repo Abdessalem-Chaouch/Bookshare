@@ -1,103 +1,87 @@
 @extends('baseB')
 @section('content')
 
-
 <div class="content-wrapper">
     <!-- Content -->
-
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Forms/</span> Ajouter Magasin</h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Store/</span> Add Store</h4>
 
-        <!-- Basic Layout & Basic with Icons -->
         <div class="row">
-            <!-- Basic with Icons -->
             <div class="col-xxl">
                 <div class="card mb-4">
                     <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="mb-0">Basic with Icons</h5>
-                        <small class="text-muted float-end">Merged input group</small>
+                        <h5 class="mb-0">Add a New Store</h5>
                     </div>
                     <div class="card-body">
-                        <form>
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <form action="{{ isset($store) ? route('stores.update', $store->id) : route('AjouterMagasin') }}" method="POST">
+                            @csrf
+                            @if(isset($store))
+                                @method('PUT')
+                            @endif
+
                             <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Name</label>
+                                <label class="col-sm-2 col-form-label" for="store_name">Store Name</label>
                                 <div class="col-sm-10">
                                     <div class="input-group input-group-merge">
-                                        <span id="basic-icon-default-fullname2" class="input-group-text"><i class="bx bx-user"></i></span>
-                                        <input
-                                            type="text"
-                                            class="form-control"
-                                            id="basic-icon-default-fullname"
-                                            placeholder="John Doe"
-                                            aria-label="John Doe"
-                                            aria-describedby="basic-icon-default-fullname2" />
+                                        <span class="input-group-text"><i class="bx bx-store"></i></span>
+                                        <input type="text" class="form-control" id="store_name" name="store_name"
+                                               placeholder="Enter store name"
+                                               value="{{ old('store_name', $store->store_name ?? '') }}" />
                                     </div>
                                 </div>
                             </div>
+
                             <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Company</label>
+                                <label class="col-sm-2 col-form-label" for="owner_name">Owner Name</label>
                                 <div class="col-sm-10">
                                     <div class="input-group input-group-merge">
-                                        <span id="basic-icon-default-company2" class="input-group-text"><i class="bx bx-buildings"></i></span>
-                                        <input
-                                            type="text"
-                                            id="basic-icon-default-company"
-                                            class="form-control"
-                                            placeholder="ACME Inc."
-                                            aria-label="ACME Inc."
-                                            aria-describedby="basic-icon-default-company2" />
+                                        <span class="input-group-text"><i class="bx bx-user"></i></span>
+                                        <input type="text" class="form-control" id="owner_name" name="owner_name"
+                                               placeholder="Enter owner name"
+                                               value="{{ old('owner_name', $store->owner_name ?? '') }}" />
                                     </div>
                                 </div>
                             </div>
+
                             <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label" for="basic-icon-default-email">Email</label>
+                                <label class="col-sm-2 col-form-label" for="location">Location</label>
                                 <div class="col-sm-10">
                                     <div class="input-group input-group-merge">
-                                        <span class="input-group-text"><i class="bx bx-envelope"></i></span>
-                                        <input
-                                            type="text"
-                                            id="basic-icon-default-email"
-                                            class="form-control"
-                                            placeholder="john.doe"
-                                            aria-label="john.doe"
-                                            aria-describedby="basic-icon-default-email2" />
-                                        <span id="basic-icon-default-email2" class="input-group-text">@example.com</span>
-                                    </div>
-                                    <div class="form-text">You can use letters, numbers & periods</div>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label class="col-sm-2 form-label" for="basic-icon-default-phone">Phone No</label>
-                                <div class="col-sm-10">
-                                    <div class="input-group input-group-merge">
-                                        <span id="basic-icon-default-phone2" class="input-group-text"><i class="bx bx-phone"></i></span>
-                                        <input
-                                            type="text"
-                                            id="basic-icon-default-phone"
-                                            class="form-control phone-mask"
-                                            placeholder="658 799 8941"
-                                            aria-label="658 799 8941"
-                                            aria-describedby="basic-icon-default-phone2" />
+                                        <span class="input-group-text"><i class="bx bx-map"></i></span>
+                                        <input type="text" class="form-control" id="location" name="location"
+                                               placeholder="Enter store location"
+                                               value="{{ old('location', $store->location ?? '') }}" />
                                     </div>
                                 </div>
                             </div>
+
                             <div class="row mb-3">
-                                <label class="col-sm-2 form-label" for="basic-icon-default-message">Message</label>
+                                <label class="col-sm-2 col-form-label" for="contact">Contact</label>
                                 <div class="col-sm-10">
                                     <div class="input-group input-group-merge">
-                                        <span id="basic-icon-default-message2" class="input-group-text"><i class="bx bx-comment"></i></span>
-                                        <textarea
-                                            id="basic-icon-default-message"
-                                            class="form-control"
-                                            placeholder="Hi, Do you have a moment to talk Joe?"
-                                            aria-label="Hi, Do you have a moment to talk Joe?"
-                                            aria-describedby="basic-icon-default-message2"></textarea>
+                                        <span class="input-group-text"><i class="bx bx-phone"></i></span>
+                                        <input type="text" class="form-control" id="contact" name="contact"
+                                               placeholder="Enter phone or email"
+                                               value="{{ old('contact', $store->contact ?? '') }}" />
                                     </div>
                                 </div>
                             </div>
+
                             <div class="row justify-content-end">
                                 <div class="col-sm-10">
-                                    <button type="submit" class="btn btn-primary">Send</button>
+                                    <button type="submit" class="btn btn-primary">
+                                        {{ isset($store) ? 'Update Store' : 'Add Store' }}
+                                    </button>
                                 </div>
                             </div>
                         </form>
@@ -109,6 +93,5 @@
     <!-- / Content -->
     <div class="content-backdrop fade"></div>
 </div>
-
 
 @endsection

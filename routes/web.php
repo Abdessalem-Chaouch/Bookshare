@@ -4,6 +4,7 @@ use App\Http\Controllers\AccueilController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CategoryBlogController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\UsersController;
@@ -74,8 +75,9 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
 
         // Magasin Management
         Route::get('/AjouterMagasin', fn() => view('BackOffice.magasin.ajouterMagasin'))->name('AjouterMagasin');
-        Route::get('/listeMagasin', fn() => view('BackOffice.magasin.listeMagasin'))->name('listeMagasin');
-
+        Route::post('/AjouterMagasin', [App\Http\Controllers\StoreController::class, 'store'])->name('AjouterMagasin');
+        Route::get('/listeMagasin', [StoreController::class, 'index'])->name('listeMagasin');
+        Route::resource('stores', StoreController::class)->except(['create','index','store']);
         // Utilisateur Management
 
         Route::get('/AjouterUtilisateur', [UsersController::class, 'createUser'])->name('AjouterUtilisateur');
