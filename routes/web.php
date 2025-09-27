@@ -13,12 +13,22 @@ use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\LivreControllerF;
 
 use App\Http\Controllers\CategoryController;
+
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\LikesController;
 
-// Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 
-Route::get('/', [AccueilController::class, 'index'])->name('accueil');
+use App\Http\Controllers\FrontOfficeController;
+
+
+
+// Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
+Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
+Route::get('/nos-categories', [FrontOfficeController::class, 'categories'])->name('front.categories');
+
+use App\Http\Controllers\CommentsController;
+use App\Http\Controllers\LikesController;
+
 
 Route::get('/livresf', function () {
     return view('FrontOffice.Livres.LivrePage');
@@ -40,7 +50,7 @@ Route::middleware(['auth'])->group(function () {
 // ========================
 // 🔒 Routes du Back Office
 // ========================
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'dashboard.access'])->group(function () {
 
     // ========================
     // 🔒 Routes réservées ADMIN uniquement
@@ -131,8 +141,18 @@ Route::get('/livres/{livre}/download', [LivreController::class, 'download'])->na
         Route::get('/borrows', fn() => view('BackOffice.Borrows.Borrows'))->name('borrows');
     });
 });
-// Likes et comments
-// web.php
+
+Route::post('/blogs/{blog}/like', [LikesController::class, 'toggle'])->name('blogs.like')->middleware('auth');
+
+// Ajouter un commentaire
+Route::post('/blogs/{blog}/comment', [CommentsController::class, 'store'])->name('comments.store')->middleware('auth');
+
+// Modifier un commentaire
+Route::put('/comments/{comment}', [CommentsController::class, 'update'])->name('comments.update')->middleware('auth');
+
+// Supprimer un commentaire
+Route::delete('/comments/{comment}', [CommentsController::class, 'destroy'])->name('comments.destroy')->middleware('auth');
+
 
 Route::get('/admin', function () {
     return view('dashboard');
@@ -140,12 +160,24 @@ Route::get('/admin', function () {
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'dashboard.access'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Facebook Login Routes
+Route::get('/auth/facebook', [App\Http\Controllers\FacebookAuthController::class, 'redirectToFacebook'])->name('facebook.login');
+Route::get('/auth/facebook/callback', [App\Http\Controllers\FacebookAuthController::class, 'handleFacebookCallback'])->name('facebook.callback');
+Route::get('/auth/facebook/select-role', [App\Http\Controllers\FacebookAuthController::class, 'showRoleSelection'])->name('facebook.select-role');
+Route::post('/auth/facebook/role', [App\Http\Controllers\FacebookAuthController::class, 'handleRoleSelection'])->name('facebook.role');
+
+// Google Login Routes
+Route::get('/auth/google', [App\Http\Controllers\GoogleAuthController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/auth/google/callback', [App\Http\Controllers\GoogleAuthController::class, 'handleGoogleCallback'])->name('google.callback');
+Route::get('/auth/google/select-role', [App\Http\Controllers\GoogleAuthController::class, 'showRoleSelection'])->name('google.select-role');
+Route::post('/auth/google/role', [App\Http\Controllers\GoogleAuthController::class, 'handleRoleSelection'])->name('google.role');
 
 require __DIR__ . '/auth.php';

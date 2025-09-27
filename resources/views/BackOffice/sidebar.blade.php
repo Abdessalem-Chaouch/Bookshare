@@ -1,7 +1,7 @@
 <!-- Menu -->
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
-        <a href="{{ route('dashboardAdmin') }}" class="app-brand-link">
+        <a class="app-brand-link">
 
             <span class="app-brand-logo demo">
                 <img alt="icon" src="{{asset('assets/img/libroLogo.png')}}" style="width:40px; height:40px; margin-right:10px;">
