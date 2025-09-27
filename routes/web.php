@@ -7,12 +7,19 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\LivreController;
 
 use App\Http\Controllers\ProfilController;
+use App\Http\Controllers\LivreControllerF;
 
 use App\Http\Controllers\CategoryController;
 
+use App\Http\Controllers\CommentsController;
+use App\Http\Controllers\LikesController;
+
+
 use App\Http\Controllers\FrontOfficeController;
+
 
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
@@ -23,9 +30,9 @@ use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\LikesController;
 
 
-Route::get('/livres', function () {
+Route::get('/livresf', function () {
     return view('FrontOffice.Livres.LivrePage');
-})->name('livres');
+})->name('livresf');
 
 Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles');
 
@@ -100,19 +107,32 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
     });
 
     // ========================
-    // 🔒 Routes réservées VISITEUR uniquement
-    // ========================
-    Route::middleware(['role:visiteur'])->group(function () {
-        // Dashboard Visiteur (si nécessaire)
-    });
-
-    // ========================
     // 🔒 Routes accessibles ADMIN + AUTEUR
-    // ========================
+    // ========================*
+     Route::middleware(['role:admin,auteur,user'])->group(function () {
+        // Livre Management
+// Routes Livres
+
+Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
+    Route::get('/livresf/{livre}', [LivreController::class, 'showf'])->name('livres.showf');
+
+});
+
+
+
     Route::middleware(['role:admin,auteur'])->group(function () {
         // Livre Management
-        Route::get('/AjouterLivre', fn() => view('BackOffice.livre.ajouterLivre'))->name('AjouterLivre');
-        Route::get('/listeLivre', fn() => view('BackOffice.livre.listeLivre'))->name('listeLivre');
+// Routes Livres
+Route::resource('livres', LivreController::class);
+
+// Routes supplémentaires si tu veux des noms plus explicites
+Route::get('/AjouterLivre', [LivreController::class, 'create'])->name('AjouterLivre');
+Route::get('/listeLivre', [LivreController::class, 'index'])->name('listeLivre');
+
+    // PDF - afficher et télécharger
+Route::get('/livres/{livre}/viewpdf', [LivreController::class, 'viewpdf'])->name('livres.viewpdf');
+Route::get('/livres/{livre}/download', [LivreController::class, 'download'])->name('livres.download');
+
 
         // Categorie Management
         Route::resource('categories', CategoryController::class);
@@ -121,8 +141,7 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         Route::get('/borrows', fn() => view('BackOffice.Borrows.Borrows'))->name('borrows');
     });
 });
-// Likes et comments 
-// web.php
+
 Route::post('/blogs/{blog}/like', [LikesController::class, 'toggle'])->name('blogs.like')->middleware('auth');
 
 // Ajouter un commentaire
@@ -133,6 +152,7 @@ Route::put('/comments/{comment}', [CommentsController::class, 'update'])->name('
 
 // Supprimer un commentaire
 Route::delete('/comments/{comment}', [CommentsController::class, 'destroy'])->name('comments.destroy')->middleware('auth');
+
 
 Route::get('/admin', function () {
     return view('dashboard');
