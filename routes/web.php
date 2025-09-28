@@ -89,6 +89,9 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         })->name('listeUtilisateur');
 
         Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
+        
+        // Subscription Management
+        Route::resource('subscriptions', \App\Http\Controllers\SubscriptionController::class);
     });
 
     // ========================
@@ -97,6 +100,10 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
     Route::middleware(['role:auteur'])->group(function () {
         // Dashboard Auteur
         Route::get('/dashboardAuteur', fn() => view('BackOffice.dashboardAuteur'))->name('dashboardAuteur');
+        
+        // Abonnements Auteur
+        Route::get('/mes-abonnements', [\App\Http\Controllers\AuthorSubscriptionController::class, 'index'])->name('author.subscriptions');
+        Route::post('/subscribe/{subscription}', [\App\Http\Controllers\AuthorSubscriptionController::class, 'subscribe'])->name('author.subscribe');
     });
 
     // ========================
@@ -110,8 +117,10 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
     // 🔒 Routes accessibles ADMIN + AUTEUR
     // ========================
     Route::middleware(['role:admin,auteur'])->group(function () {
-        // Livre Management
-        Route::get('/AjouterLivre', fn() => view('BackOffice.livre.ajouterLivre'))->name('AjouterLivre');
+        // Livre Management (avec vérification d'abonnement pour les auteurs)
+        Route::middleware(['App\Http\Middleware\CheckActiveSubscription'])->group(function () {
+            Route::get('/AjouterLivre', fn() => view('BackOffice.livre.ajouterLivre'))->name('AjouterLivre');
+        });
         Route::get('/listeLivre', fn() => view('BackOffice.livre.listeLivre'))->name('listeLivre');
 
         // Categorie Management

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Blog;
+use App\Models\Subscription;
 use Illuminate\Http\Request;
 
 class FrontOfficeController extends Controller
@@ -12,7 +13,8 @@ class FrontOfficeController extends Controller
     {
         $categories = Category::all();
         $blogs = Blog::latest()->take(3)->get();
-        return view('FrontOffice.Accueil', compact('categories', 'blogs'));
+        $subscriptions = Subscription::where('is_active', true)->get();
+        return view('FrontOffice.Accueil', compact('categories', 'blogs', 'subscriptions'));
     }
 
     public function categories(Request $request)

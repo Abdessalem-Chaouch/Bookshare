@@ -38,6 +38,14 @@
                 <div data-i18n="Analytics">Author Dashboard</div>
             </a>
         </li>
+        
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">Abonnements</span></li>
+        <li class="menu-item {{ request()->routeIs('author.subscriptions') ? 'active' : '' }}">
+            <a href="{{ route('author.subscriptions') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                <div data-i18n="Analytics">Mes Abonnements</div>
+            </a>
+        </li>
         @endif
         @endauth
 
@@ -175,10 +183,17 @@
 
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Payments</span></li>
 
-        <li class="menu-item {{ request()->routeIs('transaction') ? 'active' : '' }}">
+        <li class="menu-item {{ request()->routeIs('transactions') ? 'active' : '' }}">
             <a href="{{ route('transactions') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-money"></i>
                 <div data-i18n="Account Settings">Transactions</div>
+            </a>
+        </li>
+        
+        <li class="menu-item {{ request()->routeIs('subscriptions.*') ? 'active' : '' }}">
+            <a href="{{ route('subscriptions.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                <div data-i18n="Account Settings">Abonnements</div>
             </a>
         </li>
 
