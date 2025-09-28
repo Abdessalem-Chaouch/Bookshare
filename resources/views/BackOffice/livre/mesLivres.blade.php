@@ -54,7 +54,21 @@
                         </td>
 
                         <td>{{ $livre->stock }}</td>
-
+   <td>
+            @php $avg = $livre->averageRating(); @endphp
+            @if($avg)
+                @for($i = 1; $i <= 5; $i++)
+                    @if($i <= round($avg))
+                        <span style="color: gold;">★</span>
+                    @else
+                        <span style="color: #ccc;">★</span>
+                    @endif
+                @endfor
+                <small>({{ number_format($avg,1) }})</small>
+            @else
+                <span class="text-muted">No rating</span>
+            @endif
+        </td>
                         <!-- Actions -->
                         <td>
                             <div class="d-flex">

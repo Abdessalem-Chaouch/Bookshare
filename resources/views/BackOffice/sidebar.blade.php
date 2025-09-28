@@ -200,11 +200,7 @@
                     <div data-i18n="Account">Add Book</div>
                 </a>
             </li>
-            <li class="menu-item {{ request()->routeIs('listeLivre') ? 'active' : '' }}">
-                <a href="{{ route('listeLivre') }}" class="menu-link">
-                    <div data-i18n="Notifications">Books List</div>
-                </a>
-            </li>
+           
             <li class="menu-item {{ request()->routeIs('mesLivres') ? 'active' : '' }}">
                 <a href="{{ route('mesLivres') }}" class="menu-link">
                     <div data-i18n="Profile">My Books</div>
