@@ -2,17 +2,16 @@
 @section('content')
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Books /</span> Book List</h4>
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Books /</span> My Books</h4>
 
     <div class="card">
-        <h5 class="card-header">All Books</h5>
+        <h5 class="card-header">My Books</h5>
         <div class="table-responsive text-nowrap">
             <table class="table">
                 <thead>
                     <tr>
                         <th>Cover</th>
                         <th>Title</th>
-                        <th>Author</th>
                         <th>Category</th>
                         <th>Price</th>
                         <th>Availability</th>
@@ -21,9 +20,9 @@
                     </tr>
                 </thead>
                 <tbody class="table-border-bottom-0">
-                    @foreach($livres as $livre)
+                    @forelse($livres as $livre)
                     <tr>
-                        <!-- Cover Image -->
+                        <!-- Cover -->
                         <td>
                             @if($livre->photo_couverture)
                                 <img src="{{ asset('storage/'.$livre->photo_couverture) }}"
@@ -37,7 +36,6 @@
 
                         <!-- Info -->
                         <td>{{ $livre->titre }}</td>
-                        <td>{{ $livre->auteur->name }}</td>
                         <td>{{ $livre->categorie?->name ?? '—' }}</td>
 
                         <!-- Price -->
@@ -56,8 +54,7 @@
                         </td>
 
                         <td>{{ $livre->stock }}</td>
-      <!-- Average Rating -->
-        <td>
+   <td>
             @php $avg = $livre->averageRating(); @endphp
             @if($avg)
                 @for($i = 1; $i <= 5; $i++)
@@ -72,7 +69,6 @@
                 <span class="text-muted">No rating</span>
             @endif
         </td>
-
                         <!-- Actions -->
                         <td>
                             <div class="d-flex">
@@ -81,22 +77,19 @@
                                     <i class="bx bx-show"></i>
                                 </a>
 
-                                <!-- Actions réservées aux non-auteurs -->
-                                @if(!auth()->user()->isAuteur())
-                                    <!-- Edit -->
-                                    <a href="{{ route('livres.edit', $livre->id) }}" class="btn btn-sm btn-icon me-1" title="Edit">
-                                        <i class="bx bx-edit-alt"></i>
-                                    </a>
+                                <!-- Edit -->
+                                <a href="{{ route('livres.edit', $livre->id) }}" class="btn btn-sm btn-icon me-1" title="Edit">
+                                    <i class="bx bx-edit-alt"></i>
+                                </a>
 
-                                    <!-- Delete -->
-                                    <form action="{{ route('livres.destroy', $livre->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-icon me-1" title="Delete">
-                                            <i class="bx bx-trash"></i>
-                                        </button>
-                                    </form>
-                                @endif
+                                <!-- Delete -->
+                                <form action="{{ route('livres.destroy', $livre->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-icon me-1" title="Delete">
+                                        <i class="bx bx-trash"></i>
+                                    </button>
+                                </form>
 
                                 <!-- Download PDF -->
                                 @if($livre->pdf_path)
@@ -107,10 +100,13 @@
                             </div>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">You haven't added any books yet.</td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
-
         </div>
     </div>
 </div>

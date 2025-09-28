@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\LivreController;
+use App\Http\Controllers\RateController;
 
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\LivreControllerF;
@@ -46,6 +47,11 @@ Route::get('/aboutus', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
     Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
+
+    Route::get('/rates', [RateController::class, 'index'])->name('rates.index');
+    Route::post('/livres/{id}/rate', [RateController::class, 'store'])->name('rates.store');
+
+
 });
 // ========================
 // 🔒 Routes du Back Office
@@ -106,6 +112,8 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
     // ========================
     Route::middleware(['role:auteur'])->group(function () {
         // Dashboard Auteur
+Route::get('/mes-livres', [LivreController::class, 'mesLivres'])->name('mesLivres');
+
         Route::get('/dashboardAuteur', fn() => view('BackOffice.dashboardAuteur'))->name('dashboardAuteur');
         
         // Abonnements Auteur
