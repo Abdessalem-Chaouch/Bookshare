@@ -25,4 +25,18 @@ class Livre extends Model
     {
         return $this->belongsTo(Category::class, 'categorie_id');
     }
+    public function auteur()
+    {
+        return $this->belongsTo(User::class, 'user_id'); // 🔹 relation avec users
+    }
+    public function rates()
+{
+    return $this->hasMany(Rate::class);
+}
+
+public function averageRating()
+{
+    return $this->rates()->avg('note');
+}
+
 }

@@ -6,6 +6,7 @@ use App\Models\Livre;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\User;
 
 class LivreController extends Controller
 {
@@ -23,11 +24,23 @@ public function indexf()
 
     return view('FrontOffice.livres.LivrePage', compact('livres'));
 }
-    public function create()
-    {
-        $categories = Category::all();
-        return view('BackOffice.livre.ajouterLivre', compact('categories'));
-    }
+public function auteur()
+{
+    return $this->belongsTo(User::class, 'user_id');
+}
+public function mesLivres()
+{
+    $livres = Livre::where('user_id', auth()->id())->with('categorie')->get();
+    return view('BackOffice.livre.mesLivres', compact('livres'));
+}
+
+  public function create()
+{
+    $categories = Category::all();
+    $auteurs = User::where('role', 'auteur')->get();
+
+    return view('BackOffice.livre.ajouterLivre', compact('categories', 'auteurs'));
+}
 
    public function store(Request $request)
 {
@@ -41,7 +54,6 @@ public function indexf()
         'disponibilite' => 'required|in:disponible,emprunte,reserve',
         'stock' => 'required|integer|min:0',
         'photo_couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'pdf_contenu' => 'nullable|mimes:pdf|max:5120', // max 5 Mo
     ]);
 
     // 📌 gérer upload image
@@ -51,14 +63,15 @@ public function indexf()
 
     // 📌 gérer upload PDF
     if ($request->hasFile('pdf_contenu')) {
-        $validated['pdf_contenu'] = file_get_contents($request->file('pdf_contenu')->getRealPath());
-    }
+    $validated['pdf_contenu'] = $request->file('pdf_contenu')->store('livres/pdfs', 'public');
+}
 
     // insertion en base
     Livre::create($validated);
 
     return redirect()->route('livres.index')->with('success', 'Livre ajouté avec succès ✅');
 }
+
 
     public function edit(Livre $livre)
     {
@@ -77,7 +90,6 @@ public function indexf()
         'disponibilite' => 'required|in:disponible,emprunte,reserve',
         'stock' => 'required|integer|min:0',
         'photo_couverture' => 'nullable|image|max:2048',
-        'pdf_contenu' => 'nullable|mimes:pdf|max:10240',
         'prix' => 'nullable|numeric|min:0',
     ]);
 
@@ -140,8 +152,12 @@ public function download($id)
 {
     return view('BackOffice.livre.show', compact('livre'));
 }
- public function showf(Livre $livre)
+
+public function showf(Livre $livre)
 {
+    // Charger les rates avec l'utilisateur
+    $livre->load('rates.user');
+
     return view('FrontOffice.livres.showf', compact('livre'));
 }
 
