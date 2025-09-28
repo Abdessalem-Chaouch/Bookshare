@@ -2,9 +2,9 @@
 @section('content')
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Livres /</span> Éditer Livre</h4>
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Books /</span> Edit Book</h4>
 
-    {{-- Messages d'erreurs globaux --}}
+    {{-- Global error messages --}}
     @if($errors->any())
         <div class="alert alert-danger">
             <ul class="mb-0">
@@ -21,9 +21,9 @@
                 @csrf
                 @method('PUT')
 
-                {{-- Titre --}}
+                {{-- Title --}}
                 <div class="mb-3">
-                    <label class="form-label">Titre</label>
+                    <label class="form-label">Title</label>
                     <input type="text" name="titre"
                            class="form-control @error('titre') is-invalid @enderror"
                            required value="{{ old('titre', $livre->titre) }}">
@@ -32,12 +32,12 @@
                     @enderror
                 </div>
 
-                {{-- Auteur --}}
+                {{-- Author --}}
                 <div class="mb-3">
-                    <label class="form-label">Auteur</label>
+                    <label class="form-label">Author</label>
                     <input type="text" name="auteur"
                            class="form-control @error('auteur') is-invalid @enderror"
-                           value="{{ old('auteur', $livre->auteur) }}">
+                           value="{{ old('auteur', $livre->auteur->name) }}">
                     @error('auteur')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -64,11 +64,11 @@
                     @enderror
                 </div>
 
-                {{-- Catégorie --}}
+                {{-- Category --}}
                 <div class="mb-3">
-                    <label class="form-label">Catégorie</label>
+                    <label class="form-label">Category</label>
                     <select name="categorie_id" class="form-select @error('categorie_id') is-invalid @enderror">
-                        <option value="">-- Choisir une catégorie --</option>
+                        <option value="">-- Select a category --</option>
                         @foreach($categories as $categorie)
                             <option value="{{ $categorie->id }}" {{ old('categorie_id', $livre->categorie_id) == $categorie->id ? 'selected' : '' }}>
                                 {{ $categorie->name }}
@@ -80,9 +80,9 @@
                     @enderror
                 </div>
 
-                {{-- Prix --}}
+                {{-- Price --}}
                 <div class="mb-3">
-                    <label class="form-label">Prix (DT)</label>
+                    <label class="form-label">Price (DT)</label>
                     <input type="number" step="0.01" min="0" name="prix"
                            class="form-control @error('prix') is-invalid @enderror"
                            value="{{ old('prix', $livre->prix) }}">
@@ -91,13 +91,13 @@
                     @enderror
                 </div>
 
-                {{-- Disponibilité --}}
+                {{-- Availability --}}
                 <div class="mb-3">
-                    <label class="form-label">Disponibilité</label>
+                    <label class="form-label">Availability</label>
                     <select name="disponibilite" class="form-select @error('disponibilite') is-invalid @enderror" required>
-                        <option value="disponible" {{ old('disponibilite', $livre->disponibilite)=='disponible'?'selected':'' }}>Disponible</option>
-                        <option value="emprunte" {{ old('disponibilite', $livre->disponibilite)=='emprunte'?'selected':'' }}>Emprunté</option>
-                        <option value="reserve" {{ old('disponibilite', $livre->disponibilite)=='reserve'?'selected':'' }}>Réservé</option>
+                        <option value="disponible" {{ old('disponibilite', $livre->disponibilite)=='disponible'?'selected':'' }}>Available</option>
+                        <option value="emprunte" {{ old('disponibilite', $livre->disponibilite)=='emprunte'?'selected':'' }}>Borrowed</option>
+                        <option value="reserve" {{ old('disponibilite', $livre->disponibilite)=='reserve'?'selected':'' }}>Reserved</option>
                     </select>
                     @error('disponibilite')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -115,9 +115,9 @@
                     @enderror
                 </div>
 
-                {{-- Photo de couverture --}}
+                {{-- Cover Image --}}
                 <div class="mb-3">
-                    <label class="form-label">Photo de couverture</label>
+                    <label class="form-label">Cover Image</label>
                     <input type="file" name="photo_couverture"
                            class="form-control @error('photo_couverture') is-invalid @enderror" accept="image/*">
                     @error('photo_couverture')
@@ -130,7 +130,7 @@
 
                 {{-- PDF --}}
                 <div class="mb-3">
-                    <label class="form-label">Fichier PDF</label>
+                    <label class="form-label">PDF File</label>
                     <input type="file" name="pdf_contenu"
                            class="form-control @error('pdf_contenu') is-invalid @enderror" accept="application/pdf">
                     @error('pdf_contenu')
@@ -138,14 +138,14 @@
                     @enderror
                     @if($livre->pdf_contenu && Storage::disk('public')->exists($livre->pdf_contenu))
                         <div class="mt-2">
-                            <a href="{{ route('livres.download', $livre->id) }}" class="btn btn-sm btn-primary">📥 Télécharger le PDF actuel</a>
+                            <a href="{{ route('livres.download', $livre->id) }}" class="btn btn-sm btn-primary">📥 Download Current PDF</a>
                         </div>
                     @endif
                 </div>
 
-                {{-- Boutons --}}
-                <button type="submit" class="btn btn-success">Mettre à jour</button>
-                <a href="{{ route('livres.index') }}" class="btn btn-secondary">Annuler</a>
+                {{-- Buttons --}}
+                <button type="submit" class="btn btn-success">Update</button>
+                <a href="{{ route('livres.index') }}" class="btn btn-secondary">Cancel</a>
             </form>
         </div>
     </div>

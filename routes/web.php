@@ -4,10 +4,12 @@ use App\Http\Controllers\AccueilController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CategoryBlogController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\LivreController;
+use App\Http\Controllers\RateController;
 
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\LivreControllerF;
@@ -19,7 +21,7 @@ use App\Http\Controllers\LikesController;
 
 
 use App\Http\Controllers\FrontOfficeController;
-
+use App\Http\Controllers\ReviewController;
 
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
@@ -37,7 +39,14 @@ Route::get('/livresf', function () {
 Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles');
 
 Route::get('/article/{id}', [BlogController::class, 'show'])->name('articleDetail');
-
+//store routes
+Route::get('/stores', [StoreController::class, 'indexFront'])->name('stores');
+Route::get('/stores/{id}', [StoreController::class, 'show'])->name('stores.show');
+Route::post('/stores/{store}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+//edit and delit review store
+Route::post('/reviews/{storeId}', [ReviewController::class, 'store'])->name('reviews.store');
+Route::put('/reviews/{reviewId}', [ReviewController::class, 'update'])->name('reviews.update');
+Route::delete('/reviews/{reviewId}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
 Route::get('/aboutus', function () {
     return view('FrontOffice.Aboutus.AboutPage');
@@ -46,6 +55,11 @@ Route::get('/aboutus', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
     Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
+
+    Route::get('/rates', [RateController::class, 'index'])->name('rates.index');
+    Route::post('/livres/{id}/rate', [RateController::class, 'store'])->name('rates.store');
+
+
 });
 // ========================
 // 🔒 Routes du Back Office
@@ -81,8 +95,10 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
 
         // Magasin Management
         Route::get('/AjouterMagasin', fn() => view('BackOffice.magasin.ajouterMagasin'))->name('AjouterMagasin');
-        Route::get('/listeMagasin', fn() => view('BackOffice.magasin.listeMagasin'))->name('listeMagasin');
-
+        Route::post('/AjouterMagasin', [App\Http\Controllers\StoreController::class, 'store'])->name('AjouterMagasin');
+        Route::get('/listeMagasin', [StoreController::class, 'index'])->name('listeMagasin');
+        Route::resource('stores', StoreController::class)->except(['create','index','store']);
+        
         // Utilisateur Management
 
         Route::get('/AjouterUtilisateur', [UsersController::class, 'createUser'])->name('AjouterUtilisateur');
@@ -106,6 +122,8 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
     // ========================
     Route::middleware(['role:auteur'])->group(function () {
         // Dashboard Auteur
+Route::get('/mes-livres', [LivreController::class, 'mesLivres'])->name('mesLivres');
+
         Route::get('/dashboardAuteur', fn() => view('BackOffice.dashboardAuteur'))->name('dashboardAuteur');
         
         // Abonnements Auteur
