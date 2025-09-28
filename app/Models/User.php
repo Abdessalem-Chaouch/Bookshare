@@ -75,6 +75,11 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(\App\Models\Review::class);
+
+
     public function authorSubscriptions()
     {
         return $this->hasMany(AuthorSubscription::class);
@@ -95,5 +100,6 @@ class User extends Authenticatable
             ->where('expires_at', '>', now())
             ->with('subscription')
             ->first();
+
     }
 }
