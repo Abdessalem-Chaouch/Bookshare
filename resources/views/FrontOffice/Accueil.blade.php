@@ -71,6 +71,7 @@
 	</section>
 
 	@include("FrontOffice.Categories.CategoriesSection", ['categories' => $categories])
+	@include("FrontOffice.Subscriptions.SubscriptionsSection", ['subscriptions' => $subscriptions])
 	@include("FrontOffice.Livres.LivreContenu")
 	<section id="quotation" class="align-center pb-5 mb-5">
 		<div class="inner-content">

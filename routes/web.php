@@ -96,6 +96,9 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         })->name('listeUtilisateur');
 
         Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
+        
+        // Subscription Management
+        Route::resource('subscriptions', \App\Http\Controllers\SubscriptionController::class);
     });
 
     // ========================
@@ -104,6 +107,10 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
     Route::middleware(['role:auteur'])->group(function () {
         // Dashboard Auteur
         Route::get('/dashboardAuteur', fn() => view('BackOffice.dashboardAuteur'))->name('dashboardAuteur');
+        
+        // Abonnements Auteur
+        Route::get('/mes-abonnements', [\App\Http\Controllers\AuthorSubscriptionController::class, 'index'])->name('author.subscriptions');
+        Route::post('/subscribe/{subscription}', [\App\Http\Controllers\AuthorSubscriptionController::class, 'subscribe'])->name('author.subscribe');
     });
 
     // ========================
@@ -121,6 +128,13 @@ Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
 
 
     Route::middleware(['role:admin,auteur'])->group(function () {
+
+        // Livre Management (avec vérification d'abonnement pour les auteurs)
+        Route::middleware(['App\Http\Middleware\CheckActiveSubscription'])->group(function () {
+            Route::get('/AjouterLivre', fn() => view('BackOffice.livre.ajouterLivre'))->name('AjouterLivre');
+        });
+        Route::get('/listeLivre', fn() => view('BackOffice.livre.listeLivre'))->name('listeLivre');
+
         // Livre Management
 // Routes Livres
 Route::resource('livres', LivreController::class);
@@ -132,6 +146,7 @@ Route::get('/listeLivre', [LivreController::class, 'index'])->name('listeLivre')
     // PDF - afficher et télécharger
 Route::get('/livres/{livre}/viewpdf', [LivreController::class, 'viewpdf'])->name('livres.viewpdf');
 Route::get('/livres/{livre}/download', [LivreController::class, 'download'])->name('livres.download');
+
 
 
         // Categorie Management
