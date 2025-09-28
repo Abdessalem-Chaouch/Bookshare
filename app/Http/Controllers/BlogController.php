@@ -11,8 +11,10 @@ class BlogController extends Controller
 {
     public function index()
     {
-        $blogs = Blog::with('category')->latest()->get();
+        $blogs = Blog::with(['category', 'likes', 'comments'])->latest()->get();
         return view('BackOffice.blog.listeBlog', compact('blogs'));
+
+
     }
 
     public function indexFront()

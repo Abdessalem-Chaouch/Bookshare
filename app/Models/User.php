@@ -23,6 +23,8 @@ class User extends Authenticatable
         'password',
         'photo_profil',
         'role',
+        'facebook_id',
+        'google_id',
     ];
 
     /**
@@ -62,5 +64,14 @@ class User extends Authenticatable
     public function blogs()
     {
         return $this->hasMany(Blog::class);
+    }
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 }
