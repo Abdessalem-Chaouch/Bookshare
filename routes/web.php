@@ -14,7 +14,7 @@ use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\CategoryController;
 
 use App\Http\Controllers\FrontOfficeController;
-
+use App\Http\Controllers\ReviewController;
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
@@ -31,9 +31,14 @@ Route::get('/livres', function () {
 Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles');
 
 Route::get('/article/{id}', [BlogController::class, 'show'])->name('articleDetail');
-
+//store routes
 Route::get('/stores', [StoreController::class, 'indexFront'])->name('stores');
 Route::get('/stores/{id}', [StoreController::class, 'show'])->name('stores.show');
+Route::post('/stores/{store}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+//edit and delit review store
+Route::post('/reviews/{storeId}', [ReviewController::class, 'store'])->name('reviews.store');
+Route::put('/reviews/{reviewId}', [ReviewController::class, 'update'])->name('reviews.update');
+Route::delete('/reviews/{reviewId}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
 Route::get('/aboutus', function () {
     return view('FrontOffice.Aboutus.AboutPage');

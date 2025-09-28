@@ -34,6 +34,7 @@ class StoreController extends Controller
             'owner_name' => 'nullable|string|max:255',
             'location'   => 'required|string|max:255',
             'contact'    => 'nullable|string|max:255',
+            'store_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         //  Map form fields directly to DB columns
@@ -42,7 +43,11 @@ class StoreController extends Controller
             'owner_name' => $request->input('owner_name'),
             'location'   => $request->input('location'),
             'contact'    => $request->input('contact'),
+            'store_image' => $request->hasFile('store_image') ? $request->file('store_image')->store('store_images', 'public') : null,
         ];
+        if ($request->hasFile('store_image')) {
+                $data['store_image'] = $request->file('store_image')->store('stores', 'public');
+            }
 
         Store::create($data);
 
@@ -55,8 +60,10 @@ class StoreController extends Controller
      */
     public function show(string $id)
     {
-        $store = Store::findOrFail($id);
-        return view('FrontOffice.Stores.Show', compact('store'));
+    $store = Store::with('reviews.user')->findOrFail($id);
+    $averageRating = round($store->averageRating(), 1);
+
+    return view('FrontOffice.Stores.Show', compact('store', 'averageRating'));
     }
 
     /**
@@ -78,7 +85,13 @@ class StoreController extends Controller
             'owner_name' => 'nullable|string|max:255',
             'location'   => 'required|string|max:255',
             'contact'    => 'nullable|string|max:255',
+            'store_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        $data = $request->only(['store_name', 'owner_name', 'location', 'contact']);
+        if ($request->hasFile('store_image')) {
+            $data['store_image'] = $request->file('store_image')->store('stores', 'public');
+        }
 
         $store = Store::findOrFail($id);
         $store->update($request->all());
@@ -97,10 +110,26 @@ class StoreController extends Controller
         return redirect()->route('listeMagasin')->with('success', 'Item supprimé avec succès !');
     }
 
-    public function indexFront()
-    {
-        $stores = Store::all();
-        return view('FrontOffice.Stores.StorePage', compact('stores'));
+public function indexFront(Request $request)
+{
+    // Start a query builder
+    $query = Store::query();
+
+    // Filter by store name if provided
+    if ($request->filled('name')) {
+        $query->where('store_name', 'like', '%' . $request->name . '%');
     }
+
+    // Filter by owner name if provided
+    if ($request->filled('owner_name')) {
+        $query->where('owner_name', 'like', '%' . $request->owner_name . '%');
+    }
+
+    // Execute the query and get the results
+    $stores = $query->get();
+
+    return view('FrontOffice.Stores.StorePage', compact('stores'));
+}
+
     
 }

@@ -23,7 +23,7 @@
                             </div>
                         @endif
 
-                        <form action="{{ isset($store) ? route('stores.update', $store->id) : route('AjouterMagasin') }}" method="POST">
+                        <form action="{{ isset($store) ? route('stores.update', $store->id) : route('AjouterMagasin') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @if(isset($store))
                                 @method('PUT')
@@ -76,6 +76,13 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="mb-3">
+                                <label for="store_image" class="form-label">Store Image</label>
+                                <input type="file" name="store_image" class="form-control">
+                                @if(isset($store) && $store->store_image)
+                                    <img src="{{ asset('storage/'.$store->store_image) }}" alt="Store Image" style="height:100px; margin-top:10px;">
+                                @endif
+                            </div>                            
 
                             <div class="row justify-content-end">
                                 <div class="col-sm-10">

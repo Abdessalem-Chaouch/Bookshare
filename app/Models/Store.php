@@ -14,5 +14,17 @@ class Store extends Model
         'owner_name',
         'location',
         'contact',
+        'store_image',
     ];
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function averageRating()
+    {
+        return $this->reviews()->avg('rating');
+    }
+
 }
