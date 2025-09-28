@@ -14,7 +14,7 @@ class Livre extends Model
 
     protected $fillable = [
         'titre','auteur','description','isbn','photo_couverture',
-        'categorie_id','disponibilite','stock','pdf_contenu','date_ajout'
+        'categorie_id','disponibilite','stock','pdf_contenu','date_ajout','prix'
     ];
 
     protected $casts = [
@@ -25,4 +25,18 @@ class Livre extends Model
     {
         return $this->belongsTo(Category::class, 'categorie_id');
     }
+    public function auteur()
+    {
+        return $this->belongsTo(User::class, 'user_id'); // 🔹 relation avec users
+    }
+    public function rates()
+{
+    return $this->hasMany(Rate::class);
+}
+
+public function averageRating()
+{
+    return $this->rates()->avg('note');
+}
+
 }
