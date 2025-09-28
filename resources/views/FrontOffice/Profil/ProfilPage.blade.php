@@ -73,13 +73,6 @@
                             </div>
                         </div>
 
-                        {{-- Social Links --}}
-                        <div class="text-center mt-3">
-                            <a href="#" class="me-2"><i class="bi bi-facebook"></i></a>
-                            <a href="#" class="me-2"><i class="bi bi-twitter"></i></a>
-                            <a href="#"><i class="bi bi-linkedin"></i></a>
-                        </div>
-
                         {{-- Update Button --}}
                         <div class="text-center mt-3">
                             <button type="submit" class="btn btn-outline-accent btn-accent-arrow">
