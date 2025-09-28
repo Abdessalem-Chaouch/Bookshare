@@ -19,15 +19,15 @@ use App\Http\Controllers\LikesController;
 
 
 use App\Http\Controllers\FrontOfficeController;
-
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\PaymentController;
 
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
 Route::get('/nos-categories', [FrontOfficeController::class, 'categories'])->name('front.categories');
 
-use App\Http\Controllers\CommentsController;
-use App\Http\Controllers\LikesController;
+
 
 
 Route::get('/livresf', function () {
@@ -42,6 +42,15 @@ Route::get('/article/{id}', [BlogController::class, 'show'])->name('articleDetai
 Route::get('/aboutus', function () {
     return view('FrontOffice.Aboutus.AboutPage');
 })->name('aboutus');
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [PaymentController::class, 'showForm'])->name('checkout.form');
+    Route::post('/paypal/process', [PaymentController::class, 'processPayment'])->name('paypal.process');
+});
+
+
+
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
@@ -152,6 +161,20 @@ Route::put('/comments/{comment}', [CommentsController::class, 'update'])->name('
 
 // Supprimer un commentaire
 Route::delete('/comments/{comment}', [CommentsController::class, 'destroy'])->name('comments.destroy')->middleware('auth');
+
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+   Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add')->middleware('auth');
+    Route::patch('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+// routes/web.php
+Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
+ 
+});
+
 
 
 Route::get('/admin', function () {

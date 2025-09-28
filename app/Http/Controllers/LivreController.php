@@ -41,7 +41,7 @@ public function indexf()
         'disponibilite' => 'required|in:disponible,emprunte,reserve',
         'stock' => 'required|integer|min:0',
         'photo_couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'pdf_contenu' => 'nullable|mimes:pdf|max:5120', // max 5 Mo
+        'pdf_contenu' => 'nullable|mimes:pdf|max:20480', // max 5 Mo
     ]);
 
     // 📌 gérer upload image
@@ -49,10 +49,10 @@ public function indexf()
         $validated['photo_couverture'] = $request->file('photo_couverture')->store('livres', 'public');
     }
 
-    // 📌 gérer upload PDF
+     // 📌 gérer upload PDF
     if ($request->hasFile('pdf_contenu')) {
-        $validated['pdf_contenu'] = file_get_contents($request->file('pdf_contenu')->getRealPath());
-    }
+    $validated['pdf_contenu'] = $request->file('pdf_contenu')->store('livres/pdfs', 'public');
+}
 
     // insertion en base
     Livre::create($validated);

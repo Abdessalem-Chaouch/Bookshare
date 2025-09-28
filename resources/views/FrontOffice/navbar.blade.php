@@ -18,9 +18,15 @@
                 <div class="col-md-6">
                     <div class="right-element">
 
-                        <a href="#" class="cart for-buy">
-                            <i class="icon icon-clipboard"></i>&nbsp;&nbsp;&nbsp;<span>Cart</span>
-                        </a>
+             <a href="{{ route('cart.index') }}" class="for-buy position-relative">
+    <i class="icon icon-clipboard"></i>
+    <span>Cart</span>
+    <span id="cart-count" class="cart-badge">
+        {{ \App\Models\Cart::where('utilisateur_id', Auth::id())->sum('quantite') }}
+    </span>
+</a>
+
+
 
                         @guest
                             <!-- Utilisateur non connecté -->
@@ -154,12 +160,11 @@
                             <ul class="menu-list">
                                 <li class="menu-item active"><a href="{{ route('accueil') }}">Home</a></li>
 
-                                <li class="menu-item active"><a href="{{ route('livresf') }}">Books</a></li>
+                                <li class="menu-item"><a href="{{ route('livresf') }}">Books</a></li>
 
                                 <li class="menu-item"><a href="{{ route('front.categories') }}" class="nav-link">Categories</a></li>
-                                <li class="menu-item"><a href="{{ route('livres') }}" class="nav-link">Livres</a></li>
-
-                                <li class="menu-item"><a href="{{ route('articles') }}" class="nav-link">Articles</a></li>
+                              
+                                <li class="menu-item"><a href="{{ route('articles') }}" class="nav-link">Blogs</a></li>
                                 <li class="menu-item"><a href="{{ route('aboutus') }}" class="nav-link">About us</a></li>
                             </ul>
 
