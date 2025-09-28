@@ -8,13 +8,21 @@ use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\LivreController;
+use App\Http\Controllers\RateController;
 
 use App\Http\Controllers\ProfilController;
+use App\Http\Controllers\LivreControllerF;
 
 use App\Http\Controllers\CategoryController;
 
+use App\Http\Controllers\CommentsController;
+use App\Http\Controllers\LikesController;
+
+
 use App\Http\Controllers\FrontOfficeController;
 use App\Http\Controllers\ReviewController;
+
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
@@ -24,9 +32,9 @@ use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\LikesController;
 
 
-Route::get('/livres', function () {
+Route::get('/livresf', function () {
     return view('FrontOffice.Livres.LivrePage');
-})->name('livres');
+})->name('livresf');
 
 Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles');
 
@@ -47,6 +55,11 @@ Route::get('/aboutus', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
     Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
+
+    Route::get('/rates', [RateController::class, 'index'])->name('rates.index');
+    Route::post('/livres/{id}/rate', [RateController::class, 'store'])->name('rates.store');
+
+
 });
 // ========================
 // 🔒 Routes du Back Office
@@ -99,6 +112,9 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         })->name('listeUtilisateur');
 
         Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
+        
+        // Subscription Management
+        Route::resource('subscriptions', \App\Http\Controllers\SubscriptionController::class);
     });
 
     // ========================
@@ -106,23 +122,50 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
     // ========================
     Route::middleware(['role:auteur'])->group(function () {
         // Dashboard Auteur
-        Route::get('/dashboardAuteur', fn() => view('BackOffice.dashboardAuteur'))->name('dashboardAuteur');
-    });
+Route::get('/mes-livres', [LivreController::class, 'mesLivres'])->name('mesLivres');
 
-    // ========================
-    // 🔒 Routes réservées VISITEUR uniquement
-    // ========================
-    Route::middleware(['role:visiteur'])->group(function () {
-        // Dashboard Visiteur (si nécessaire)
+        Route::get('/dashboardAuteur', fn() => view('BackOffice.dashboardAuteur'))->name('dashboardAuteur');
+        
+        // Abonnements Auteur
+        Route::get('/mes-abonnements', [\App\Http\Controllers\AuthorSubscriptionController::class, 'index'])->name('author.subscriptions');
+        Route::post('/subscribe/{subscription}', [\App\Http\Controllers\AuthorSubscriptionController::class, 'subscribe'])->name('author.subscribe');
     });
 
     // ========================
     // 🔒 Routes accessibles ADMIN + AUTEUR
-    // ========================
-    Route::middleware(['role:admin,auteur'])->group(function () {
+    // ========================*
+     Route::middleware(['role:admin,auteur,user'])->group(function () {
         // Livre Management
-        Route::get('/AjouterLivre', fn() => view('BackOffice.livre.ajouterLivre'))->name('AjouterLivre');
+// Routes Livres
+
+Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
+    Route::get('/livresf/{livre}', [LivreController::class, 'showf'])->name('livres.showf');
+
+});
+
+
+
+    Route::middleware(['role:admin,auteur'])->group(function () {
+
+        // Livre Management (avec vérification d'abonnement pour les auteurs)
+        Route::middleware(['App\Http\Middleware\CheckActiveSubscription'])->group(function () {
+            Route::get('/AjouterLivre', fn() => view('BackOffice.livre.ajouterLivre'))->name('AjouterLivre');
+        });
         Route::get('/listeLivre', fn() => view('BackOffice.livre.listeLivre'))->name('listeLivre');
+
+        // Livre Management
+// Routes Livres
+Route::resource('livres', LivreController::class);
+
+// Routes supplémentaires si tu veux des noms plus explicites
+Route::get('/AjouterLivre', [LivreController::class, 'create'])->name('AjouterLivre');
+Route::get('/listeLivre', [LivreController::class, 'index'])->name('listeLivre');
+
+    // PDF - afficher et télécharger
+Route::get('/livres/{livre}/viewpdf', [LivreController::class, 'viewpdf'])->name('livres.viewpdf');
+Route::get('/livres/{livre}/download', [LivreController::class, 'download'])->name('livres.download');
+
+
 
         // Categorie Management
         Route::resource('categories', CategoryController::class);
@@ -131,8 +174,7 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         Route::get('/borrows', fn() => view('BackOffice.Borrows.Borrows'))->name('borrows');
     });
 });
-// Likes et comments 
-// web.php
+
 Route::post('/blogs/{blog}/like', [LikesController::class, 'toggle'])->name('blogs.like')->middleware('auth');
 
 // Ajouter un commentaire
@@ -143,6 +185,7 @@ Route::put('/comments/{comment}', [CommentsController::class, 'update'])->name('
 
 // Supprimer un commentaire
 Route::delete('/comments/{comment}', [CommentsController::class, 'destroy'])->name('comments.destroy')->middleware('auth');
+
 
 Route::get('/admin', function () {
     return view('dashboard');
@@ -163,5 +206,11 @@ Route::get('/auth/facebook', [App\Http\Controllers\FacebookAuthController::class
 Route::get('/auth/facebook/callback', [App\Http\Controllers\FacebookAuthController::class, 'handleFacebookCallback'])->name('facebook.callback');
 Route::get('/auth/facebook/select-role', [App\Http\Controllers\FacebookAuthController::class, 'showRoleSelection'])->name('facebook.select-role');
 Route::post('/auth/facebook/role', [App\Http\Controllers\FacebookAuthController::class, 'handleRoleSelection'])->name('facebook.role');
+
+// Google Login Routes
+Route::get('/auth/google', [App\Http\Controllers\GoogleAuthController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/auth/google/callback', [App\Http\Controllers\GoogleAuthController::class, 'handleGoogleCallback'])->name('google.callback');
+Route::get('/auth/google/select-role', [App\Http\Controllers\GoogleAuthController::class, 'showRoleSelection'])->name('google.select-role');
+Route::post('/auth/google/role', [App\Http\Controllers\GoogleAuthController::class, 'handleRoleSelection'])->name('google.role');
 
 require __DIR__ . '/auth.php';
