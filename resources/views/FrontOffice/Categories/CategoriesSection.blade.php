@@ -1,9 +1,9 @@
 <section id="categories-section" class="bookshelf pb-5 mb-5">
     <div class="section-header align-center">
         <div class="title">
-            <span>Découvrez nos</span>
+            <span>Discover Our</span>
         </div>
-        <h2 class="section-title">Catégories de Livres</h2>
+        <h2 class="section-title">Book Categories</h2>
     </div>
 
     <div class="container">
@@ -28,8 +28,8 @@
                                             <p style="font-size: 0.9em;">{{ $category->description }}</p>
                                         </div>
                                     </div>
-                                    <button type="button" class="add-to-cart" data-product-tile="view-category">
-                                        Voir Catégorie
+                                    <button type="button" class="add-to-cart" onclick="window.location.href='{{ route('category.books', $category->id) }}'">
+                                        View Category
                                     </button>
                                 </figure>
                                 <figcaption>

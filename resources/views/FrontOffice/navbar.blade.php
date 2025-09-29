@@ -32,7 +32,7 @@
                         @guest
                             <!-- Utilisateur non connecté -->
                             <a href="{{ route('login') }}" class="user-account for-buy">
-                                <i class="icon icon-user"></i>&nbsp;&nbsp;&nbsp;<span>Se connecter</span>
+                                <i class="icon icon-user"></i>&nbsp;&nbsp;&nbsp;<span>Login</span>
                             </a>
                         @endguest
 

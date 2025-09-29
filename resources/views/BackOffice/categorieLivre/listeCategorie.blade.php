@@ -3,9 +3,9 @@
 
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="d-flex justify-content-between align-items-center py-3 mb-4">
-        <h4 class="fw-bold"><span class="text-muted fw-light">Tables /</span> Liste des Catégories</h4>
+        <h4 class="fw-bold"><span class="text-muted fw-light">Tables /</span> Categories List</h4>
         <a href="{{ route('categories.create') }}" class="btn btn-primary">
-            <i class="bx bx-plus me-1"></i>Ajouter Catégorie
+            <i class="bx bx-plus me-1"></i>Add Category
         </a>
     </div>
 
@@ -25,13 +25,13 @@
                         <div class="search-input-wrapper position-relative">
                             <i class="bx bx-search position-absolute" style="left: 15px; top: 50%; transform: translateY(-50%); color: #999;"></i>
                             <input type="text" name="search" value="{{ request('search') }}" 
-                                   placeholder="Rechercher une catégorie..." 
+                                   placeholder="Search for a category..." 
                                    class="form-control ps-5" id="searchInput">
                         </div>
                     </div>
                     <div class="col-md-3">
                         <select name="search_type" class="form-select">
-                            <option value="name" {{ request('search_type', 'name') == 'name' ? 'selected' : '' }}>📖 Nom</option>
+                            <option value="name" {{ request('search_type', 'name') == 'name' ? 'selected' : '' }}>📖 Name</option>
                             <option value="description" {{ request('search_type') == 'description' ? 'selected' : '' }}>📝 Description</option>
                         </select>
                     </div>
@@ -44,7 +44,7 @@
                 </div>
                 @if(request()->hasAny(['search', 'sort']))
                     <div class="mt-3 text-center">
-                        <span class="badge bg-primary">{{ $categories->count() }} résultat(s)</span>
+                        <span class="badge bg-primary">{{ $categories->count() }} result(s)</span>
                     </div>
                 @endif
             </form>
@@ -52,15 +52,15 @@
     </div>
 
     <div class="card">
-        <h5 class="card-header">Catégories</h5>
+        <h5 class="card-header">Categories</h5>
         <div class="table-responsive text-nowrap">
             <table class="table">
                 <thead>
                     <tr>
                         <th>Image</th>
-                        <th>Nom</th>
+                        <th>Name</th>
                         <th>Description</th>
-                        <th>Date de création</th>
+                        <th>Creation Date</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -90,15 +90,15 @@
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="{{ route('categories.edit', $category) }}">
-                                        <i class="bx bx-edit-alt me-1"></i> Modifier
+                                        <i class="bx bx-edit-alt me-1"></i> Edit
                                     </a>
                                     <form action="{{ route('categories.destroy', $category) }}" method="POST" 
-                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')" 
+                                          onsubmit="return confirm('Are you sure you want to delete this category?')" 
                                           style="display: inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="dropdown-item text-danger">
-                                            <i class="bx bx-trash me-1"></i> Supprimer
+                                            <i class="bx bx-trash me-1"></i> Delete
                                         </button>
                                     </form>
                                 </div>
@@ -110,9 +110,9 @@
                         <td colspan="5" class="text-center py-4">
                             <div class="text-muted">
                                 <i class="bx bx-category bx-lg mb-2"></i>
-                                <p>Aucune catégorie trouvée</p>
+                                <p>No categories found</p>
                                 <a href="{{ route('categories.create') }}" class="btn btn-primary btn-sm">
-                                    Ajouter la première catégorie
+                                    Add first category
                                 </a>
                             </div>
                         </td>

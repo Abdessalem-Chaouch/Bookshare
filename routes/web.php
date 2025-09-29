@@ -33,6 +33,10 @@ use App\Http\Controllers\ReviewController;
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
 Route::get('/nos-categories', [FrontOfficeController::class, 'categories'])->name('front.categories');
 
+Route::get('/category/{id}/books', [FrontOfficeController::class, 'categoryBooks'])->name('category.books');
+
+
+
 Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
 
 

@@ -4,9 +4,9 @@
 <section id="categories-page" class="bookshelf pb-5 mb-5" style="padding-top: 100px;">
     <div class="section-header align-center">
         <div class="title">
-            <span>Toutes nos</span>
+            <span>All Our</span>
         </div>
-        <h2 class="section-title">Catégories de Livres</h2>
+        <h2 class="section-title">Book Categories</h2>
     </div>
 
     <!-- Recherche moderne -->
@@ -18,11 +18,11 @@
                         <div class="search-input-wrapper">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" name="search" value="{{ request('search') }}" 
-                                   placeholder="Rechercher une catégorie..." class="search-input" id="searchInput">
+                                   placeholder="Search for a category..." class="search-input" id="searchInput">
                         </div>
                         <div class="filters-wrapper">
                             <select name="search_type" class="filter-select">
-                                <option value="name" {{ request('search_type', 'name') == 'name' ? 'selected' : '' }}>📖 Nom</option>
+                                <option value="name" {{ request('search_type', 'name') == 'name' ? 'selected' : '' }}>📖 Name</option>
                                 <option value="description" {{ request('search_type') == 'description' ? 'selected' : '' }}>📝 Description</option>
                             </select>
                             <select name="sort" class="filter-select">
@@ -33,7 +33,7 @@
                     </form>
                     @if(request()->hasAny(['search', 'sort']))
                         <div class="results-count">
-                            <span class="count-badge">{{ $categories->count() }} résultat(s)</span>
+                            <span class="count-badge">{{ $categories->count() }} result(s)</span>
                         </div>
                     @endif
                 </div>
@@ -56,8 +56,8 @@
                                 <p style="font-size: 0.9em;">{{ $category->description }}</p>
                             </div>
                         </div>
-                        <button type="button" class="add-to-cart" data-product-tile="view-category">
-                            Voir Catégorie
+                        <button type="button" class="add-to-cart" onclick="window.location.href='{{ route('category.books', $category->id) }}'">
+                            View Category
                         </button>
                     </figure>
                     <figcaption>
@@ -72,10 +72,10 @@
                 <div class="col-12 text-center py-5">
                     <div class="no-results">
                         <i class="bi bi-search" style="font-size: 3rem; color: #ccc;"></i>
-                        <h4 class="mt-3">Aucune catégorie trouvée</h4>
-                        <p class="text-muted">Essayez de modifier vos critères de recherche.</p>
+                        <h4 class="mt-3">No categories found</h4>
+                        <p class="text-muted">Try modifying your search criteria.</p>
                         <a href="{{ route('front.categories') }}" class="btn btn-primary mt-2">
-                            Voir toutes les catégories
+                            View all categories
                         </a>
                     </div>
                 </div>
