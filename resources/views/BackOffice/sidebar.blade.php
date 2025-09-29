@@ -1,7 +1,7 @@
 <!-- Menu -->
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
-        <a class="app-brand-link">
+        <a href="{{ route('accueil') }}" class="app-brand-link">
 
             <span class="app-brand-logo demo">
                 <img alt="icon" src="{{asset('assets/img/libroLogo.png')}}" style="width:40px; height:40px; margin-right:10px;">
@@ -36,6 +36,14 @@
             <a href="{{ route('dashboardAuteur') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
                 <div data-i18n="Analytics">Author Dashboard</div>
+            </a>
+        </li>
+        
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">Abonnements</span></li>
+        <li class="menu-item {{ request()->routeIs('author.subscriptions') ? 'active' : '' }}">
+            <a href="{{ route('author.subscriptions') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                <div data-i18n="Analytics">Mes Abonnements</div>
             </a>
         </li>
         @endif
@@ -127,7 +135,7 @@
         @endif
 
         <!-- ✅ Partie visible pour ADMIN ET AUTEUR : Gestion des Livres -->
-        @if(auth()->user()->isAdmin() || auth()->user()->isAuteur())
+        @if(auth()->user()->isAdmin())
         <!-- Gestion des catégories -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Books Managements</span></li>
         <li class="menu-item {{ request()->routeIs('AjouterCategorie', 'listeCategorie') ? 'open active' : '' }}">
@@ -182,6 +190,48 @@
 
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Payments</span></li>
 
+        <li class="menu-item {{ request()->routeIs('transactions') ? 'active' : '' }}">
+            <a href="{{ route('transactions') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-money"></i>
+                <div data-i18n="Account Settings">Transactions</div>
+            </a>
+        </li>
+        
+        <li class="menu-item {{ request()->routeIs('subscriptions.*') ? 'active' : '' }}">
+            <a href="{{ route('subscriptions.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                <div data-i18n="Account Settings">Abonnements</div>
+            </a>
+        </li>
+
+        @endif
+
+        @if(auth()->user()->isAuteur())
+
+
+
+    <!-- Gestion des livres -->
+    <li class="menu-item {{ request()->routeIs('AjouterLivre', 'listeLivre', 'mesLivres') ? 'open active' : '' }}">
+        <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons bx bx-book"></i>
+            <div data-i18n="Account Settings">Books</div>
+        </a>
+        <ul class="menu-sub">
+            <li class="menu-item {{ request()->routeIs('AjouterLivre') ? 'active' : '' }}">
+                <a href="{{ route('AjouterLivre') }}" class="menu-link">
+                    <div data-i18n="Account">Add Book</div>
+                </a>
+            </li>
+           
+            <li class="menu-item {{ request()->routeIs('mesLivres') ? 'active' : '' }}">
+                <a href="{{ route('mesLivres') }}" class="menu-link">
+                    <div data-i18n="Profile">My Books</div>
+                </a>
+            </li>
+        </ul>
+    </li>
+    <li class="menu-header small text-uppercase"><span class="menu-header-text">Payments</span></li>
+
         <li class="menu-item {{ request()->routeIs('transaction') ? 'active' : '' }}">
             <a href="{{ route('transactions') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-money"></i>
@@ -190,6 +240,7 @@
         </li>
 
         @endif
+
     </ul>
 </aside>
 <!-- / Menu -->

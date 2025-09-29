@@ -192,15 +192,27 @@
                     <nav id="navbar">
                         <div class="main-menu stellarnav">
                             <ul class="menu-list">
-                                <li class="menu-item active"><a href="{{ route('accueil') }}">Home</a></li>
 
-                                <li class="menu-item"><a href="{{ route('livresf') }}">Books</a></li>
+      <li class="menu-item {{ request()->routeIs('accueil') ? 'active' : '' }}">
+          <a href="{{ route('accueil') }}">Home</a>
+      </li>
+      <li class="menu-item {{ request()->routeIs('front.categories') ? 'active' : '' }}">
+          <a href="{{ route('front.categories') }}" class="nav-link">Categories</a>
+      </li>
+      <li class="menu-item {{ request()->routeIs('livresf') ? 'active' : '' }}">
+          <a href="{{ route('livresf') }}">Books</a>
+      </li>
+      <li class="menu-item {{ request()->routeIs('articles') ? 'active' : '' }}">
+          <a href="{{ route('articles') }}" class="nav-link">Blogs</a>
+      </li>
+      <li class="menu-item {{ request()->routeIs('stores') ? 'active' : '' }}">
+          <a href="{{ route('stores') }}" class="nav-link">Stores</a>
+      </li>
+      <li class="menu-item {{ request()->routeIs('aboutus') ? 'active' : '' }}">
+          <a href="{{ route('aboutus') }}" class="nav-link">About us</a>
+      </li>
+  </ul>
 
-                                <li class="menu-item"><a href="{{ route('front.categories') }}" class="nav-link">Categories</a></li>
-                              
-                                <li class="menu-item"><a href="{{ route('articles') }}" class="nav-link">Blogs</a></li>
-                                <li class="menu-item"><a href="{{ route('aboutus') }}" class="nav-link">About us</a></li>
-                            </ul>
 
                             <div class="hamburger">
                                 <span class="bar"></span>
