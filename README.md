@@ -28,7 +28,7 @@
 ## ⚙ Installation
 
 1. Clone the repository:  
-git clone https://github.com/YOSRcharek/LibroLink.git
+git clone https://github.com/Slouumaa/Bookshare.git
 cd LibroLink
 
 2. Install dependencies:
