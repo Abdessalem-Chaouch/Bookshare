@@ -13,6 +13,8 @@
     <meta name="description" content="">
     <link rel="icon" type="image/png" href="../assets/img/libroLogo.png">
     <!-- Bootstrap CSS -->
+    <!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
@@ -29,6 +31,7 @@
     @include("FrontOffice.navbar")
 
         @yield('content')
+
     @if(session('success'))
     <div class="alert alert-success text-center">
         {{ session('success') }}
@@ -40,6 +43,7 @@
         {{ session('error') }}
     </div>
 @endif
+
 
     @include("FrontOffice.footer")
 
@@ -54,6 +58,33 @@
     <!-- Template JS -->
     <script src="{{ asset('js/plugins.js') }}"></script>
     <script src="{{ asset('js/script.js') }}"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Force dropdown functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdownToggle = document.getElementById('profileDropdown');
+    if (dropdownToggle) {
+        dropdownToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            const dropdownMenu = this.nextElementSibling;
+            if (dropdownMenu) {
+                dropdownMenu.classList.toggle('show');
+            }
+        });
+    }
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        const dropdown = document.querySelector('.dropdown-menu.show');
+        if (dropdown && !e.target.closest('.dropdown')) {
+            dropdown.classList.remove('show');
+        }
+    });
+});
+</script>
 
 </body>
 

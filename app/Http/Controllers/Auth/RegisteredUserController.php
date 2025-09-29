@@ -33,7 +33,6 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'in:visiteur,auteur'],
         ]);
 
         $user = User::create([
@@ -43,7 +42,7 @@ class RegisteredUserController extends Controller
             'photo_profil' => $request->hasFile('photo_profil')
                 ? $request->file('photo_profil')->store('photos', 'public')
                 : null,
-            'role' => $request->role,
+            'role' => 'user',
         ]);
 
         event(new Registered($user));

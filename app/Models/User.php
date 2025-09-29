@@ -74,4 +74,36 @@ class User extends Authenticatable
     {
         return $this->hasMany(Comment::class);
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(\App\Models\Review::class);
+    }
+
+    public function authorSubscriptions()
+    {
+        return $this->hasMany(AuthorSubscription::class);
+    }
+
+    public function hasActiveSubscription()
+    {
+        return $this->authorSubscriptions()
+            ->where('is_active', true)
+            ->where('expires_at', '>', now())
+            ->exists();
+    }
+
+    public function currentSubscription()
+    {
+        return $this->authorSubscriptions()
+            ->where('is_active', true)
+            ->where('expires_at', '>', now())
+            ->with('subscription')
+            ->first();
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
 }

@@ -4,10 +4,12 @@ use App\Http\Controllers\AccueilController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CategoryBlogController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\LivreController;
+use App\Http\Controllers\RateController;
 
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\LivreControllerF;
@@ -19,25 +21,32 @@ use App\Http\Controllers\LikesController;
 
 use App\Http\Controllers\BorrowController;
 use App\Http\Controllers\FrontOfficeController;
+
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaypalController;
+
+use App\Http\Controllers\ReviewController;
+
+
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
 Route::get('/nos-categories', [FrontOfficeController::class, 'categories'])->name('front.categories');
 
+Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
 
-
-
-Route::get('/livresf', function () {
-    return view('FrontOffice.Livres.LivrePage');
-})->name('livresf');
 
 Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles');
 
 Route::get('/article/{id}', [BlogController::class, 'show'])->name('articleDetail');
-
+//store routes
+Route::get('/stores', [StoreController::class, 'indexFront'])->name('stores');
+Route::get('/stores/{id}', [StoreController::class, 'show'])->name('stores.show');
+Route::post('/stores/{store}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+//edit and delit review store
+Route::post('/reviews/{storeId}', [ReviewController::class, 'store'])->name('reviews.store');
+Route::put('/reviews/{reviewId}', [ReviewController::class, 'update'])->name('reviews.update');
+Route::delete('/reviews/{reviewId}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
 Route::get('/aboutus', function () {
     return view('FrontOffice.Aboutus.AboutPage');
@@ -68,6 +77,14 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
     Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
+
+    Route::get('/rates', [RateController::class, 'index'])->name('rates.index');
+    Route::post('/livres/{id}/rate', [RateController::class, 'store'])->name('rates.store');
+
+    // Paiement des abonnements - accessible à tous les utilisateurs connectés
+    Route::get('/payment/{subscription}', [\App\Http\Controllers\PaymentController::class, 'showPaymentForm'])->name('payment.form');
+    Route::post('/payment/{subscription}', [\App\Http\Controllers\PaymentController::class, 'processPayment'])->name('payment.process');
+    Route::get('/payment-history', [\App\Http\Controllers\PaymentController::class, 'history'])->name('payment.history');
 });
 // ========================
 // 🔒 Routes du Back Office
@@ -103,8 +120,10 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
 
         // Magasin Management
         Route::get('/AjouterMagasin', fn() => view('BackOffice.magasin.ajouterMagasin'))->name('AjouterMagasin');
-        Route::get('/listeMagasin', fn() => view('BackOffice.magasin.listeMagasin'))->name('listeMagasin');
-
+        Route::post('/AjouterMagasin', [App\Http\Controllers\StoreController::class, 'store'])->name('AjouterMagasin');
+        Route::get('/listeMagasin', [StoreController::class, 'index'])->name('listeMagasin');
+        Route::resource('stores', StoreController::class)->except(['create','index','store']);
+        
         // Utilisateur Management
 
         Route::get('/AjouterUtilisateur', [UsersController::class, 'createUser'])->name('AjouterUtilisateur');
@@ -118,6 +137,11 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         })->name('listeUtilisateur');
 
 
+        Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
+        
+        // Subscription Management
+        Route::resource('subscriptions', \App\Http\Controllers\SubscriptionController::class);
+
     });
 
     // ========================
@@ -125,7 +149,14 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
     // ========================
     Route::middleware(['role:auteur'])->group(function () {
         // Dashboard Auteur
+Route::get('/mes-livres', [LivreController::class, 'mesLivres'])->name('mesLivres');
+
         Route::get('/dashboardAuteur', fn() => view('BackOffice.dashboardAuteur'))->name('dashboardAuteur');
+        
+        // Abonnements Auteur
+        Route::get('/mes-abonnements', [\App\Http\Controllers\AuthorSubscriptionController::class, 'index'])->name('author.subscriptions');
+        
+
     });
 
     // ========================
@@ -134,8 +165,6 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
      Route::middleware(['role:admin,auteur,user'])->group(function () {
         // Livre Management
 // Routes Livres
-
-Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
     Route::get('/livresf/{livre}', [LivreController::class, 'showf'])->name('livres.showf');
 
 });
@@ -144,6 +173,13 @@ Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
 
 
     Route::middleware(['role:admin,auteur'])->group(function () {
+
+        // Livre Management (avec vérification d'abonnement pour les auteurs)
+        Route::middleware(['App\Http\Middleware\CheckActiveSubscription'])->group(function () {
+            Route::get('/AjouterLivre', fn() => view('BackOffice.livre.ajouterLivre'))->name('AjouterLivre');
+        });
+        Route::get('/listeLivre', fn() => view('BackOffice.livre.listeLivre'))->name('listeLivre');
+
         // Livre Management
 // Routes Livres
 Route::resource('livres', LivreController::class);
@@ -155,6 +191,7 @@ Route::get('/listeLivre', [LivreController::class, 'index'])->name('listeLivre')
     // PDF - afficher et télécharger
 Route::get('/livres/{livre}/viewpdf', [LivreController::class, 'viewpdf'])->name('livres.viewpdf');
 Route::get('/livres/{livre}/download', [LivreController::class, 'download'])->name('livres.download');
+
 
 
         // Categorie Management
@@ -211,13 +248,9 @@ Route::middleware('auth')->group(function () {
 // Facebook Login Routes
 Route::get('/auth/facebook', [App\Http\Controllers\FacebookAuthController::class, 'redirectToFacebook'])->name('facebook.login');
 Route::get('/auth/facebook/callback', [App\Http\Controllers\FacebookAuthController::class, 'handleFacebookCallback'])->name('facebook.callback');
-Route::get('/auth/facebook/select-role', [App\Http\Controllers\FacebookAuthController::class, 'showRoleSelection'])->name('facebook.select-role');
-Route::post('/auth/facebook/role', [App\Http\Controllers\FacebookAuthController::class, 'handleRoleSelection'])->name('facebook.role');
 
 // Google Login Routes
 Route::get('/auth/google', [App\Http\Controllers\GoogleAuthController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('/auth/google/callback', [App\Http\Controllers\GoogleAuthController::class, 'handleGoogleCallback'])->name('google.callback');
-Route::get('/auth/google/select-role', [App\Http\Controllers\GoogleAuthController::class, 'showRoleSelection'])->name('google.select-role');
-Route::post('/auth/google/role', [App\Http\Controllers\GoogleAuthController::class, 'handleRoleSelection'])->name('google.role');
 
 require __DIR__ . '/auth.php';
