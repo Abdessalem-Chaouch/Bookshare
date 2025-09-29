@@ -14,17 +14,17 @@
                     <div class="row">
 
 
-                          @foreach($livres as $livre)
-<div class="col-md-3">
-    <div class="product-item" >
-        <figure class="product-style">
-            <img src="{{ asset('storage/' . $livre->photo_couverture) }}" alt="{{ $livre->titre }}" class="livre-image">
+                        @foreach($livres as $livre)
+                        <div class="col-md-3">
+                            <div class="product-item">
+                                <figure class="product-style">
+                                    <img src="{{ asset('storage/' . $livre->photo_couverture) }}" alt="{{ $livre->titre }}" class="livre-image">
 
-           <button type="button" 
-               class="add-to-cart btn btn-sm btn-primary" 
-            data-product-id="{{ $livre->id }}">
-            Add to Cart
-        </button>
+                                    <button type="button"
+                                        class="add-to-cart btn btn-sm btn-primary"
+                                        data-product-id="{{ $livre->id }}">
+                                        Add to Cart
+                                    </button>
 
         </figure>
         <figcaption>
@@ -39,33 +39,35 @@
 
 
 
-<script>
-document.querySelectorAll('.add-to-cart').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const livreId = this.dataset.productId;
+                        <script>
+                            document.querySelectorAll('.add-to-cart').forEach(btn => {
+                                btn.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    const livreId = this.dataset.productId;
 
-        fetch('{{ route("cart.add") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ livre_id: livreId })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error); // ❌ Affiche seulement si stock limité
-            } else {
-                // ✅ Mettre à jour le badge sans reload
-                document.getElementById('cart-count').textContent = data.count;
-            }
-        })
-        .catch(err => console.error(err));
-    });
-});
-</script>
+                                    fetch('{{ route("cart.add") }}', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                            },
+                                            body: JSON.stringify({
+                                                livre_id: livreId
+                                            })
+                                        })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            if (data.error) {
+                                                alert(data.error); // ❌ Affiche seulement si stock limité
+                                            } else {
+                                                // ✅ Mettre à jour le badge sans reload
+                                                document.getElementById('cart-count').textContent = data.count;
+                                            }
+                                        })
+                                        .catch(err => console.error(err));
+                                });
+                            });
+                        </script>
 
 
 

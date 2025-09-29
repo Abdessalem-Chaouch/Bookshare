@@ -1,61 +1,149 @@
 <section id="subscriptions-section" class="py-5" style="background: #e8e6e1;">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="section-title mb-3">Choisissez Votre Plan d'Abonnement</h2>
-            <p class="text-muted">Devenez auteur et partagez vos livres avec notre communauté</p>
+            <h2 class="section-title mb-3">Choose Your Subscription Plan</h2>
+            <p class="text-muted">Become an author and share your books with our community</p>
         </div>
 
-        <div class="row justify-content-center">
-            @foreach($subscriptions as $index => $subscription)
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="subscription-card {{ $index == 1 ? 'featured' : '' }}" data-plan="{{ strtolower($subscription->name) }}">
-                    <div class="card-header">
-                        <h3 class="plan-name">{{ $subscription->name }}</h3>
-                        <p class="plan-description">{{ $subscription->description }}</p>
-                        
-                        <div class="plan-toggle">
-                            <span class="toggle-option active">Mensuel</span>
-                            <span class="toggle-option">Annuel</span>
+        <div class="subscription-carousel-container position-relative">
+            <button class="carousel-arrow carousel-arrow-left" onclick="slideSubscriptions(-1)">
+                <i class="bx bx-chevron-left"></i>
+            </button>
+            
+            <div class="subscription-carousel">
+                <div class="subscription-track" id="subscriptionTrack">
+                    @foreach($subscriptions as $index => $subscription)
+                    <div class="subscription-slide">
+                        <div class="subscription-card {{ $index == 1 ? 'featured' : '' }}">
+                            <div class="card-header">
+                                <h3 class="plan-name">{{ $subscription->name }}</h3>
+                                <p class="plan-description">{{ $subscription->description }}</p>
+                                
+                                <div class="plan-toggle">
+                                    <span class="toggle-option active">Monthly</span>
+                                    <span class="toggle-option">Annual</span>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <div class="price-section">
+                                    <span class="currency">€</span>
+                                    <span class="price">{{ number_format($subscription->price, 0) }}</span>
+                                    <span class="period">/month</span>
+                                </div>
+                                <p class="billing-info">Billed monthly</p>
+                                
+                                <ul class="features-list">
+                                    @foreach($subscription->features as $feature)
+                                    <li>
+                                        <i class="bx bx-check"></i>
+                                        {{ $feature }}
+                                    </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                            
+                            <div class="card-footer">
+                                @auth
+                                    <a href="{{ route('payment.form', $subscription) }}" class="btn-subscribe">
+                                        SUBSCRIBE
+                                    </a>
+                                @else
+                                    <a href="{{ route('login') }}" class="btn-subscribe">
+                                        SUBSCRIBE
+                                    </a>
+                                @endauth
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="card-body">
-                        <div class="price-section">
-                            <span class="currency">€</span>
-                            <span class="price">{{ number_format($subscription->price, 0) }}</span>
-                            <span class="period">/mois</span>
-                        </div>
-                        <p class="billing-info">Facturé mensuellement</p>
-                        
-                        <ul class="features-list">
-                            @foreach($subscription->features as $feature)
-                            <li>
-                                <i class="bx bx-check"></i>
-                                {{ $feature }}
-                            </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                    
-                    <div class="card-footer">
-                        @auth
-                            <a href="{{ route('payment.form', $subscription) }}" class="btn-subscribe">
-                                S'ABONNER
-                            </a>
-                        @else
-                            <a href="{{ route('login') }}" class="btn-subscribe">
-                                S'ABONNER
-                            </a>
-                        @endauth
-                    </div>
+                    @endforeach
                 </div>
             </div>
-            @endforeach
+            
+            <button class="carousel-arrow carousel-arrow-right" onclick="slideSubscriptions(1)">
+                <i class="bx bx-chevron-right"></i>
+            </button>
         </div>
     </div>
 </section>
 
+<script>
+let currentSlide = 0;
+const totalSlides = {{ count($subscriptions) }};
+const slidesPerView = 3;
+const maxSlide = Math.max(0, totalSlides - slidesPerView);
+
+function slideSubscriptions(direction) {
+    const track = document.getElementById('subscriptionTrack');
+    
+    currentSlide += direction;
+    
+    if (currentSlide < 0) {
+        currentSlide = 0;
+    } else if (currentSlide > maxSlide) {
+        currentSlide = maxSlide;
+    }
+    
+    const slideWidth = 100 / slidesPerView;
+    const translateX = -currentSlide * slideWidth;
+    track.style.transform = `translateX(${translateX}%)`;
+}
+</script>
+
 <style>
+.subscription-carousel-container {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.subscription-carousel {
+    overflow: hidden;
+    width: 100%;
+}
+
+.subscription-track {
+    display: flex;
+    transition: transform 0.5s ease;
+    gap: 20px;
+}
+
+.subscription-slide {
+    width: calc((100% - 40px) / 3);
+    flex-shrink: 0;
+}
+
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    z-index: 10;
+}
+
+.carousel-arrow:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.carousel-arrow-left {
+    left: -25px;
+}
+
+.carousel-arrow-right {
+    right: -25px;
+}
+
 .subscription-card {
     border-radius: 20px;
     padding: 0;
@@ -72,18 +160,8 @@
     box-shadow: 0 20px 40px rgba(0,0,0,0.15);
 }
 
-.subscription-card[data-plan="basique"] {
-    background: linear-gradient(145deg, #f5f2ee, #a88253);
-    color: white;
-}
-
-.subscription-card[data-plan="premium"] {
-    background: linear-gradient(145deg, #f0e7d6, #6a5331);
-    color: white;
-}
-
-.subscription-card[data-plan="Étudiant"] {
-    background: linear-gradient(145deg, #f3e7c9, #a39673) !important;
+.subscription-card {
+    background: linear-gradient(145deg, #dccdb6, #9d7d42);
     color: white;
 }
 
@@ -208,5 +286,21 @@
 .btn-subscribe:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .subscription-slide {
+        width: calc((100% - 20px) / 2);
+    }
+}
+
+@media (max-width: 480px) {
+    .subscription-slide {
+        width: 100%;
+    }
+    
+    .carousel-arrow {
+        display: none;
+    }
 }
 </style>

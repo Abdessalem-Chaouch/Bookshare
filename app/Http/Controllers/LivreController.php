@@ -7,9 +7,11 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class LivreController extends Controller
 {
+    
   public function index()
 {
     // Récupérer les livres avec leur catégorie
@@ -19,20 +21,30 @@ class LivreController extends Controller
 }
 public function indexf()
 {
-    // Récupérer les livres avec leur catégorie
-    $livres = Livre::with('categorie')->latest('date_ajout')->get();
+    $livres = Livre::with('categorie', 'auteur')
+                   ->latest('date_ajout')
+                   ->get();
 
     return view('FrontOffice.livres.LivrePage', compact('livres'));
 }
-public function auteur()
-{
-    return $this->belongsTo(User::class, 'user_id');
-}
+
+
 public function mesLivres()
 {
-    $livres = Livre::where('user_id', auth()->id())->with('categorie')->get();
+    
+    $user = Auth::user();
+
+    if (!$user) {
+        return redirect()->route('login')->with('error', 'Vous devez être connecté.');
+    }
+
+    $livres = Livre::where('user_id', $user->id)
+                   ->with('categorie')
+                   ->get();
+
     return view('BackOffice.livre.mesLivres', compact('livres'));
 }
+
 
   public function create()
 {

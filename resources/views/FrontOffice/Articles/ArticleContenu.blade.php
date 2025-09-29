@@ -10,7 +10,81 @@
 					<h2 class="section-title">Latest Articles</h2>
 				</div>
 
-				<div class="row">
+				<div class="row mb-4">
+					<div class="col-md-6 offset-md-3">
+						<input type="text" id="searchInput" class="form-control text-center transparent-input" placeholder="Search articles or categories...">
+					</div>
+				</div>
+
+				<div class="row mb-4">
+					<div class="col-md-4 offset-md-4">
+						<form method="GET" action="{{ route('articles') }}">
+							<select name="category" class="form-select text-center fw-bold category-select" onchange="this.form.submit()">
+								<option value="">All Categories</option>
+								@foreach($categoriesblogs as $category)
+								<option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+									{{ $category->name }}
+								</option>
+								@endforeach
+							</select>
+						</form>
+					</div>
+				</div>
+
+				<style>
+					/* Input transparent permanent */
+					.transparent-input {
+						background-color: transparent !important;
+						border: 4px solid #ccc;
+						padding: 0.5rem 1rem;
+						text-align: center;
+						font-family: 'Times New Roman', Times, serif;
+						width: 100%;
+						box-sizing: border-box;
+					}
+
+					.transparent-input:focus {
+						background-color: transparent !important;
+						border-color: #ccc;
+						outline: none;
+						box-shadow: none;
+					}
+
+					/* Select transparent permanent */
+					.category-select {
+						background-color: transparent !important;
+						border: 1px solid #ccc;
+						padding: 0.5rem 1rem;
+						text-align: center;
+						font-family: 'Times New Roman', Times, serif;
+						width: 100%;
+						box-sizing: border-box;
+						appearance: none;
+						-webkit-appearance: none;
+						-moz-appearance: none;
+					}
+
+					.category-select:focus {
+						background-color: transparent !important;
+						border-color: 1px solid #ccc;
+						outline: none;
+						box-shadow: none;
+					}
+
+					/* Centrer le texte des options */
+					.category-select option {
+						text-align: center;
+						font-family: 'Times New Roman', Times, serif;
+					}
+
+					/* Espacement uniforme */
+					.row.mb-4 {
+						margin-bottom: 1.5rem !important;
+					}
+				</style>
+
+
+				<div class="row" id="articlesContainer">
 					@foreach($blogs as $index => $blog)
 					<div class="col-md-4">
 						<article class="column" data-aos="fade-up" @if($index) data-aos-delay="{{ $index * 200 }}" @endif>
@@ -40,7 +114,15 @@
 								<div class="links-element d-flex align-items-center justify-content-between">
 									<!-- Icônes like et chat -->
 									<div class="icons d-flex align-items-center">
-										<a href="javascript:void(0)" class="like-btn me-3" data-blog="{{ $blog->id }}">
+										<a
+											@guest
+											href="{{ route('login') }}"
+											class="me-2"
+											@else
+											href="javascript:void(0)"
+											class="like-btn me-3"
+											data-blog="{{ $blog->id }}"
+											@endguest>
 											<i class="bi bi-hand-thumbs-up"></i>
 											<span class="like-count">{{ $blog->likes->count() }}</span>
 										</a>
@@ -97,6 +179,21 @@
 					})
 					.catch(error => console.error('Erreur:', error));
 			});
+		});
+	});
+	document.getElementById('searchInput').addEventListener('input', function() {
+		const query = this.value.toLowerCase();
+		const articles = document.querySelectorAll('#articlesContainer .col-md-4');
+
+		articles.forEach(article => {
+			const title = article.querySelector('h3 a').textContent.toLowerCase();
+			const category = article.querySelector('.meta-category').textContent.toLowerCase();
+
+			if (title.includes(query) || category.includes(query)) {
+				article.style.display = '';
+			} else {
+				article.style.display = 'none';
+			}
 		});
 	});
 </script>
