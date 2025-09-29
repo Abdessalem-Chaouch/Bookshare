@@ -179,6 +179,13 @@
 
             </ul>
         </li>
+       <li class="menu-item {{ request()->routeIs('borrowsBook') ? 'active' : '' }}">
+                    <a href="{{ route('borrowsBook') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-book-open"></i>
+
+                        <div data-i18n="Notifications">Borrows </div>
+                    </a>
+        </li>
 
 
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Payments</span></li>
