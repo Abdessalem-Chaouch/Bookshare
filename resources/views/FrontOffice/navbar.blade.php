@@ -24,6 +24,7 @@
     <span id="cart-count" class="cart-badge">
         {{ \App\Models\Cart::where('utilisateur_id', Auth::id())->sum('quantite') }}
     </span>
+    
 </a>
 
 
@@ -35,92 +36,125 @@
                             </a>
                         @endguest
 
-                      @auth
-						@if(Auth::user()->role === 'auteur')
-							<!-- Dropdown Auteur -->
-							<div class="nav-item dropdown d-inline-block align-items-center">
-								<a class="nav-link dropdown-toggle align-items-center" href="#" id="profileDropdown"
-								role="button" data-bs-toggle="dropdown" aria-expanded="false">
-									<img src="{{ auth()->user()->photo_profil
-												? asset('storage/' . auth()->user()->photo_profil)
-												: asset('images/default-avatar.jpg') }}"
-										alt="Profile"
-										class="rounded-circle"
-										style="width:40px; height:40px; object-fit:cover;">
-									<span class="ms-2">{{ Auth::user()->name }}</span>
-								</a>
+                     @auth
+                        @if(Auth::user()->role === 'auteur')
+                            <!-- Dropdown Auteur -->
+                            <div class="nav-item dropdown d-inline-block align-items-center">
+                                <a class="nav-link dropdown-toggle align-items-center" href="#" id="profileDropdown"
+                                role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="{{ auth()->user()->photo_profil
+                                                ? asset('storage/' . auth()->user()->photo_profil)
+                                                : asset('images/default-avatar.jpg') }}"
+                                        alt="Profile"
+                                        class="rounded-circle"
+                                        style="width:40px; height:40px; object-fit:cover;">
+                                    <span class="ms-2">{{ Auth::user()->name }}</span>
+                                </a>
 
-								<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-									<li>
-										<a class="dropdown-item" href="{{ route('profil.index') }}">
-											<i class="bi bi-person"></i> Profil
-										</a>
-									</li>
-									<li>
-										<a class="dropdown-item" href="{{ route('dashboardAuteur') }}">
-											<i class="bi bi-gear"></i> Dashboard
-										</a>
-									</li>
-									<li><hr class="dropdown-divider"></li>
-									<li>
-										<form method="POST" action="{{ route('logout') }}" class="d-inline">
-											@csrf
-											<button class="dropdown-item text-danger" type="submit">
-												<i class="bi bi-box-arrow-right"></i> Logout
-											</button>
-										</form>
-									</li>
-								</ul>
-							</div>
-							@else
-							<!-- Dropdown Simple User -->
-							<div class="nav-item dropdown d-inline-block align-items-center">
-								<a class="nav-link dropdown-toggle align-items-center" href="#" id="profileDropdown"
-								role="button" data-bs-toggle="dropdown" aria-expanded="false">
-									<img src="{{ auth()->user()->photo_profil
-												? asset('storage/' . auth()->user()->photo_profil)
-												: asset('images/default-avatar.jpg') }}"
-										alt="Profile"
-										class="rounded-circle"
-										style="width:40px; height:40px; object-fit:cover;">
-									<span class="ms-2">{{ Auth::user()->name }}</span>
-								</a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('profil.index') }}">
+                                            <i class="bi bi-person"></i> Profil
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('dashboardAuteur') }}">
+                                            <i class="bi bi-gear"></i> Dashboard
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                            @csrf
+                                            <button class="dropdown-item text-danger" type="submit">
+                                                <i class="bi bi-box-arrow-right"></i> Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
 
-								<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-									<li>
-										<a class="dropdown-item" href="{{ route('profil.index') }}">
-											<i class="bi bi-person"></i> Profil
-										</a>
-									</li>
-									<li>
-										<a class="dropdown-item" href="{{ route('profil.index') }}">
-											<i class="bi bi-journal-bookmark"></i> My Books
-										</a>
-									</li>
-									<li>
-										<a class="dropdown-item" href="{{ route('profil.index') }}">
-											<i class="bi bi-book"></i> Borrows
-										</a>
-									</li>
-									<li>
-										<a class="dropdown-item" href="{{ route('profil.index') }}">
-											<i class="bi bi-clock-history"></i> Late Return
-										</a>
-									</li>
-									<li><hr class="dropdown-divider"></li>
-									<li>
-										<form method="POST" action="{{ route('logout') }}" class="d-inline">
-											@csrf
-											<button class="dropdown-item text-danger" type="submit">
-												<i class="bi bi-box-arrow-right"></i> Logout
-											</button>
-										</form>
-									</li>
-								</ul>
-							</div>
-						    @endif
-                      @endauth
+                        @elseif(Auth::user()->role === 'admin')
+                            <!-- Dropdown Admin -->
+                            <div class="nav-item dropdown d-inline-block align-items-center">
+                                <a class="nav-link dropdown-toggle align-items-center" href="#" id="profileDropdown"
+                                role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="{{ auth()->user()->photo_profil
+                                                ? asset('storage/' . auth()->user()->photo_profil)
+                                                : asset('images/default-avatar.jpg') }}"
+                                        alt="Profile"
+                                        class="rounded-circle"
+                                        style="width:40px; height:40px; object-fit:cover;">
+                                    <span class="ms-2">{{ Auth::user()->name }}</span>
+                                </a>
 
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('profil.index') }}">
+                                            <i class="bi bi-person"></i> Profil
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('dashboardAdmin') }}">
+                                            <i class="bi bi-gear"></i> Dashboard
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                            @csrf
+                                            <button class="dropdown-item text-danger" type="submit">
+                                                <i class="bi bi-box-arrow-right"></i> Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        @else
+                            <!-- Dropdown Simple User -->
+                            <div class="nav-item dropdown d-inline-block align-items-center">
+                                <a class="nav-link dropdown-toggle align-items-center" href="#" id="profileDropdown"
+                                role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="{{ auth()->user()->photo_profil
+                                                ? asset('storage/' . auth()->user()->photo_profil)
+                                                : asset('images/default-avatar.jpg') }}"
+                                        alt="Profile"
+                                        class="rounded-circle"
+                                        style="width:40px; height:40px; object-fit:cover;">
+                                    <span class="ms-2">{{ Auth::user()->name }}</span>
+                                </a>
+
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('profil.index') }}">
+                                            <i class="bi bi-person"></i> Profil
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('myBooks') }}">
+                                            <i class="bi bi-journal-bookmark"></i> My Books
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('borrows') }}">
+                                            <i class="bi bi-book"></i> My Borrows
+                                        </a>
+                                    </li>
+                                  
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                            @csrf
+                                            <button class="dropdown-item text-danger" type="submit">
+                                                <i class="bi bi-box-arrow-right"></i> Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        @endif
+                    @endauth
 
                         <!-- Search -->
                         <div class="action-menu">

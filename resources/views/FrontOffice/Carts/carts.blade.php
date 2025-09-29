@@ -36,23 +36,10 @@
                             <div class="row">{{ $item->livre->titre }}</div>
                         </div>
                         <div class="col">
-                            <!-- Boutons - et + -->
-                            <form action="{{ route('cart.update', $item->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="quantite" value="{{ $item->quantite - 1 }}">
-                                <button type="submit" class="btn btn-outline-accent2 btn-accent-arrow">-</button>
-                                
-                            </form>
+                          
 
-                            <a href="#" class="border px-2">{{ $item->quantite }}</a>
+                        
 
-                            <form action="{{ route('cart.update', $item->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="quantite" value="{{ $item->quantite + 1 }}">
-                                <button type="submit" class="btn btn-outline-accent2 btn-accent-arrow">+</button>
-                            </form>
                         </div>
                         <div class="col">
                             {{ $item->livre->prix * $item->quantite }} DT
@@ -66,10 +53,22 @@
                 </div>
             @endforeach
 
-            <div class="back-to-shop">
-                <a href="{{ route('livresf') }}">&leftarrow;</a>
-                <span class="col align-self-center text-right text-muted">Back to shop</span>
-            </div>
+          
+            <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="back-to-shop">
+        <a href="{{ route('livresf') }}">&larr;</a>
+        <span class="col align-self-center text-right text-muted" style="cursor: pointer;">Back to shop</span>
+    </div>
+
+    <div class="back-to-shop">
+        <span id="clear-cart" class="col align-self-left text-left text-muted" style="cursor: pointer;">
+            Clear Cart &nbsp; 🗑
+        </span>
+    </div>
+</div>
+
+      
+
         </div>
 
         <!-- Summary -->
@@ -88,12 +87,18 @@
                 </div>
             </div>
 
-       <form action="{{ route('checkout.form') }}" method="GET">
-    @csrf
-    <input type="hidden" name="montant" value="{{ $cartItems->sum(fn($i) => $i->livre->prix * $i->quantite) + 5 }}"> 
-    <button class="btn btn-outline-accent btn-accent-arrow">PAY WITH PAYPAL</button>
-</form>
 
+<form action="{{ route('paypal') }}" method="POST">
+    @csrf
+    @foreach($cartItems as $item)
+        <input type="hidden" name="items[{{ $loop->index }}][livre_id]" value="{{ $item->livre->id }}">
+        <input type="hidden" name="items[{{ $loop->index }}][product_name]" value="{{ $item->livre->titre }}">
+        <input type="hidden" name="items[{{ $loop->index }}][amount]" value="{{ $item->livre->prix }}">
+    @endforeach
+    <button type="submit" class="btn btn-outline-accent btn-accent-arrow">
+        PAY WITH PAYPAL
+    </button>
+</form>
 
 
         </div>
@@ -106,6 +111,32 @@
         </div>
     </div>
 </section>
+<script>
+document.getElementById('clear-cart').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    if(!confirm('Are you sure you want to clear your cart?')) return;
+
+    fetch('{{ route("cart.clear") }}', {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message); // message succès
+        document.getElementById('cart-count').textContent = data.count;
+
+        // Optionnel : vider la liste des items du DOM
+        document.querySelector('.cart').innerHTML = '<p>Your cart is empty.</p>';
+        document.querySelector('.summary').innerHTML = '';
+    })
+    .catch(err => console.error(err));
+});
+</script>
+
 <style>
   
 .cartTitle{
@@ -132,6 +163,8 @@
     border-bottom-left-radius: 1rem;
     border-top-left-radius: 1rem;
 }
+
+
 @media(max-width:767px){
     .cart{
         padding: 4vh;

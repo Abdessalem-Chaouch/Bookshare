@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Livre;
 use Illuminate\Support\Facades\Auth;
-
+use DB;
 class CartController extends Controller
 {
     public function index()
@@ -20,27 +20,47 @@ class CartController extends Controller
 
 public function add(Request $request)
 {
-    $livreId = $request->input('livre_id');
+    $bookId = $request->input('livre_id');
 
-    $cartItem = Cart::where('utilisateur_id', Auth::id())
-        ->where('livre_id', $livreId)
+    if (!Auth::check()) {
+        return response()->json(['error' => 'You must be logged in.'], 401);
+    }
+
+    $book = Livre::find($bookId);
+    if (!$book) {
+        return response()->json(['error' => 'Book not found.'], 404);
+    }
+
+    if ($book->stock <= 0) {
+        return response()->json(['error' => '🚫 This book is out of stock.'], 409);
+    }
+
+    $userId = Auth::id();
+
+    $cartItem = Cart::where('utilisateur_id', $userId)
+        ->where('livre_id', $bookId)
         ->first();
 
     if ($cartItem) {
-        $cartItem->increment('quantite');
-    } else {
-        Cart::create([
-            'utilisateur_id' => Auth::id(),
-            'livre_id' => $livreId,
-            'quantite' => 1,
-        ]);
+        // Book is already in the cart
+        return response()->json(['error' => '🚫 This book is already in your cart.'], 409);
     }
 
-    // Retourne seulement le nombre d'items pour le JS
-    $count = Cart::where('utilisateur_id', Auth::id())->sum('quantite');
+    // Otherwise, add it to the cart
+    Cart::create([
+        'utilisateur_id' => $userId,
+        'livre_id' => $bookId,
+        'quantite' => 1,
+    ]);
 
-    return response()->json(['count' => $count]);
+    $count = Cart::where('utilisateur_id', $userId)->sum('quantite');
+
+    return response()->json([
+        'count' => $count,
+        'message' => 'Book added to cart.'
+    ]);
 }
+
 
 
 
@@ -84,5 +104,16 @@ public function count()
     $count = Cart::where('utilisateur_id', Auth::id())->sum('quantite');
     return response()->json(['count' => $count]);
 }
+public function clear()
+{
+    $userId = Auth::id();
+    Cart::where('utilisateur_id', $userId)->delete();
+
+    return response()->json([
+        'count' => 0,
+        'message' => 'Cart cleared successfully.'
+    ]);
+}
+
 
 }

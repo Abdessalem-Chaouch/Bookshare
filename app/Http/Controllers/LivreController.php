@@ -126,16 +126,22 @@ public function indexf()
 
 
 // Télécharger le PDF
+
 public function download($id)
 {
     $livre = Livre::findOrFail($id);
+
     if ($livre->pdf_contenu) {
-        return response($livre->pdf_contenu)
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'attachment; filename="'.$livre->titre.'.pdf"');
+        $path = public_path('storage/' . $livre->pdf_contenu); // correct full path
+        if (file_exists($path)) {
+            return response()->download($path, $livre->titre . '.pdf');
+        }
     }
-    return redirect()->back()->with('error', 'Aucun PDF disponible');
+
+    return redirect()->back()->with('error', 'No PDF available.');
 }
+
+
     public function show(Livre $livre)
 {
     return view('BackOffice.livre.show', compact('livre'));

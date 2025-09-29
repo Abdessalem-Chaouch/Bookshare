@@ -17,11 +17,11 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\LikesController;
 
-
+use App\Http\Controllers\BorrowController;
 use App\Http\Controllers\FrontOfficeController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaymentController;
-
+use App\Http\Controllers\PaypalController;
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
@@ -45,11 +45,24 @@ Route::get('/aboutus', function () {
 
 
 Route::middleware('auth')->group(function () {
-    Route::get('/checkout', [PaymentController::class, 'showForm'])->name('checkout.form');
-    Route::post('/paypal/process', [PaymentController::class, 'processPayment'])->name('paypal.process');
+  Route::post('paypal', [PaypalController::class, 'paypal'])->name('paypal');
+Route::get('paypal', [PaypalController::class, 'paypal'])->name('paypal');
+Route::get('success', [PaypalController::class, 'success'])->name('success');
+Route::get('cancel', [PaypalController::class, 'cancel'])->name('cancel');
+
+});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/my-books', [PaypalController::class, 'myBooks'])->name('myBooks');
 });
 
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/borrows', [BorrowController::class, 'index'])->name('borrows');
+    Route::post('/borrows/{livreId}', [BorrowController::class, 'store'])->name('borrows.store');
+   Route::post('/borrows/{livreId}/pay', [BorrowController::class, 'payAndBorrow'])->name('borrows.pay');
+    Route::get('/borrows/success', [BorrowController::class, 'success'])->name('borrows.success');
+
+});
 
 
 Route::middleware(['auth'])->group(function () {
@@ -104,7 +117,7 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
             return view('BackOffice.utilisateur.listeUtilisateur', compact('users'));
         })->name('listeUtilisateur');
 
-        Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
+
     });
 
     // ========================
@@ -126,6 +139,7 @@ Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
     Route::get('/livresf/{livre}', [LivreController::class, 'showf'])->name('livres.showf');
 
 });
+        Route::get('/transactions', [App\Http\Controllers\PaypalController::class, 'transactions'])->name('transactions');
 
 
 
@@ -147,7 +161,8 @@ Route::get('/livres/{livre}/download', [LivreController::class, 'download'])->na
         Route::resource('categories', CategoryController::class);
         Route::get('/AjouterCategorie', [CategoryController::class, 'create'])->name('AjouterCategorie');
         Route::get('/listeCategorie', [CategoryController::class, 'index'])->name('listeCategorie');
-        Route::get('/borrows', fn() => view('BackOffice.Borrows.Borrows'))->name('borrows');
+       // Route::get('/borrowsBook', fn() => view('BackOffice.Borrows.Borrows'))->name('borrowsBook');
+     Route::get('/borrowsBook', [BorrowController::class, 'borrows'])->name('borrowsBook');
     });
 });
 
@@ -170,6 +185,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+    Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
 // routes/web.php
 Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
  

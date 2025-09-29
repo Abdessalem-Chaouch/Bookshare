@@ -2,55 +2,197 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Borrow;
+use App\Models\User;
+use App\Models\Livre;
 use Illuminate\Http\Request;
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
-use App\Book;
-use App\Borrow;
-
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use Srmklive\PayPal\Services\PayPal as PayPalClient;
+use App\Models\Payment;
 class BorrowController extends Controller
 {
-    // Borrow a book
-    public function borrow(Book $book)
-    {   
+    /**
+     * 📚 Lister tous mes emprunts (historique complet) 
+     * et expirer automatiquement ceux dépassés
+     */
+    public function index()
+    {
+        $now = Carbon::now();
+
+        // Expire automatiquement les borrows dont la date_fin est passée
+        Borrow::where('status', 'active')
+              ->where('date_fin', '<', $now)
+              ->update(['status' => 'expired']);
+
         $user = Auth::user();
 
-        // Optional: Limit active borrows per month
-        $activeBorrows = Borrow::where('user_id', $user->id)
-                               ->whereNull('date_retour')
-                               ->count();
-        if($activeBorrows >= 5) { // max 5 books at a time
-            return back()->with('error', 'You have reached your borrow limit!');
+        $borrows = Borrow::where('user_id', $user->id)
+                         ->with('livre', 'auteur')
+                         ->orderBy('created_at', 'desc')
+                         ->get();
+
+        return view('FrontOffice.Borrows.Borrows', compact('borrows'));
+    }
+
+    /**
+     * 🚀 Demander un emprunt (directement actif)
+     */
+    public function store(Request $request, $livreId)
+    {
+        $user = Auth::user();
+
+        // Vérifier le nombre d’emprunts actifs cette semaine
+        $activeBorrowsCount = Borrow::where('user_id', $user->id)
+            ->where('status', 'active')
+            ->whereBetween('date_debut', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+            ->count();
+
+        if ($activeBorrowsCount >= 3) {
+            return redirect()->back()->with('error', 'You cannot borrow more than 3 books this week.');
+        }
+
+        $livre = Livre::findOrFail($livreId);
+
+        // Récupérer l'auteur par son nom (champ 'auteur' dans la table livres)
+        $author = User::where('name', $livre->auteur)->first();
+
+        if (!$author) {
+            return redirect()->back()->with('error', 'Author not found in system.');
         }
 
         Borrow::create([
-            'livre_id' => $book->id,
-            'user_id' => $user->id,
-            'auteur_id' => $book->auteur_id, // assuming Books table has auteur_id
-            'date_début' => Carbon::now(),
-            'date_fin' => Carbon::now()->addDays(14), // 2 weeks borrow
+            'livre_id'   => $livre->id,
+            'user_id'    => $user->id,       // celui qui emprunte
+            'auteur_id'  => $author->id,     // propriétaire du livre
+            'date_debut' => now(),
+            'date_fin'   => now()->addDays(7),
+            'status'     => 'active',        // directement actif
         ]);
 
-        return back()->with('success', 'Book borrowed successfully!');
+        return redirect()->back()->with('success', 'Borrow created successfully.');
     }
 
-    // Return a book
-    public function return(Borrow $borrow)
-    {
-        $borrow->update([
-            'date_retour' => Carbon::now(),
+
+// BorrowController.php
+public function payAndBorrow(Request $request, $livreId)
+{
+    $user = auth()->user();
+    $livre = Livre::findOrFail($livreId);
+    $author = User::where('name', $livre->auteur)->first();
+
+    if (!$author) {
+        return redirect()->back()->with('error', 'Author not found.');
+    }
+
+    $provider = new PayPalClient;
+    $provider->setApiCredentials(config('paypal'));
+    $provider->getAccessToken();
+
+    $response = $provider->createOrder([
+        "intent" => "CAPTURE",
+        "purchase_units" => [
+            [
+                "amount" => [
+                    "currency_code" => "USD",
+                    "value" => 5, // prix fixe
+                ]
+            ]
+        ],
+        "application_context" => [
+            "cancel_url" => route('cancel'),
+            "return_url" => route('borrows.success', ['livreId' => $livre->id]),
+        ]
+    ]);
+
+    if (isset($response['id'])) {
+        foreach ($response['links'] as $link) {
+            if ($link['rel'] === 'approve') {
+                return redirect()->away($link['href']); // redirige vers PayPal
+            }
+        }
+    }
+
+    return redirect()->back()->with('error', 'Unable to start PayPal payment.');
+}
+
+
+
+public function success(Request $request)
+{
+    $orderId = $request->query('token'); // token envoyé par PayPal
+    $livreId = $request->query('livreId');
+    $user = auth()->user();
+    $livre = Livre::findOrFail($livreId);
+    $author = User::where('name', $livre->auteur)->first();
+
+    $provider = new PayPalClient;
+    $provider->setApiCredentials(config('paypal'));
+    $provider->getAccessToken();
+
+    $capture = $provider->capturePaymentOrder($orderId);
+
+    if (isset($capture['status']) && $capture['status'] === 'COMPLETED') {
+
+        // Créer le borrow
+        Borrow::create([
+            'livre_id'   => $livre->id,
+            'user_id'    => $user->id,
+            'auteur_id'  => $author->id,
+            'date_debut' => now(),
+            'date_fin'   => now()->addDays(7),
+            'status'     => 'active',
         ]);
 
-        return back()->with('success', 'Book returned successfully!');
+        // Enregistrer le paiement dans la table payments
+        Payment::create([
+            'payment_id'     => $orderId,
+            'livre_id'       => $livre->id,
+            'user_id'        => $user->id,
+            'product_name'   => $livre->titre,
+            'amount'         => 5, // prix fixe
+            'currency'       => 'USD',
+            'payer_name'     => $user->name,
+            'payer_email'    => $user->email,
+            'payment_status' => 'completed',
+            'payment_method' => 'PayPal',
+        ]);
+
+        return redirect()->route('borrows')->with('success', 'Payment successful! Borrow created.');
     }
 
-    // Show all borrows for the user
-    public function index()
-    {
-        $borrows = Borrow::where('user_id', Auth::id())
-                         ->with('Book')
+    return redirect()->route('borrows')->with('error', 'Payment not completed.');
+}
+
+
+
+
+public function borrows()
+{
+    $user = Auth::user();
+
+    if ($user->role === 'admin') {
+        // Admin : voir tous les borrows
+        $borrows = Borrow::with('livre', 'user', 'auteur')
+                         ->orderBy('created_at', 'desc')
                          ->get();
-
-        return view('borrows.index', compact('borrows'));
+    } elseif ($user->role === 'auteur') {
+        // Auteur : voir uniquement les borrows de ses livres
+        $borrows = Borrow::with('livre', 'user', 'auteur')
+                         ->whereIn('livre_id', function($query) use ($user) {
+                             $query->select('id')
+                                   ->from('livres')
+                                   ->where('user_id', $user->id); // livres de l'auteur
+                         })
+                         ->orderBy('created_at', 'desc')
+                         ->get();
+    } else {
+        // Les autres rôles : ne rien afficher
+        $borrows = collect();
     }
+
+    return view('BackOffice.Borrows.Borrows', compact('borrows'));
+}
+
+
 }

@@ -16,15 +16,15 @@
 
                           @foreach($livres as $livre)
 <div class="col-md-3">
-    <div class="product-item">
+    <div class="product-item" >
         <figure class="product-style">
             <img src="{{ asset('storage/' . $livre->photo_couverture) }}" alt="{{ $livre->titre }}" class="livre-image">
 
-            <button type="button" 
-                    class="add-to-cart btn btn-sm btn-primary" 
-                    data-product-id="{{ $livre->id }}">
-                Add to Cart
-            </button>
+           <button type="button" 
+               class="add-to-cart btn btn-sm btn-primary" 
+            data-product-id="{{ $livre->id }}">
+            Add to Cart
+        </button>
 
         </figure>
         <figcaption>
@@ -35,6 +35,8 @@
     </div>
 </div>
 @endforeach
+
+
 
 
 <script>
@@ -53,13 +55,18 @@ document.querySelectorAll('.add-to-cart').forEach(btn => {
         })
         .then(res => res.json())
         .then(data => {
-            // Mettre à jour le badge en temps réel
-            document.getElementById('cart-count').textContent = data.count;
+            if (data.error) {
+                alert(data.error); // ❌ Affiche seulement si stock limité
+            } else {
+                // ✅ Mettre à jour le badge sans reload
+                document.getElementById('cart-count').textContent = data.count;
+            }
         })
         .catch(err => console.error(err));
     });
 });
 </script>
+
 
 
 

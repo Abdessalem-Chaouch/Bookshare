@@ -22,7 +22,7 @@
                     </div>
 
                     {{-- Détails du livre --}}
-                    <div class="col-md-6">
+                    <div class="col-md-6 position-relative">
                         <div class="product-entry">
                             <h2 class="section-title divider">{{ $livre->titre }}</h2>
 
@@ -39,7 +39,29 @@
                                         <span class="badge bg-secondary">Reserved</span>
                                     @endif
                                 </div>
-                              
+                            </div>
+
+                            {{-- Boutons en bas à droite --}}
+                            <div class="action-buttons">
+                             
+                          <form action="{{ route('borrows.pay', $livre->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-primary" 
+                                    style="background: #9c9259; color: white; cursor: pointer;">
+                                Borrow $5
+                            </button>
+                        </form>
+
+
+                        <form action="{{ route('paypal') }}" method="POST" class="d-inline">
+                            @csrf
+                            <input type="hidden" name="items[0][livre_id]" value="{{ $livre->id }}">
+                            <input type="hidden" name="items[0][product_name]" value="{{ $livre->titre }}">
+                            <input type="hidden" name="items[0][amount]" value="{{ $livre->prix }}">
+                            
+                            <button type="submit" class="btn btn-outline-success">Buy</button>
+                        </form>
+
                             </div>
 
                         </div>
@@ -63,6 +85,13 @@
 }
 .products-content .item-stock {
     margin-top: 10px;
+}
+.action-buttons {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
 }
 </style>
 @endsection
