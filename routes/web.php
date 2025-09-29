@@ -136,6 +136,7 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
             return view('BackOffice.utilisateur.listeUtilisateur', compact('users'));
         })->name('listeUtilisateur');
 
+       Route::get('/listeUtilisateur', [UsersController::class, 'index'])->name('listeUtilisateur');   
 
         Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
         

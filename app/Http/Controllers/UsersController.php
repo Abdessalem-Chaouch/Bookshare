@@ -9,12 +9,37 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 class UsersController extends Controller
 {
-     public function index()
-    {
-        $users = User::all(); // Récupérer tous les utilisateurs
-        return view('BackOffice.utilisateur.listeUtilisateur', compact('users'));
-   
+public function index(Request $request) 
+{
+    $query = User::query();
+
+    // Exclude admin
+    $query->where('role', '!=', 'admin');
+
+    // Real-time search by name or email
+    if ($request->filled('search')) {
+        $search = $request->input('search');
+        $query->where(function($q) use ($search) {
+            $q->where('name', 'like', "%$search%")
+              ->orWhere('email', 'like', "%$search%");
+        });
     }
+
+    // Filter by role (auteur / user)
+    if ($request->filled('role') && $request->role != 'all') {
+        $query->where('role', $request->role);
+    }
+
+    // Sort
+    $sort = $request->input('sort', 'asc');
+    $query->orderBy('name', $sort);
+
+    $users = $query->get();
+
+    return view('BackOffice.utilisateur.listeUtilisateur', compact('users'));
+}
+
+
 
      public function createUser()
     {

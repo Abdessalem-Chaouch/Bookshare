@@ -240,7 +240,16 @@
         </li>
 
         @endif
+  
 
     </ul>
+          <li>
+
+    <div class="text-center">
+        <a href="{{ route('accueil') }}" class="btn btn-primary">
+            <i class="bx bx-arrow-back me-1"></i> Go Back Home
+        </a>
+    </div>
+</li>
 </aside>
 <!-- / Menu -->

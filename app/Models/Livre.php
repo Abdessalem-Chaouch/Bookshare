@@ -49,6 +49,11 @@ class Livre extends Model
     {
         return $this->hasMany(Rate::class);
     }
+    public function borrows()
+{
+    return $this->hasMany(Borrow::class);
+}
+
 
     public function averageRating()
     {

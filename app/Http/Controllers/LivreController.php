@@ -118,21 +118,27 @@ return redirect()->route('livres.index')->with('success', 'Livre ajouté avec su
     return redirect()->route('livres.index')->with('success', 'Livre mis à jour avec succès.');
 }
 
-    public function destroy(Livre $livre)
-    {
-        if ($livre->photo_couverture) {
-            Storage::disk('public')->delete($livre->photo_couverture);
-        }
+public function destroy(Livre $livre)
+{
+    // Supprimer les borrows liés
+    $livre->borrows()->delete();
 
-        if ($livre->pdf_contenu) { // ✅ correction
+    // Supprimer fichiers
+    if ($livre->photo_couverture && Storage::disk('public')->exists($livre->photo_couverture)) {
+        Storage::disk('public')->delete($livre->photo_couverture);
+    }
+
+    if ($livre->pdf_contenu && Storage::disk('public')->exists($livre->pdf_contenu)) {
         Storage::disk('public')->delete($livre->pdf_contenu);
     }
 
+    // Supprimer le livre
+    $livre->delete();
 
-        $livre->delete();
+    return redirect()->route('livres.index')->with('success', 'Livre supprimé.');
+}
 
-        return redirect()->route('livres.index')->with('success', 'Livre supprimé.');
-    }
+
   public function viewpdf(Livre $livre)
 {
     if ($livre->pdf_contenu && Storage::disk('public')->exists($livre->pdf_contenu)) {
