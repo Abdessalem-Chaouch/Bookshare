@@ -35,10 +35,20 @@
 
                                 <!-- ✅ Zone like/comment -->
                                 <div class="links-element d-flex align-items-center justify-content-start mt-3 mb-4">
-                                    <a href="javascript:void(0)" class="like-btn me-3" data-blog="{{ $blog->id }}">
+
+                                    <a
+                                        @guest
+                                        class=" me-2"
+                                        href="{{ route('login') }}"
+                                        @else
+                                        href="javascript:void(0)"
+                                        class="like-btn me-3"
+                                        data-blog="{{ $blog->id }}"
+                                        @endguest>
                                         <i class="bi bi-hand-thumbs-up"></i>
                                         <span class="like-count">{{ $blog->likes->count() }}</span>
                                     </a>
+
                                     <a href="#comments">
                                         <i class="bi bi-chat-dots"></i>
                                         <span class="comment-count">{{ $blog->comments->count() }}</span>
@@ -82,8 +92,14 @@
                                         @endforeach
                                     </ul>
 
-                                    <!-- ✅ Formulaire d'ajout de commentaire -->
                                     <div class="add-comment mt-5">
+                                        @guest
+                                        <p>
+                                            <a href="{{ route('login') }}" class="btn btn-outline-primary">
+                                                Please log in to comment
+                                            </a>
+                                        </p>
+                                        @else
                                         <form id="comment-form" data-blog="{{ $blog->id }}">
                                             @csrf
                                             <div class="mb-3">
@@ -94,6 +110,7 @@
                                                 <i class="bi bi-send"></i> Post Comment
                                             </button>
                                         </form>
+                                        @endguest
                                     </div>
                                 </div>
                             </div>
@@ -233,7 +250,7 @@
                 textarea.value = oldContent;
                 textarea.className = 'form-control'; // style identique au formulaire
                 textarea.rows = 4; // hauteur identique
-                textarea.style.width =  '800px'; // même largeur que le paragraphe
+                textarea.style.width = '800px'; // même largeur que le paragraphe
                 textarea.style.minHeight = contentP.offsetHeight + 'px';
                 textarea.style.marginBottom = '1rem';
 

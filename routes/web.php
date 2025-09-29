@@ -41,7 +41,8 @@ Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
 
 
 Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles');
-
+// routes/web.php
+Route::get('/articles/search', [BlogController::class, 'search']);
 Route::get('/article/{id}', [BlogController::class, 'show'])->name('articleDetail');
 //store routes
 Route::get('/stores', [StoreController::class, 'indexFront'])->name('stores');

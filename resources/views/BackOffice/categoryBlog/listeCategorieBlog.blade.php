@@ -3,9 +3,9 @@
 
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="d-flex justify-content-between align-items-center py-3 mb-4">
-        <h4 class="fw-bold"><span class="text-muted fw-light">Tables /</span> Liste des Categorie Blogs</h4>
+        <h4 class="fw-bold"><span class="text-muted fw-light">Tables /</span> Blog Categories List</h4>
         <a href="{{ route('categoryBlog.create') }}" class="btn btn-primary">
-            <i class="bx bx-plus me-1"></i>Ajouter Categorie
+            <i class="bx bx-plus me-1"></i>Add Category
         </a>
     </div>
 
@@ -25,12 +25,12 @@
 
     <!-- Basic Bootstrap Table -->
     <div class="card">
-        <h5 class="card-header">Categories Blog</h5>
+        <h5 class="card-header">Blog Categories</h5>
         <div class="table-responsive text-nowrap">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Nom</th>
+                        <th>Name</th>
                         <th>Description</th>
                         <th>Actions</th>
                     </tr>
@@ -38,21 +38,21 @@
                 <tbody class="table-border-bottom-0">
                     @foreach($categories as $category)
                     <tr>
-                        <!-- Nom -->
+                        <!-- Name -->
                         <td><strong>{{ $category->name }}</strong></td>
 
                         <!-- Description -->
                         <td>
                             <strong>
                                 @php
-                                $limit = 20; // nombre de caractères à afficher
+                                $limit = 20; // number of characters to display
                                 $content = $category->description;
                                 @endphp
 
                                 @if(strlen($content) > $limit)
                                 <span class="short-text">{{ substr($content, 0, $limit) }}</span>
                                 <span class="full-text d-none">{{ $content }}</span>
-                                <a href="javascript:void(0)" class="toggle-text"> voir plus</a>
+                                <a href="javascript:void(0)" class="toggle-text"> see more</a>
                                 @else
                                 {{ $content }}
                                 @endif
@@ -67,13 +67,13 @@
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="{{ route('categoryBlog.edit', $category->id) }}">
-                                        <i class="bx bx-edit-alt me-1"></i> Modifier
+                                        <i class="bx bx-edit-alt me-1"></i> Edit
                                     </a>
                                     <form action="{{ route('categoryBlog.destroy', $category->id) }}" method="POST" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="dropdown-item text-danger" onclick="return confirm('Voulez-vous vraiment supprimer cette categorie ?')">
-                                            <i class="bx bx-trash me-1"></i> Supprimer
+                                        <button class="dropdown-item text-danger" onclick="return confirm('Do you really want to delete this category?')">
+                                            <i class="bx bx-trash me-1"></i> Delete
                                         </button>
                                     </form>
                                 </div>
@@ -87,9 +87,9 @@
                         <td colspan="3" class="text-center py-4">
                             <div class="text-muted">
                                 <i class="bx bx-category bx-lg mb-2"></i>
-                                <p>Aucune categorie trouvée</p>
+                                <p>No category found</p>
                                 <a href="{{ route('categoryBlog.create') }}" class="btn btn-primary btn-sm">
-                                    Ajouter la premiere categorie
+                                    Add the first category
                                 </a>
                             </div>
                         </td>
@@ -110,15 +110,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const fullText = td.querySelector('.full-text');
 
             if(shortText.classList.contains('d-none')) {
-                // Revenir au texte court
+                // Back to short text
                 shortText.classList.remove('d-none');
                 fullText.classList.add('d-none');
-                this.textContent = ' voir plus';
+                this.textContent = ' see more';
             } else {
-                // Afficher texte complet
+                // Show full text
                 shortText.classList.add('d-none');
                 fullText.classList.remove('d-none');
-                this.textContent = ' voir moins';
+                this.textContent = ' see less';
             }
         });
     });
