@@ -43,23 +43,24 @@ class Livre extends Model
     {
         return $this->belongsTo(User::class, 'user_id'); // 🔹 relation correcte
     }
+    public function auteur()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     // Relations pour les notes
-   public function rates()
-{
-    return $this->hasMany(Rate::class);
-}
+    public function rates()
+    {
+        return $this->hasMany(Rate::class);
+    }
 
-public function averageRating()
-{
-    return $this->rates()->avg('note');
-}
+    public function averageRating()
+    {
+        return $this->rates()->avg('note');
+    }
 
     public function borrows()
-{
-    return $this->hasMany(Borrow::class);
-}
-
-
-
+    {
+        return $this->hasMany(Borrow::class);
+    }
 }
