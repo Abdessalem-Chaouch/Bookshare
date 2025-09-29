@@ -101,19 +101,7 @@
                         @enderror
                     </div>
 
-                    {{-- Availability --}}
-                    <div class="mb-3">
-                        <label class="form-label">Availability</label>
-                        <select name="disponibilite" class="form-select @error('disponibilite') is-invalid @enderror" required>
-                            <option value="disponible" {{ old('disponibilite')=='disponible'?'selected':'' }}>Available</option>
-                            <option value="emprunte" {{ old('disponibilite')=='emprunte'?'selected':'' }}>Borrowed</option>
-                            <option value="reserve" {{ old('disponibilite')=='reserve'?'selected':'' }}>Reserved</option>
-                        </select>
-                        @error('disponibilite')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
+               
                     {{-- Stock --}}
                     <div class="mb-3">
                         <label class="form-label">Stock</label>

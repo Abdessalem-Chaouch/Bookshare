@@ -46,12 +46,11 @@
                             <p><strong>Price:</strong> ${{ number_format($livre->prix, 2) }}</p>
                             <p><strong>Stock:</strong> {{ $livre->stock }}</p>
                             <p><strong>Availability:</strong>
-                                @if($livre->disponibilite == 'disponible')
-                                    <span class="badge bg-success">Available</span>
-                                @elseif($livre->disponibilite == 'emprunte')
-                                    <span class="badge bg-warning">Borrowed</span>
+                                @if($livre->stock == '0'|| $livre->stock == 0 )
+                                    <span class="badge bg-warning">Unavailable</span>
                                 @else
-                                    <span class="badge bg-secondary">Reserved</span>
+                                    <span class="badge bg-success">Available</span>
+                               
                                 @endif
                             </p>
                             <p><strong>Date Added:</strong> {{ $livre->date_ajout ?? '—' }}</p>
