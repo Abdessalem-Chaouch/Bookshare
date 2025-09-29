@@ -52,3 +52,17 @@ php artisan migrate --seed
 
 6. Start the Laravel server:
 php artisan serve
+
+---
+
+## 👨‍💻 Contributors
+
+- [Eya Chamekh](https://github.com/eyachamekh)
+- [Yosr Charek](https://github.com/YOSRcharek)
+- [Doua Baghdadi](https://github.com/Douabaghdadi)
+- [Aymen Khalifa](https://github.com/aymen-khelifa)
+- [Abdessalem Chaouch](https://github.com/Slouumaa)
+
+## 👨‍💻 Coach
+- [Ghada Ben Khalifa](https://github.com/BenKhalifaGHADA)
+---
