@@ -27,14 +27,7 @@ use App\Http\Controllers\ReviewController;
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
 Route::get('/nos-categories', [FrontOfficeController::class, 'categories'])->name('front.categories');
-
-use App\Http\Controllers\CommentsController;
-use App\Http\Controllers\LikesController;
-
-
-Route::get('/livresf', function () {
-    return view('FrontOffice.Livres.LivrePage');
-})->name('livresf');
+Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
 
 Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles');
 
@@ -59,7 +52,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/rates', [RateController::class, 'index'])->name('rates.index');
     Route::post('/livres/{id}/rate', [RateController::class, 'store'])->name('rates.store');
 
-
+    // Paiement des abonnements - accessible à tous les utilisateurs connectés
+    Route::get('/payment/{subscription}', [\App\Http\Controllers\PaymentController::class, 'showPaymentForm'])->name('payment.form');
+    Route::post('/payment/{subscription}', [\App\Http\Controllers\PaymentController::class, 'processPayment'])->name('payment.process');
+    Route::get('/payment-history', [\App\Http\Controllers\PaymentController::class, 'history'])->name('payment.history');
 });
 // ========================
 // 🔒 Routes du Back Office
@@ -128,7 +124,8 @@ Route::get('/mes-livres', [LivreController::class, 'mesLivres'])->name('mesLivre
         
         // Abonnements Auteur
         Route::get('/mes-abonnements', [\App\Http\Controllers\AuthorSubscriptionController::class, 'index'])->name('author.subscriptions');
-        Route::post('/subscribe/{subscription}', [\App\Http\Controllers\AuthorSubscriptionController::class, 'subscribe'])->name('author.subscribe');
+        
+
     });
 
     // ========================
@@ -137,8 +134,6 @@ Route::get('/mes-livres', [LivreController::class, 'mesLivres'])->name('mesLivre
      Route::middleware(['role:admin,auteur,user'])->group(function () {
         // Livre Management
 // Routes Livres
-
-Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
     Route::get('/livresf/{livre}', [LivreController::class, 'showf'])->name('livres.showf');
 
 });
@@ -204,13 +199,9 @@ Route::middleware('auth')->group(function () {
 // Facebook Login Routes
 Route::get('/auth/facebook', [App\Http\Controllers\FacebookAuthController::class, 'redirectToFacebook'])->name('facebook.login');
 Route::get('/auth/facebook/callback', [App\Http\Controllers\FacebookAuthController::class, 'handleFacebookCallback'])->name('facebook.callback');
-Route::get('/auth/facebook/select-role', [App\Http\Controllers\FacebookAuthController::class, 'showRoleSelection'])->name('facebook.select-role');
-Route::post('/auth/facebook/role', [App\Http\Controllers\FacebookAuthController::class, 'handleRoleSelection'])->name('facebook.role');
 
 // Google Login Routes
 Route::get('/auth/google', [App\Http\Controllers\GoogleAuthController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('/auth/google/callback', [App\Http\Controllers\GoogleAuthController::class, 'handleGoogleCallback'])->name('google.callback');
-Route::get('/auth/google/select-role', [App\Http\Controllers\GoogleAuthController::class, 'showRoleSelection'])->name('google.select-role');
-Route::post('/auth/google/role', [App\Http\Controllers\GoogleAuthController::class, 'handleRoleSelection'])->name('google.role');
 
 require __DIR__ . '/auth.php';

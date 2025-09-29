@@ -2,7 +2,12 @@
 @section('content')
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Mes Abonnements</h4>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold py-3 mb-0">Mes Abonnements</h4>
+        <a href="{{ route('payment.history') }}" class="btn btn-outline-primary">
+            <i class="bx bx-history me-1"></i>Historique des paiements
+        </a>
+    </div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -32,7 +37,7 @@
                 </div>
                 <div class="col-md-6">
                     <p><strong>Expire le:</strong> {{ $currentSubscription->expires_at->format('d/m/Y H:i') }}</p>
-                    <p><strong>Jours restants:</strong> {{ $currentSubscription->expires_at->diffInDays(now()) }} jours</p>
+                    <p><strong>Jours restants:</strong> {{ floor($currentSubscription->expires_at->diffInDays(now())) }} jours</p>
                 </div>
             </div>
         </div>
@@ -65,13 +70,9 @@
                     @if($currentSubscription && $currentSubscription->subscription_id == $subscription->id)
                         <span class="badge bg-success">Abonnement Actuel</span>
                     @else
-                        <form action="{{ route('author.subscribe', $subscription) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-primary" 
-                                    onclick="return confirm('Confirmer l\'abonnement à {{ $subscription->name }} ?')">
-                                S'abonner
-                            </button>
-                        </form>
+                        <a href="{{ route('payment.form', $subscription) }}" class="btn btn-primary">
+                            <i class="bx bx-credit-card me-1"></i>S'abonner
+                        </a>
                     @endif
                 </div>
             </div>

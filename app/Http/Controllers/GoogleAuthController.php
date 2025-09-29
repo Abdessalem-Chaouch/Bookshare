@@ -32,7 +32,7 @@ class GoogleAuthController extends Controller
                 }
                 
                 Auth::login($existingUser);
-                return $this->redirectBasedOnRole($existingUser);
+                return redirect()->route('accueil');
             }
             
             // Vérifier si un utilisateur avec ce google_id existe
@@ -40,20 +40,21 @@ class GoogleAuthController extends Controller
             
             if ($user) {
                 Auth::login($user);
-                return $this->redirectBasedOnRole($user);
+                return redirect()->route('accueil');
             }
             
-            // Nouvel utilisateur - rediriger vers la sélection de rôle
-            session([
-                'google_user' => [
-                    'id' => $googleUser->getId(),
-                    'name' => $googleUser->getName(),
-                    'email' => $googleUser->getEmail(),
-                    'avatar' => $googleUser->getAvatar(),
-                ]
+            // Nouvel utilisateur - créer avec rôle user par défaut
+            $user = User::create([
+                'name' => $googleUser->getName(),
+                'email' => $googleUser->getEmail(),
+                'google_id' => $googleUser->getId(),
+                'role' => 'user',
+                'photo_profil' => $googleUser->getAvatar(),
+                'password' => bcrypt(Str::random(16)),
             ]);
             
-            return redirect()->route('google.select-role');
+            Auth::login($user);
+            return redirect()->route('accueil');
             
         } catch (\Exception $e) {
             return redirect('/login')->with('error', 'Erreur lors de la connexion avec Google');
@@ -69,33 +70,7 @@ class GoogleAuthController extends Controller
         return view('auth.google-role-selection');
     }
 
-    public function handleRoleSelection(Request $request)
-    {
-        $request->validate([
-            'role' => 'required|in:visiteur,auteur'
-        ]);
-        
-        $googleUserData = session('google_user');
-        
-        if (!$googleUserData) {
-            return redirect('/login');
-        }
-        
-        $user = User::create([
-            'name' => $googleUserData['name'],
-            'email' => $googleUserData['email'],
-            'google_id' => $googleUserData['id'],
-            'role' => $request->role,
-            'photo_profil' => $googleUserData['avatar'],
-            'password' => bcrypt(Str::random(16)), // Mot de passe aléatoire
-        ]);
-        
-        session()->forget('google_user');
-        
-        Auth::login($user);
-        
-        return $this->redirectBasedOnRole($user);
-    }
+
 
     private function redirectBasedOnRole($user)
     {
