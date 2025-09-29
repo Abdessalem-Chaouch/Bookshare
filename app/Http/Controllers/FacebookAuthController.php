@@ -23,16 +23,24 @@ class FacebookAuthController extends Controller
             $user = User::where('email', $facebookUser->getEmail())->first();
             
             if ($user) {
+                // Mettre à jour le facebook_id si ce n'est pas déjà fait
+                if (!$user->facebook_id) {
+                    $user->update(['facebook_id' => $facebookUser->getId()]);
+                }
+                
                 Auth::login($user);
-                return redirect()->intended('/dashboard');
+                return redirect()->route('accueil');
             } else {
-                Session::put('facebook_user', [
+                $user = User::create([
                     'name' => $facebookUser->getName(),
                     'email' => $facebookUser->getEmail(),
                     'facebook_id' => $facebookUser->getId(),
+                    'role' => 'user',
+                    'password' => bcrypt('facebook_user'),
                 ]);
                 
-                return redirect()->route('facebook.select-role');
+                Auth::login($user);
+                return redirect()->route('accueil');
             }
             
         } catch (\Exception $e) {
@@ -40,42 +48,5 @@ class FacebookAuthController extends Controller
         }
     }
 
-    public function showRoleSelection()
-    {
-        if (!Session::has('facebook_user')) {
-            return redirect('/login');
-        }
-        
-        return view('auth.select-role');
-    }
 
-    public function handleRoleSelection(Request $request)
-    {
-        $request->validate([
-            'role' => 'required|in:visiteur,auteur'
-        ]);
-
-        $facebookData = Session::get('facebook_user');
-        
-        if (!$facebookData) {
-            return redirect('/login');
-        }
-
-        $user = User::create([
-            'name' => $facebookData['name'],
-            'email' => $facebookData['email'],
-            'facebook_id' => $facebookData['facebook_id'],
-            'role' => $request->role,
-            'password' => bcrypt('facebook_user'),
-        ]);
-        
-        Session::forget('facebook_user');
-        Auth::login($user);
-        
-        if ($request->role === 'auteur') {
-            return redirect()->route('accueil');
-        } else {
-            return redirect()->route('accueil');
-        }
-    }
 }

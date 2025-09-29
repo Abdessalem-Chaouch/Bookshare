@@ -39,21 +39,12 @@
                     
                     <div class="card-footer">
                         @auth
-                            @if(auth()->user()->isAuteur())
-                                <form action="{{ route('author.subscribe', $subscription) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn-subscribe">
-                                        S'ABONNER
-                                    </button>
-                                </form>
-                            @else
-                                <button class="btn-subscribe" disabled>
-                                    Réservé aux Auteurs
-                                </button>
-                            @endif
+                            <a href="{{ route('payment.form', $subscription) }}" class="btn-subscribe">
+                                S'ABONNER
+                            </a>
                         @else
                             <a href="{{ route('login') }}" class="btn-subscribe">
-                                COMMENCER
+                                S'ABONNER
                             </a>
                         @endauth
                     </div>

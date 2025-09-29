@@ -1,0 +1,110 @@
+/* Styles pour le formulaire de paiement */
+.payment-form {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.card-input {
+    position: relative;
+}
+
+.card-input input {
+    padding-left: 45px;
+}
+
+.card-input::before {
+    content: "💳";
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    z-index: 10;
+}
+
+.payment-summary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+}
+
+.payment-summary .card-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.feature-list li {
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.feature-list li:last-child {
+    border-bottom: none;
+}
+
+.secure-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #28a745;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    margin-bottom: 15px;
+}
+
+.secure-badge i {
+    margin-right: 5px;
+}
+
+.payment-methods {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.payment-method {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: #f8f9fa;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Animation pour le bouton de paiement */
+.btn-payment {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-payment:hover {
+    background: linear-gradient(45deg, #20c997, #28a745);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-payment:disabled {
+    background: #6c757d;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .payment-summary {
+        margin-bottom: 20px;
+    }
+    
+    .payment-methods {
+        flex-wrap: wrap;
+    }
+    
+    .payment-method {
+        flex: 1;
+        min-width: 80px;
+        text-align: center;
+    }
+}
