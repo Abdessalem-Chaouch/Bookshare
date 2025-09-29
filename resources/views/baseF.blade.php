@@ -18,6 +18,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('css/normalize.css') }}">
@@ -33,16 +34,22 @@
         @yield('content')
 
     @if(session('success'))
-    <div class="alert alert-success text-center">
+    <div class="alert alert-success text-center" 
+             style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 250px;">
+    
         {{ session('success') }}
     </div>
 @endif
 
 @if(session('error'))
-    <div class="alert alert-danger text-center">
+    <div class="alert alert-danger text-center"
+             style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 250px;">
+    >
         {{ session('error') }}
     </div>
 @endif
+
+
 
 
     @include("FrontOffice.footer")
@@ -61,6 +68,7 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 // Force dropdown functionality

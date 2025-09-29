@@ -10,7 +10,7 @@ class RateController extends Controller
     // Afficher toutes les évaluations
     public function index()
     {
-        $rates = Rate::with(['user', 'livre'])->latest()->get();
+        $rates = Rate::with(relations: ['user', 'livre'])->latest()->get();
         return view('BackOffice.rate.index', compact('rates'));
     }
 

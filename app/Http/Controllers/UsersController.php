@@ -34,10 +34,12 @@ public function index(Request $request)
     $sort = $request->input('sort', 'asc');
     $query->orderBy('name', $sort);
 
-    $users = $query->get();
+    // Paginate
+    $users = $query->paginate(2)->appends($request->all()); // 10 per page, preserve filters in links
 
     return view('BackOffice.utilisateur.listeUtilisateur', compact('users'));
 }
+
 
 
 

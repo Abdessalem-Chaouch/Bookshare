@@ -45,18 +45,21 @@ class Livre extends Model
     }
 
     // Relations pour les notes
-    public function rates()
-    {
-        return $this->hasMany(Rate::class);
-    }
+   public function rates()
+{
+    return $this->hasMany(Rate::class);
+}
+
+public function averageRating()
+{
+    return $this->rates()->avg('note');
+}
+
     public function borrows()
 {
     return $this->hasMany(Borrow::class);
 }
 
 
-    public function averageRating()
-    {
-        return $this->rates()->avg('note');
-    }
+
 }

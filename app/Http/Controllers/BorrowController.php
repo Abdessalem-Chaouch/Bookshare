@@ -78,8 +78,19 @@ class BorrowController extends Controller
 public function payAndBorrow(Request $request, $livreId)
 {
     $user = auth()->user();
+
+    // ✅ Vérifier le nombre d’emprunts actifs cette semaine
+    $activeBorrowsCount = Borrow::where('user_id', $user->id)
+        ->where('status', 'active')
+        ->whereBetween('date_debut', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+        ->count();
+
+    if ($activeBorrowsCount >= 3) {
+        return redirect()->back()->with('error', 'You cannot borrow more than 3 books this week.');
+    }
+
     $livre = Livre::findOrFail($livreId);
-    $author = User::where('name', $livre->auteur)->first();
+    $author = $livre->user;
 
     if (!$author) {
         return redirect()->back()->with('error', 'Author not found.');
@@ -95,7 +106,7 @@ public function payAndBorrow(Request $request, $livreId)
             [
                 "amount" => [
                     "currency_code" => "USD",
-                    "value" => 5, // prix fixe
+                    "value" => 5,
                 ]
             ]
         ],
@@ -108,7 +119,7 @@ public function payAndBorrow(Request $request, $livreId)
     if (isset($response['id'])) {
         foreach ($response['links'] as $link) {
             if ($link['rel'] === 'approve') {
-                return redirect()->away($link['href']); // redirige vers PayPal
+                return redirect()->away($link['href']);
             }
         }
     }
@@ -117,19 +128,23 @@ public function payAndBorrow(Request $request, $livreId)
 }
 
 
-
 public function success(Request $request)
 {
-    $orderId = $request->query('token'); // token envoyé par PayPal
+    $orderId = $request->query('token'); 
     $livreId = $request->query('livreId');
     $user = auth()->user();
     $livre = Livre::findOrFail($livreId);
-    //$author = User::where('name', $livre->auteur)->first();
-// Ancien code
-$author = User::where('name', $livre->auteur)->first();
+    $author = $livre->user;
 
-// Nouveau code
-$author = $livre->user; // récupère directement l'utilisateur lié via user_id
+    // ✅ Vérifier à nouveau le nombre d’emprunts actifs avant création
+    $activeBorrowsCount = Borrow::where('user_id', $user->id)
+        ->where('status', 'active')
+        ->whereBetween('date_debut', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+        ->count();
+
+    if ($activeBorrowsCount >= 3) {
+        return redirect()->route('borrows')->with('error', 'You cannot borrow more than 3 books this week.');
+    }
 
     $provider = new PayPalClient;
     $provider->setApiCredentials(config('paypal'));
@@ -138,7 +153,6 @@ $author = $livre->user; // récupère directement l'utilisateur lié via user_id
     $capture = $provider->capturePaymentOrder($orderId);
 
     if (isset($capture['status']) && $capture['status'] === 'COMPLETED') {
-
         // Créer le borrow
         Borrow::create([
             'livre_id'   => $livre->id,
@@ -149,13 +163,13 @@ $author = $livre->user; // récupère directement l'utilisateur lié via user_id
             'status'     => 'active',
         ]);
 
-        // Enregistrer le paiement dans la table payments
+        // Enregistrer le paiement
         Payment::create([
             'payment_id'     => $orderId,
             'livre_id'       => $livre->id,
             'user_id'        => $user->id,
             'product_name'   => $livre->titre,
-            'amount'         => 5, // prix fixe
+            'amount'         => 5,
             'currency'       => 'USD',
             'payer_name'     => $user->name,
             'payer_email'    => $user->email,
@@ -172,6 +186,7 @@ $author = $livre->user; // récupère directement l'utilisateur lié via user_id
 
 
 
+
 public function borrows()
 {
     $user = Auth::user();
@@ -180,19 +195,18 @@ public function borrows()
         // Admin : voir tous les borrows
         $borrows = Borrow::with('livre', 'user', 'auteur')
                          ->orderBy('created_at', 'desc')
-                         ->get();
+                         ->paginate(10); // 10 par page
     } elseif ($user->role === 'auteur') {
         // Auteur : voir uniquement les borrows de ses livres
         $borrows = Borrow::with('livre', 'user', 'auteur')
                          ->whereIn('livre_id', function($query) use ($user) {
                              $query->select('id')
                                    ->from('livres')
-                                   ->where('user_id', $user->id); // livres de l'auteur
+                                   ->where('user_id', $user->id);
                          })
                          ->orderBy('created_at', 'desc')
-                         ->get();
+                         ->paginate(10);
     } else {
-        // Les autres rôles : ne rien afficher
         $borrows = collect();
     }
 

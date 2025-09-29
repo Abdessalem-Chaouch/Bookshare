@@ -7,26 +7,38 @@ use Srmklive\PayPal\Services\PayPal as PayPalClient;
 use App\Models\Payment;
 use App\Models\User;
 use App\Models\Livre;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Pagination\LengthAwarePaginator; 
 class PaypalController extends Controller
 {
-public function transactions()
+public function transactions(Request $request)
 {
     $user = Auth::user();
 
     if ($user->role === 'admin') {
-        // Admin : voir toutes les transactions
-        $payments = Payment::orderBy('created_at', 'desc')->get();
+        $payments = Payment::orderBy('created_at', 'desc')
+                    ->paginate(10)
+                    ->appends($request->all());
     } elseif ($user->role === 'auteur') {
-        // Auteur : voir uniquement les transactions pour ses livres
         $payments = Payment::whereIn('livre_id', function($query) use ($user) {
             $query->select('id')
                   ->from('livres')
-                  ->where('user_id', $user->id); // ou 'user_id' selon ta table
-        })->orderBy('created_at', 'desc')->get();
+                  ->where('user_id', $user->id);
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(10)
+        ->appends($request->all());
     } else {
-        // Les autres rôles : ne rien afficher
-        $payments = collect();
+        // Paginator vide
+        $empty = new Collection();
+        $payments = new LengthAwarePaginator(
+            $empty, // items
+            0,      // total
+            10,     // per page
+            $request->get('page', 1), // page courant
+            ['path' => $request->url(), 'query' => $request->query()] // garder les query params
+        );
     }
 
     return view('BackOffice.Transactions.Transactions', compact('payments'));

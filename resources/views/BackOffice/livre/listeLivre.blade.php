@@ -46,14 +46,32 @@
                         </td>
 
                         <!-- Availability -->
-                        <td>
-                            <span class="badge
-                                {{ $livre->disponibilite == 'disponible' ? 'bg-label-success' : '' }}
-                                {{ $livre->disponibilite == 'emprunte' ? 'bg-label-warning' : '' }}
-                                {{ $livre->disponibilite == 'reserve' ? 'bg-label-danger' : '' }}">
-                                {{ ucfirst($livre->disponibilite) }}
-                            </span>
-                        </td>
+                    <td>
+   @php
+    if ($livre->stock == 0) {
+        $dispoText = 'Unavailable';
+        $badgeClass = 'bg-label-secondary'; // couleur pour non disponible
+    } else {
+        // Traduire la disponibilité en anglais
+        switch ($livre->disponibilite) {
+            case 'disponible':
+                $dispoText = 'Available';
+                $badgeClass = 'bg-label-success';
+                break;
+          
+            default:
+                $dispoText = ucfirst($livre->disponibilite);
+                $badgeClass = '';
+        }
+    }
+@endphp
+
+
+
+    <span class="badge {{ $badgeClass }}">
+        {{ $dispoText }}
+    </span>
+</td>
 
                         <td>{{ $livre->stock }}</td>
       <!-- Average Rating -->

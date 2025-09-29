@@ -29,7 +29,7 @@
                         <div class="product-entry d-flex align-items-center justify-content-between">
                             <h2 class="section-title divider">{{ $livre->titre }}</h2>
 
-                            @auth
+                          @auth
                             <!-- Rate Button -->
                             <button type="button" class="btn btn-rate" data-bs-toggle="modal" data-bs-target="#rateModal">
                                 ⭐ Rate
@@ -112,15 +112,15 @@
     </div>
 
     {{-- Display all ratings --}}
-    <div class="mt-3">
-       <strong>Ratings & Comments : </strong>
-         <!-- Show Reviews Button -->
-            @if($livre->rates->count() > 0)
-            <button type="button" class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#reviewsModal">
-                SHOW REVIEWS
-            </button>
-            @endif
-    </div>
+<div class="mt-3">
+   <strong>Ratings & Comments : </strong>
+     <!-- Show Reviews Button -->
+        @if($livre->rates->count() > 0)
+        <button type="button" class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#reviewsModal">
+            SHOW REVIEWS
+        </button>
+        @endif
+</div>
 
 
 
@@ -277,12 +277,6 @@
 
 
 <style>
-.single-image {
-    width: 100%;
-    height: 400px;
-    object-fit: cover;
-    display: block;
-}
 .products-content p {
     margin-bottom: 8px;
 }
@@ -320,13 +314,6 @@
 .rating-stars label:hover,
 .rating-stars label:hover ~ label {
     color: #ffb400; /* couleur des étoiles sélectionnées */
-}
-.action-buttons {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    display: flex;
-    gap: 10px;
 }
 </style>
 @endsection
