@@ -6,6 +6,7 @@ use App\Models\Borrow;
 use Carbon\Carbon;
 use App\Notifications\BorrowReminder;
 
+
 class BorrowNotificationService
 {
     public static function handle()
@@ -18,7 +19,6 @@ class BorrowNotificationService
             ->get();
 
         foreach ($inTwoDays as $borrow) {
-            // Vérifie si une notification "expire dans 2 jours" existe déjà
             $exists = $borrow->user->notifications()
                 ->where('type', BorrowReminder::class)
                 ->where('data->borrow_id', $borrow->id)
@@ -27,7 +27,7 @@ class BorrowNotificationService
 
             if (! $exists) {
                 $borrow->user->notify(new BorrowReminder(
-                    "Your borrow for the book '{$borrow->livre->title}' will expire in 2 days.",
+                    "Your borrow for '{$borrow->livre->titre}' will expire in 2 days.",
                     $borrow->id,
                     'expire_2_days'
                 ));
@@ -42,7 +42,6 @@ class BorrowNotificationService
         foreach ($todayExpired as $borrow) {
             $borrow->update(['status' => 'expired']);
 
-            // Vérifie si une notification "expired today" existe déjà
             $exists = $borrow->user->notifications()
                 ->where('type', BorrowReminder::class)
                 ->where('data->borrow_id', $borrow->id)
@@ -51,7 +50,7 @@ class BorrowNotificationService
 
             if (! $exists) {
                 $borrow->user->notify(new BorrowReminder(
-                    "Your borrow for the book '{$borrow->livre->title}' has expired.",
+                    "Your borrow for '{$borrow->livre->titre}' has expired.",
                     $borrow->id,
                     'expired_today'
                 ));

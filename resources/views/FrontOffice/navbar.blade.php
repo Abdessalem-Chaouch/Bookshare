@@ -27,31 +27,64 @@
     </span>
     
 </a>
-<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="width: 300px;">
-    @forelse($notifications as $notification)
-        <li>
-            <a class="dropdown-item" href="#">
-                {{ $notification->data['message'] }}
-                <br>
-                <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
-            </a>
+<!-- Notification Dropdown -->
+<div class="dropdown d-inline-block position-relative">
+    <a href="#" class="for-buy position-relative dropdown-toggle" id="notificationDropdown"
+       data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-bell" style="font-size: 1.2rem;"></i>
+        @if(Auth::user() && Auth::user()->unreadNotifications->count() > 0)
+            <span id="notification-count" class="cart-badge">
+                {{ Auth::user()->unreadNotifications->count() }}
+            </span>
+        @endif
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-end p-0 shadow"
+        aria-labelledby="notificationDropdown"
+        style="width: 300px; max-height: 400px; overflow-y: auto;">
+        
+        <!-- Header -->
+        <li class="px-3 py-2 border-bottom bg-light d-flex justify-content-between align-items-center">
+            <span class="fw-bold">Notifications</span>
+            <form action="{{ route('notifications.clear') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-danger">Clear All</button>
+            </form>
         </li>
-    @empty
-        <li><span class="dropdown-item">Aucune notification</span></li>
-    @endforelse
-</ul>
-<a href="#" class="for-buy position-relative dropdown-toggle" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-    <i class="bi bi-bell" style="font-size: 1.2rem;"></i>
-    @if(Auth::user() && Auth::user()->unreadNotifications->count() > 0)
-        <span id="notification-count" class="cart-badge">
-            {{ Auth::user()->unreadNotifications->count() }}
-        </span>
-    @endif
-</a>
 
+        <!-- Notifications list -->
+        @forelse($notifications as $notification)
+            <li class="px-3 py-2 border-bottom d-flex justify-content-between align-items-start">
+                <div>
+                    {{ $notification->data['message'] }}
+                    <br>
+                    <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+                </div>
+                <form action="{{ route('notifications.delete', $notification->id) }}" method="POST" class="ms-2">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">&times;</button>
+                </form>
+            </li>
+        @empty
+            <li class="px-3 py-2"><span class="text-muted">Aucune notification</span></li>
+        @endforelse
+    </ul>
+</div>
 
-
-
+<!-- CSS pour badge -->
+<style>
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #9c9259; /* couleur primaire de ton projet */
+    color: #fff;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+}
+</style>
 
 
                         @guest
