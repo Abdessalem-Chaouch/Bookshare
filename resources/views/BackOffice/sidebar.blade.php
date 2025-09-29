@@ -1,7 +1,7 @@
 <!-- Menu -->
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
-        <a class="app-brand-link">
+        <a href="{{ route('accueil') }}" class="app-brand-link">
 
             <span class="app-brand-logo demo">
                 <img alt="icon" src="{{asset('assets/img/libroLogo.png')}}" style="width:40px; height:40px; margin-right:10px;">
@@ -39,11 +39,11 @@
             </a>
         </li>
         
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Abonnements</span></li>
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">Subscriptions</span></li>
         <li class="menu-item {{ request()->routeIs('author.subscriptions') ? 'active' : '' }}">
             <a href="{{ route('author.subscriptions') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-credit-card"></i>
-                <div data-i18n="Analytics">Mes Abonnements</div>
+                <div data-i18n="Analytics">My Subscriptions</div>
             </a>
         </li>
         @endif
@@ -179,6 +179,13 @@
 
             </ul>
         </li>
+       <li class="menu-item {{ request()->routeIs('borrowsBook') ? 'active' : '' }}">
+                    <a href="{{ route('borrowsBook') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-book-open"></i>
+
+                        <div data-i18n="Notifications">Borrows </div>
+                    </a>
+        </li>
 
 
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Payments</span></li>
@@ -193,7 +200,7 @@
         <li class="menu-item {{ request()->routeIs('subscriptions.*') ? 'active' : '' }}">
             <a href="{{ route('subscriptions.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-credit-card"></i>
-                <div data-i18n="Account Settings">Abonnements</div>
+                <div data-i18n="Account Settings">Subscriptions</div>
             </a>
         </li>
 

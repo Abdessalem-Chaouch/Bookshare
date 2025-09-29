@@ -54,19 +54,21 @@ public function mesLivres()
     return view('BackOffice.livre.ajouterLivre', compact('categories', 'auteurs'));
 }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'titre' => 'required|string|max:255',
-            'auteur' => 'nullable|string|max:150',
-            'description' => 'nullable|string|max:1000',
-            'isbn' => 'nullable|string|max:50|unique:livres,isbn',
-            'categorie_id' => 'required|exists:categories,id',
-            'prix' => 'required|numeric|min:0',
-            'disponibilite' => 'required|in:disponible,emprunte,reserve',
-            'stock' => 'required|integer|min:0',
-            'photo_couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+   public function store(Request $request)
+{
+    $validated = $request->validate([
+        'titre' => 'required|string|max:255',
+        'auteur' => 'nullable|string|max:150',
+        'description' => 'nullable|string|max:1000',
+        'isbn' => 'nullable|string|max:50|unique:livres,isbn',
+        'categorie_id' => 'required|exists:categories,id',
+        'prix' => 'required|numeric|min:0',
+        'disponibilite' => 'required|in:disponible,emprunte,reserve',
+        'stock' => 'required|integer|min:0',
+        'photo_couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'pdf_contenu' => 'nullable|mimes:pdf|max:20480', // max 5 Mo
+
+    ]);
 
         // 📌 gérer upload image
         if ($request->hasFile('photo_couverture')) {
@@ -78,8 +80,10 @@ public function mesLivres()
         $validated['pdf_contenu'] = $request->file('pdf_contenu')->store('livres/pdfs', 'public');
     }
 
-        // insertion en base
-        Livre::create($validated);
+     // 📌 gérer upload PDF
+    if ($request->hasFile('pdf_contenu')) {
+    $validated['pdf_contenu'] = $request->file('pdf_contenu')->store('livres/pdfs', 'public');
+}
 
         return redirect()->route('livres.index')->with('success', 'Livre ajouté avec succès ✅');
     }
@@ -150,16 +154,22 @@ public function mesLivres()
 
 
 // Télécharger le PDF
+
 public function download($id)
 {
     $livre = Livre::findOrFail($id);
+
     if ($livre->pdf_contenu) {
-        return response($livre->pdf_contenu)
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'attachment; filename="'.$livre->titre.'.pdf"');
+        $path = public_path('storage/' . $livre->pdf_contenu); // correct full path
+        if (file_exists($path)) {
+            return response()->download($path, $livre->titre . '.pdf');
+        }
     }
-    return redirect()->back()->with('error', 'Aucun PDF disponible');
+
+    return redirect()->back()->with('error', 'No PDF available.');
 }
+
+
     public function show(Livre $livre)
 {
     return view('BackOffice.livre.show', compact('livre'));

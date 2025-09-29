@@ -23,6 +23,7 @@
                         </figure>
                     </div>
 
+
                     {{-- Book Details --}}
                     <div class="col-md-6">
                         <div class="product-entry d-flex align-items-center justify-content-between">
@@ -55,44 +56,71 @@
                             <p><strong>Date Added:</strong> {{ $livre->date_ajout ?? '—' }}</p>
                               {{-- PDF --}}
                             @if($livre->pdf_contenu && Storage::disk('public')->exists($livre->pdf_contenu))
-                                <div class="mt-3">
+                              <!--  <div class="mt-3">
                                     <strong>PDF:</strong>
                                     <a href="{{ route('livres.download', $livre->id) }}" class="btn btn-primary btn-sm">
                                         📥 Download PDF
                                     </a>
                                 </div>
+                               -->
+                            </div>
+
+                            {{-- Boutons en bas à droite --}}
+                            <div class="action-buttons">
+                             
+                          <form action="{{ route('borrows.pay', $livre->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-primary" 
+                                    style="background: #9c9259; color: white; cursor: pointer;">
+                                Borrow $5
+                            </button>
+                        </form>
+
+
+                        <form action="{{ route('paypal') }}" method="POST" class="d-inline">
+                            @csrf
+                            <input type="hidden" name="items[0][livre_id]" value="{{ $livre->id }}">
+                            <input type="hidden" name="items[0][product_name]" value="{{ $livre->titre }}">
+                            <input type="hidden" name="items[0][amount]" value="{{ $livre->prix }}">
+                            
+                            <button type="submit" class="btn btn-outline-success">Buy</button>
+                        </form>
+
+                            </div>
+
                             @else
                                 <p><em>No PDF available for this book.</em></p>
                             @endif
-{{-- Average Rating --}}
-<div class="mt-3 mb-3">
-    @php $average = $livre->averageRating(); @endphp
-    <p><strong>Average Rating:</strong>
-        @if($average)
-            @for($i = 1; $i <= 5; $i++)
-                @if($i <= round($average))
-                    <span style="color: gold;">★</span>
-                @else
-                    <span style="color: #ccc;">★</span>
-                @endif
-            @endfor
-            ({{ number_format($average, 1) }} / 5)
-        @else
-            No rating yet.
-        @endif
-    </p>
-</div>
+    {{-- Average Rating --}}
+    <div class="mt-3 mb-3">
+        @php $average = $livre->averageRating(); @endphp
+        <p><strong>Average Rating:</strong>
+            @if($average)
+                @for($i = 1; $i <= 5; $i++)
+                    @if($i <= round($average))
+                        <span style="color: gold;">★</span>
+                    @else
+                        <span style="color: #ccc;">★</span>
+                    @endif
+                @endfor
+                ({{ number_format($average, 1) }} / 5)
+            @else
+                No rating yet.
+            @endif
+        </p>
+    </div>
 
-{{-- Display all ratings --}}
-<div class="mt-3">
-   <strong>Ratings & Comments : </strong>
-     <!-- Show Reviews Button -->
-        @if($livre->rates->count() > 0)
-        <button type="button" class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#reviewsModal">
-            SHOW REVIEWS
-        </button>
-        @endif
-</div>
+    {{-- Display all ratings --}}
+    <div class="mt-3">
+       <strong>Ratings & Comments : </strong>
+         <!-- Show Reviews Button -->
+            @if($livre->rates->count() > 0)
+            <button type="button" class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#reviewsModal">
+                SHOW REVIEWS
+            </button>
+            @endif
+    </div>
+
 
 
                         </div>
@@ -291,6 +319,13 @@
 .rating-stars label:hover,
 .rating-stars label:hover ~ label {
     color: #ffb400; /* couleur des étoiles sélectionnées */
+}
+.action-buttons {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
 }
 </style>
 @endsection

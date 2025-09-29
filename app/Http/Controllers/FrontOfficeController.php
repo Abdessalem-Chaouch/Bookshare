@@ -42,4 +42,11 @@ class FrontOfficeController extends Controller
         $categories = $query->get();
         return view('FrontOffice.Categories.CategoriesPage', compact('categories'));
     }
+
+    public function categoryBooks($id)
+    {
+        $category = Category::with('livres')->findOrFail($id);
+        $livres = $category->livres;
+        return view('FrontOffice.Categories.CategoryBooks', compact('category', 'livres'));
+    }
 }

@@ -1,4 +1,4 @@
-	@extends('baseF')
+@extends('baseF')
 	@section('content')
 
 	<section id="billboard">
@@ -86,6 +86,7 @@
 	</section>
 
 	<section id="special-offer" class="bookshelf pb-5 mb-5">
+
 
 
 	<section id="subscribe">

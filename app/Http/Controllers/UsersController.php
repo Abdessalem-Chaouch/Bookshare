@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 class UsersController extends Controller
 {
-    //
      public function index()
     {
         $users = User::all(); // Récupérer tous les utilisateurs
