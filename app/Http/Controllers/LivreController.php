@@ -54,6 +54,8 @@ public function mesLivres()
         'disponibilite' => 'required|in:disponible,emprunte,reserve',
         'stock' => 'required|integer|min:0',
         'photo_couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'pdf_contenu' => 'nullable|mimes:pdf|max:20480', // max 5 Mo
+
     ]);
 
     // 📌 gérer upload image
@@ -61,7 +63,7 @@ public function mesLivres()
         $validated['photo_couverture'] = $request->file('photo_couverture')->store('livres', 'public');
     }
 
-    // 📌 gérer upload PDF
+     // 📌 gérer upload PDF
     if ($request->hasFile('pdf_contenu')) {
     $validated['pdf_contenu'] = $request->file('pdf_contenu')->store('livres/pdfs', 'public');
 }
@@ -138,16 +140,22 @@ public function mesLivres()
 
 
 // Télécharger le PDF
+
 public function download($id)
 {
     $livre = Livre::findOrFail($id);
+
     if ($livre->pdf_contenu) {
-        return response($livre->pdf_contenu)
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'attachment; filename="'.$livre->titre.'.pdf"');
+        $path = public_path('storage/' . $livre->pdf_contenu); // correct full path
+        if (file_exists($path)) {
+            return response()->download($path, $livre->titre . '.pdf');
+        }
     }
-    return redirect()->back()->with('error', 'Aucun PDF disponible');
+
+    return redirect()->back()->with('error', 'No PDF available.');
 }
+
+
     public function show(Livre $livre)
 {
     return view('BackOffice.livre.show', compact('livre'));
