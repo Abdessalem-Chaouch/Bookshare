@@ -11,15 +11,20 @@ use Illuminate\Http\Request;
 
 class FrontOfficeController extends Controller
 {
-    public function accueil()
-    {
-        $categoriesblogs = categoryBlog::all(); 
-        $categories = Category::all();
-        $blogs = Blog::latest()->take(3)->get();
-        $subscriptions = Subscription::where('is_active', true)->get();
-        $livres = Livre::with('categorie', 'auteur')->latest('date_ajout')->get();
-        return view('FrontOffice.Accueil', compact('livres','categories', 'blogs', 'subscriptions','categoriesblogs'));
-    }
+public function accueil()
+{
+    $categoriesblogs = categoryBlog::all(); 
+    $categories = Category::all();
+    $blogs = Blog::latest()->take(3)->get();
+    $subscriptions = Subscription::where('is_active', true)->get();
+    
+    $livres = Livre::with('categorie', 'user')
+        ->latest('date_ajout')
+        ->get();
+
+    return view('FrontOffice.Accueil', compact('livres','categories', 'blogs', 'subscriptions','categoriesblogs'));
+}
+
 
     public function categories(Request $request)
     {

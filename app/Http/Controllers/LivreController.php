@@ -21,7 +21,7 @@ class LivreController extends Controller
 }
 public function indexf()
 {
-    $livres = Livre::with('categorie', 'auteur')
+    $livres = Livre::with('categorie', 'user')
                    ->latest('date_ajout')
                    ->get();
 

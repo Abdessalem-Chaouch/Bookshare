@@ -26,7 +26,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaypalController;
 
 use App\Http\Controllers\ReviewController;
-
+use App\Http\Controllers\NotificationController;
 
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
@@ -75,6 +75,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/borrows/{livreId}', [BorrowController::class, 'store'])->name('borrows.store');
    Route::post('/borrows/{livreId}/pay', [BorrowController::class, 'payAndBorrow'])->name('borrows.pay');
     Route::get('/borrows/success', [BorrowController::class, 'success'])->name('borrows.success');
+// web.php
+Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.list');
+Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])->name('notifications.delete');
+Route::post('/notifications/clear', [NotificationController::class, 'clearAll'])->name('notifications.clear');
 
 });
 
