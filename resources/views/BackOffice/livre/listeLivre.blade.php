@@ -37,7 +37,7 @@
 
                         <!-- Info -->
                         <td>{{ $livre->titre }}</td>
-                        <td>{{ $livre->auteur }}</td>
+                        <td>{{ $livre->user ? $livre->user->name : 'Auteur inconnu'}}</td>
                         <td>{{ $livre->categorie?->name ?? '—' }}</td>
 
                         <!-- Price -->

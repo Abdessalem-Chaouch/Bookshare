@@ -15,8 +15,9 @@ return new class extends Migration
             // Supprimer la colonne auteur
             $table->dropColumn('auteur');
 
-            // Ajouter user_id (clé étrangère vers users)
+            // Ajouter user_id (nullable pour éviter conflit avec données existantes)
             $table->foreignId('user_id')
+                  ->nullable()           // ← important
                   ->after('categorie_id')
                   ->constrained('users')
                   ->cascadeOnDelete();
@@ -29,7 +30,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('livres', function (Blueprint $table) {
-            // En cas de rollback, on supprime la clé étrangère et la colonne user_id
+            // Supprimer la clé étrangère et la colonne user_id
             $table->dropForeign(['user_id']);
             $table->dropColumn('user_id');
 

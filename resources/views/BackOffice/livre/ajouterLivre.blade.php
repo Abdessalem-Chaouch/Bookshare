@@ -36,18 +36,21 @@
                   {{-- Author --}}
 <div class="mb-3">
     <label class="form-label">Author</label>
-    <select name="auteur_id" class="form-select @error('auteur_id') is-invalid @enderror" required>
+    <select name="user_id" class="form-select @error('user_id') is-invalid @enderror" required>
         <option value="">-- Select an Author --</option>
         @foreach($auteurs as $auteur)
-            <option value="{{ $auteur->id }}" {{ old('auteur_id') == $auteur->id ? 'selected' : '' }}>
+            <option value="{{ $auteur->id }}" 
+                {{ (old('user_id') == $auteur->id || (isset($livre) && $livre->user_id == $auteur->id)) ? 'selected' : '' }}>
                 {{ $auteur->name }} {{ $auteur->prenom }}
             </option>
         @endforeach
     </select>
-    @error('auteur_id')
+    @error('user_id')
         <div class="invalid-feedback">{{ $message }}</div>
     @enderror
 </div>
+
+
 
 
                     {{-- Description --}}

@@ -29,7 +29,7 @@
         </figure>
         <figcaption>
             <h3><a href="{{ route('livres.showf', $livre->id) }}"> {{ $livre->titre }}</a></h3>
-            <span>{{ $livre->auteur }}</span>
+            <span>{{ $livre->user ? $livre->user->name : 'Auteur inconnu' }}</span>
             <p><strong>Prix :</strong> {{ $livre->prix ? $livre->prix . ' DT' : 'Non spécifié' }}</p>
         </figcaption>
     </div>

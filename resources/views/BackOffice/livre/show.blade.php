@@ -20,7 +20,8 @@
 
             <!-- Info -->
             <div class="col-md-9">
-                <p><strong>Author:</strong> {{ $livre->auteur->name }}</p>
+              <p><strong>Author:</strong> {{ $livre->user ? $livre->user->name : 'Auteur inconnu' }}</p>
+
                 <p><strong>Category:</strong> {{ $livre->categorie?->name ?? '—' }}</p>
                 <p><strong>Description:</strong> {{ $livre->description ?? '—' }}</p>
                 <p><strong>ISBN:</strong> {{ $livre->isbn ?? '—' }}</p>

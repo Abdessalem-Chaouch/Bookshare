@@ -38,7 +38,8 @@
                         </div>
 
                         <div class="products-content mt-3">
-                            <p><strong>Author:</strong> {{ $livre->auteur->name ?? $livre->auteur ?? 'Unknown' }}</p>
+                           <p><strong>Author:</strong> {{ $livre->user ? $livre->user->name : 'Auteur inconnu' }}</p>
+
                             <p><strong>Category:</strong> {{ $livre->categorie?->name ?? '—' }}</p>
                             <p><strong>Description:</strong> {{ $livre->description ?? 'No description available.' }}</p>
                             <p><strong>ISBN:</strong> {{ $livre->isbn ?? '—' }}</p>

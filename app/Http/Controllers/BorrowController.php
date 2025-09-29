@@ -124,7 +124,12 @@ public function success(Request $request)
     $livreId = $request->query('livreId');
     $user = auth()->user();
     $livre = Livre::findOrFail($livreId);
-    $author = User::where('name', $livre->auteur)->first();
+    //$author = User::where('name', $livre->auteur)->first();
+// Ancien code
+$author = User::where('name', $livre->auteur)->first();
+
+// Nouveau code
+$author = $livre->user; // récupère directement l'utilisateur lié via user_id
 
     $provider = new PayPalClient;
     $provider->setApiCredentials(config('paypal'));

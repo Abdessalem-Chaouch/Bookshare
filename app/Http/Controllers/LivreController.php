@@ -44,60 +44,61 @@ public function mesLivres()
 
    public function store(Request $request)
 {
-    $validated = $request->validate([
-        'titre' => 'required|string|max:255',
-        'auteur' => 'nullable|string|max:150',
-        'description' => 'nullable|string|max:1000',
-        'isbn' => 'nullable|string|max:50|unique:livres,isbn',
-        'categorie_id' => 'required|exists:categories,id',
-        'prix' => 'required|numeric|min:0',
-        'disponibilite' => 'required|in:disponible,emprunte,reserve',
-        'stock' => 'required|integer|min:0',
-        'photo_couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'pdf_contenu' => 'nullable|mimes:pdf|max:20480', // max 5 Mo
+  $validated = $request->validate([
+    'titre' => 'required|string|max:255',
+    'user_id' => 'required|exists:users,id',
+    'description' => 'nullable|string|max:1000',
+    'isbn' => 'nullable|string|max:50|unique:livres,isbn',
+    'categorie_id' => 'required|exists:categories,id',
+    'prix' => 'required|numeric|min:0',
+    'disponibilite' => 'required|in:disponible,emprunte,reserve',
+    'stock' => 'required|integer|min:0',
+    'photo_couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20048',
+    'pdf_contenu' => 'nullable|mimes:pdf|max:20480', 
+]);
 
-    ]);
 
     // 📌 gérer upload image
     if ($request->hasFile('photo_couverture')) {
-        $validated['photo_couverture'] = $request->file('photo_couverture')->store('livres', 'public');
-    }
+    $validated['photo_couverture'] = $request->file('photo_couverture')->store('livres', 'public');
+}
 
-     // 📌 gérer upload PDF
-    if ($request->hasFile('pdf_contenu')) {
+if ($request->hasFile('pdf_contenu')) {
     $validated['pdf_contenu'] = $request->file('pdf_contenu')->store('livres/pdfs', 'public');
 }
 
-    // insertion en base
-    Livre::create($validated);
+Livre::create($validated);
 
-    return redirect()->route('livres.index')->with('success', 'Livre ajouté avec succès ✅');
+return redirect()->route('livres.index')->with('success', 'Livre ajouté avec succès ✅');
 }
 
 
     public function edit(Livre $livre)
     {
+         $auteurs = User::where('role', 'auteur')->get();
+
         $categories = Category::all();
-        return view('BackOffice.livre.editLivre', compact('livre', 'categories'));
+        return view('BackOffice.livre.editLivre', compact('livre', 'categories','auteurs'));
     }
 
-    public function update(Request $request, Livre $livre)
+ public function update(Request $request, Livre $livre)
 {
     $data = $request->validate([
         'titre' => 'required|string|max:255',
-        'auteur' => 'nullable|string|max:150',
+        'user_id' => 'required|exists:users,id', // remplacer 'auteur'
         'description' => 'nullable|string',
         'isbn' => 'nullable|string|max:50',
         'categorie_id' => 'nullable|exists:categories,id',
         'disponibilite' => 'required|in:disponible,emprunte,reserve',
         'stock' => 'required|integer|min:0',
         'photo_couverture' => 'nullable|image|max:2048',
+        'pdf_contenu' => 'nullable|file|mimes:pdf|max:20480',
         'prix' => 'nullable|numeric|min:0',
     ]);
 
     // Image
     if ($request->hasFile('photo_couverture')) {
-        if ($livre->photo_couverture) {
+        if ($livre->photo_couverture && Storage::disk('public')->exists($livre->photo_couverture)) {
             Storage::disk('public')->delete($livre->photo_couverture);
         }
         $data['photo_couverture'] = $request->file('photo_couverture')->store('livres/covers', 'public');
@@ -105,16 +106,18 @@ public function mesLivres()
 
     // PDF
     if ($request->hasFile('pdf_contenu')) {
-        if ($livre->pdf_contenu) {
+        if ($livre->pdf_contenu && Storage::disk('public')->exists($livre->pdf_contenu)) {
             Storage::disk('public')->delete($livre->pdf_contenu);
         }
         $data['pdf_contenu'] = $request->file('pdf_contenu')->store('livres/pdfs', 'public');
     }
 
+    // Met à jour uniquement les champs valides
     $livre->update($data);
 
     return redirect()->route('livres.index')->with('success', 'Livre mis à jour avec succès.');
 }
+
     public function destroy(Livre $livre)
     {
         if ($livre->photo_couverture) {
