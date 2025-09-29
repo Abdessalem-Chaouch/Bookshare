@@ -7,9 +7,11 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class LivreController extends Controller
 {
+    
   public function index()
 {
     // Récupérer les livres avec leur catégorie
@@ -19,20 +21,30 @@ class LivreController extends Controller
 }
 public function indexf()
 {
-    // Récupérer les livres avec leur catégorie
-    $livres = Livre::with('categorie')->latest('date_ajout')->get();
+    $livres = Livre::with('categorie', 'auteur')
+                   ->latest('date_ajout')
+                   ->get();
 
     return view('FrontOffice.livres.LivrePage', compact('livres'));
 }
-public function auteur()
-{
-    return $this->belongsTo(User::class, 'user_id');
-}
+
+
 public function mesLivres()
 {
-    $livres = Livre::where('user_id', auth()->id())->with('categorie')->get();
+    
+    $user = Auth::user();
+
+    if (!$user) {
+        return redirect()->route('login')->with('error', 'Vous devez être connecté.');
+    }
+
+    $livres = Livre::where('user_id', $user->id)
+                   ->with('categorie')
+                   ->get();
+
     return view('BackOffice.livre.mesLivres', compact('livres'));
 }
+
 
   public function create()
 {
@@ -42,35 +54,35 @@ public function mesLivres()
     return view('BackOffice.livre.ajouterLivre', compact('categories', 'auteurs'));
 }
 
-   public function store(Request $request)
-{
-    $validated = $request->validate([
-        'titre' => 'required|string|max:255',
-        'auteur' => 'nullable|string|max:150',
-        'description' => 'nullable|string|max:1000',
-        'isbn' => 'nullable|string|max:50|unique:livres,isbn',
-        'categorie_id' => 'required|exists:categories,id',
-        'prix' => 'required|numeric|min:0',
-        'disponibilite' => 'required|in:disponible,emprunte,reserve',
-        'stock' => 'required|integer|min:0',
-        'photo_couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'titre' => 'required|string|max:255',
+            'auteur' => 'nullable|string|max:150',
+            'description' => 'nullable|string|max:1000',
+            'isbn' => 'nullable|string|max:50|unique:livres,isbn',
+            'categorie_id' => 'required|exists:categories,id',
+            'prix' => 'required|numeric|min:0',
+            'disponibilite' => 'required|in:disponible,emprunte,reserve',
+            'stock' => 'required|integer|min:0',
+            'photo_couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-    // 📌 gérer upload image
-    if ($request->hasFile('photo_couverture')) {
-        $validated['photo_couverture'] = $request->file('photo_couverture')->store('livres', 'public');
+        // 📌 gérer upload image
+        if ($request->hasFile('photo_couverture')) {
+            $validated['photo_couverture'] = $request->file('photo_couverture')->store('livres', 'public');
+        }
+
+        // 📌 gérer upload PDF
+        if ($request->hasFile('pdf_contenu')) {
+        $validated['pdf_contenu'] = $request->file('pdf_contenu')->store('livres/pdfs', 'public');
     }
 
-    // 📌 gérer upload PDF
-    if ($request->hasFile('pdf_contenu')) {
-    $validated['pdf_contenu'] = $request->file('pdf_contenu')->store('livres/pdfs', 'public');
-}
+        // insertion en base
+        Livre::create($validated);
 
-    // insertion en base
-    Livre::create($validated);
-
-    return redirect()->route('livres.index')->with('success', 'Livre ajouté avec succès ✅');
-}
+        return redirect()->route('livres.index')->with('success', 'Livre ajouté avec succès ✅');
+    }
 
 
     public function edit(Livre $livre)
