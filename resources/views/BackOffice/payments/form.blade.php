@@ -3,7 +3,7 @@
 <link href="{{ asset('css/payment.css') }}" rel="stylesheet">
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Paiement de l'abonnement</h4>
+    <h4 class="fw-bold py-3 mb-4">Subscription Payment</h4>
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -17,7 +17,7 @@
         <div class="col-md-4">
             <div class="card payment-summary">
                 <div class="card-header">
-                    <h5><i class="bx bx-receipt me-2"></i>Résumé de la commande</h5>
+                    <h5><i class="bx bx-receipt me-2"></i>Order Summary</h5>
                 </div>
                 <div class="card-body">
                     <h6>{{ $subscription->name }}</h6>
@@ -29,8 +29,8 @@
                     </ul>
                     <hr>
                     <div class="d-flex justify-content-between">
-                        <span>Durée:</span>
-                        <span>{{ $subscription->duration_days }} jours</span>
+                        <span>Duration:</span>
+                        <span>{{ $subscription->duration_days }} days</span>
                     </div>
                     <div class="d-flex justify-content-between">
                         <strong>Total:</strong>
@@ -45,9 +45,9 @@
             <div class="card payment-form">
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5><i class="bx bx-credit-card me-2"></i>Informations de paiement</h5>
+                        <h5><i class="bx bx-credit-card me-2"></i>Payment Information</h5>
                         <div class="secure-badge">
-                            <i class="bx bx-shield"></i>Paiement sécurisé
+                            <i class="bx bx-shield"></i>Secure Payment
                         </div>
                     </div>
                     <div class="payment-methods">
@@ -61,7 +61,7 @@
                         @csrf
                         
                         <div class="mb-3">
-                            <label for="cardholder_name" class="form-label">Nom du titulaire</label>
+                            <label for="cardholder_name" class="form-label">CARDHOLDER NAME</label>
                             <input type="text" class="form-control @error('cardholder_name') is-invalid @enderror" 
                                    id="cardholder_name" name="cardholder_name" value="{{ old('cardholder_name') }}" required>
                             @error('cardholder_name')
@@ -70,7 +70,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="card_number" class="form-label">Numéro de carte</label>
+                            <label for="card_number" class="form-label">CARD NUMBER</label>
                             <div class="card-input">
                                 <input type="text" class="form-control @error('card_number') is-invalid @enderror" 
                                        id="card_number" name="card_number" placeholder="1234 5678 9012 3456" 
@@ -84,7 +84,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="expiry_date" class="form-label">Date d'expiration</label>
+                                    <label for="expiry_date" class="form-label">EXPIRY DATE</label>
                                     <input type="text" class="form-control @error('expiry_date') is-invalid @enderror" 
                                            id="expiry_date" name="expiry_date" placeholder="MM/YY" 
                                            maxlength="5" required>
@@ -105,21 +105,14 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="terms" required>
-                                <label class="form-check-label" for="terms">
-                                    J'accepte les <a href="#" target="_blank">conditions d'utilisation</a> et la <a href="#" target="_blank">politique de confidentialité</a>
-                                </label>
-                            </div>
-                        </div>
+
 
                         <div class="d-flex justify-content-between">
                             <a href="{{ route('author.subscriptions') }}" class="btn btn-outline-secondary">
-                                <i class="bx bx-arrow-back me-1"></i>Retour
+                                <i class="bx bx-arrow-back me-1"></i>Back
                             </a>
                             <button type="submit" class="btn btn-primary btn-payment" id="pay-button">
-                                <i class="bx bx-credit-card me-1"></i>Payer {{ number_format($subscription->price, 2) }} €
+                                <i class="bx bx-credit-card me-1"></i>Pay {{ number_format($subscription->price, 2) }} €
                             </button>
                         </div>
                     </form>
@@ -160,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('payment-form');
     
     form.addEventListener('submit', function() {
-        payButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Traitement...';
+        payButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
         payButton.disabled = true;
     });
 });

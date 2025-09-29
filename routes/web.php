@@ -27,6 +27,7 @@ use App\Http\Controllers\ReviewController;
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
 Route::get('/nos-categories', [FrontOfficeController::class, 'categories'])->name('front.categories');
+Route::get('/category/{id}/books', [FrontOfficeController::class, 'categoryBooks'])->name('category.books');
 Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
 
 Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles');

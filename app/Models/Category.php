@@ -11,4 +11,9 @@ class Category extends Model
         'description',
         'image'
     ];
+
+    public function livres()
+    {
+        return $this->hasMany(Livre::class, 'categorie_id');
+    }
 }

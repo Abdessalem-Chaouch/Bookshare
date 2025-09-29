@@ -2,12 +2,12 @@
 @section('content')
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Historique des paiements</h4>
+    <h4 class="fw-bold py-3 mb-4">Payment History</h4>
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Mes transactions</h5>
-            <span class="badge bg-primary">{{ $payments->count() }} transaction(s)</span>
+            <h5 class="mb-0">My Transactions</h5>
+            <span class="badge bg-primary">{{ $payments->count() }} TRANSACTION(S)</span>
         </div>
         <div class="card-body">
             @if($payments->count() > 0)
@@ -15,12 +15,12 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Abonnement</th>
-                                <th>Montant</th>
-                                <th>Méthode</th>
-                                <th>Statut</th>
-                                <th>Transaction ID</th>
+                                <th>DATE</th>
+                                <th>SUBSCRIPTION</th>
+                                <th>AMOUNT</th>
+                                <th>METHOD</th>
+                                <th>STATUS</th>
+                                <th>TRANSACTION ID</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -29,28 +29,28 @@
                                 <td>{{ $payment->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
                                     <strong>{{ $payment->subscription->name }}</strong><br>
-                                    <small class="text-muted">{{ $payment->subscription->duration_days }} jours</small>
+                                    <small class="text-muted">{{ $payment->subscription->duration_days }} days</small>
                                 </td>
                                 <td>
                                     <strong>{{ number_format($payment->amount, 2) }} €</strong>
                                 </td>
                                 <td>
                                     <i class="bx bx-credit-card me-1"></i>
-                                    Carte ****{{ $payment->payment_data['card_last_four'] ?? '****' }}
+                                    Card ****{{ $payment->payment_data['card_last_four'] ?? '****' }}
                                 </td>
                                 <td>
                                     @switch($payment->status)
                                         @case('completed')
-                                            <span class="badge bg-success">Réussi</span>
+                                            <span class="badge bg-success">SUCCESS</span>
                                             @break
                                         @case('failed')
-                                            <span class="badge bg-danger">Échoué</span>
+                                            <span class="badge bg-danger">FAILED</span>
                                             @break
                                         @case('pending')
-                                            <span class="badge bg-warning">En attente</span>
+                                            <span class="badge bg-warning">PENDING</span>
                                             @break
                                         @case('refunded')
-                                            <span class="badge bg-info">Remboursé</span>
+                                            <span class="badge bg-info">REFUNDED</span>
                                             @break
                                         @default
                                             <span class="badge bg-secondary">{{ $payment->status }}</span>
@@ -67,9 +67,9 @@
             @else
                 <div class="text-center py-4">
                     <i class="bx bx-receipt" style="font-size: 3rem; color: #ddd;"></i>
-                    <p class="text-muted mt-2">Aucune transaction trouvée</p>
+                    <p class="text-muted mt-2">No transactions found</p>
                     <a href="{{ route('author.subscriptions') }}" class="btn btn-primary">
-                        <i class="bx bx-plus me-1"></i>Souscrire un abonnement
+                        <i class="bx bx-plus me-1"></i>Subscribe to a plan
                     </a>
                 </div>
             @endif

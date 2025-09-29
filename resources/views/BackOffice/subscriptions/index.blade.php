@@ -3,9 +3,9 @@
 
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="d-flex justify-content-between align-items-center py-3 mb-4">
-        <h4 class="fw-bold"><span class="text-muted fw-light">Payments /</span> Abonnements</h4>
+        <h4 class="fw-bold"><span class="text-muted fw-light">Payments /</span> Subscriptions</h4>
         <a href="{{ route('subscriptions.create') }}" class="btn btn-primary">
-            <i class="bx bx-plus me-1"></i>Ajouter Abonnement
+            <i class="bx bx-plus me-1"></i>Add Subscription
         </a>
     </div>
 
@@ -22,17 +22,17 @@
                 <div class="row align-items-end">
                     <div class="col-md-6">
                         <input type="text" name="search" value="{{ request('search') }}" 
-                               placeholder="Rechercher un abonnement..." class="form-control">
+                               placeholder="Search for a subscription..." class="form-control">
                     </div>
                     <div class="col-md-3">
                         <select name="status" class="form-select">
-                            <option value="">Tous les statuts</option>
-                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Actif</option>
-                            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactif</option>
+                            <option value="">All statuses</option>
+                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary">Rechercher</button>
+                        <button type="submit" class="btn btn-primary">Search</button>
                     </div>
                 </div>
             </form>
@@ -40,16 +40,16 @@
     </div>
 
     <div class="card">
-        <h5 class="card-header">Abonnements</h5>
+        <h5 class="card-header">Subscriptions</h5>
         <div class="table-responsive text-nowrap">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Nom</th>
-                        <th>Prix</th>
-                        <th>Durée</th>
-                        <th>Fonctionnalités</th>
-                        <th>Statut</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Duration</th>
+                        <th>Features</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -58,13 +58,13 @@
                     <tr>
                         <td><strong>{{ $subscription->name }}</strong></td>
                         <td>{{ number_format($subscription->price, 2) }} €</td>
-                        <td>{{ $subscription->duration_days }} jours</td>
+                        <td>{{ $subscription->duration_days }} days</td>
                         <td>
-                            <span class="badge bg-info">{{ count($subscription->features) }} fonctionnalités</span>
+                            <span class="badge bg-info">{{ count($subscription->features) }} features</span>
                         </td>
                         <td>
                             <span class="badge bg-{{ $subscription->is_active ? 'success' : 'danger' }}">
-                                {{ $subscription->is_active ? 'Actif' : 'Inactif' }}
+                                {{ $subscription->is_active ? 'Active' : 'Inactive' }}
                             </span>
                         </td>
                         <td>
@@ -74,14 +74,14 @@
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="{{ route('subscriptions.edit', $subscription) }}">
-                                        <i class="bx bx-edit-alt me-1"></i> Modifier
+                                        <i class="bx bx-edit-alt me-1"></i> Edit
                                     </a>
                                     <form action="{{ route('subscriptions.destroy', $subscription) }}" method="POST" 
-                                          onsubmit="return confirm('Êtes-vous sûr ?')" style="display: inline;">
+                                          onsubmit="return confirm('Are you sure?')" style="display: inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="dropdown-item text-danger">
-                                            <i class="bx bx-trash me-1"></i> Supprimer
+                                            <i class="bx bx-trash me-1"></i> Delete
                                         </button>
                                     </form>
                                 </div>
@@ -92,7 +92,7 @@
                     <tr>
                         <td colspan="6" class="text-center py-4">
                             <i class="bx bx-credit-card bx-lg mb-2"></i>
-                            <p>Aucun abonnement trouvé</p>
+                            <p>No subscriptions found</p>
                         </td>
                     </tr>
                     @endforelse
