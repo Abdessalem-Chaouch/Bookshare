@@ -18,6 +18,7 @@
                 <div class="col-md-6">
                     <div class="right-element">
 
+                    
              <a href="{{ route('cart.index') }}" class="for-buy position-relative">
     <i class="icon icon-clipboard"></i>
     <span>Cart</span>
@@ -26,6 +27,30 @@
     </span>
     
 </a>
+<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="width: 300px;">
+    @forelse($notifications as $notification)
+        <li>
+            <a class="dropdown-item" href="#">
+                {{ $notification->data['message'] }}
+                <br>
+                <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+            </a>
+        </li>
+    @empty
+        <li><span class="dropdown-item">Aucune notification</span></li>
+    @endforelse
+</ul>
+<a href="#" class="for-buy position-relative dropdown-toggle" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-bell" style="font-size: 1.2rem;"></i>
+    @if(Auth::user() && Auth::user()->unreadNotifications->count() > 0)
+        <span id="notification-count" class="cart-badge">
+            {{ Auth::user()->unreadNotifications->count() }}
+        </span>
+    @endif
+</a>
+
+
+
 
 
 

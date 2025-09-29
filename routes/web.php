@@ -85,6 +85,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/rates', [RateController::class, 'index'])->name('rates.index');
     Route::post('/livres/{id}/rate', [RateController::class, 'store'])->name('rates.store');
+//Route::post('/rates/{livre}', [RateController::class, 'store'])->name('rates.store')->middleware('auth');
 
     // Paiement des abonnements - accessible à tous les utilisateurs connectés
     Route::get('/payment/{subscription}', [\App\Http\Controllers\PaymentController::class, 'showPaymentForm'])->name('payment.form');
@@ -141,8 +142,10 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
             return view('BackOffice.utilisateur.listeUtilisateur', compact('users'));
         })->name('listeUtilisateur');
 
+       Route::get('/listeUtilisateur', [UsersController::class, 'index'])->name('listeUtilisateur');   
 
         Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
+        Route::get('/transactions', [App\Http\Controllers\PaypalController::class, 'transactions'])->name('transactions');
         
         // Subscription Management
         Route::resource('subscriptions', \App\Http\Controllers\SubscriptionController::class);
@@ -173,7 +176,6 @@ Route::get('/mes-livres', [LivreController::class, 'mesLivres'])->name('mesLivre
     Route::get('/livresf/{livre}', [LivreController::class, 'showf'])->name('livres.showf');
 
 });
-        Route::get('/transactions', [App\Http\Controllers\PaypalController::class, 'transactions'])->name('transactions');
 
 
 

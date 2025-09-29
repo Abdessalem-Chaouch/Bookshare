@@ -8,19 +8,14 @@ use App\Models\categoryBlog;
 use App\Models\Livre;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 class AccueilController extends Controller
 {
-public function index()
-{
-    $blogs = Blog::latest()->take(3)->get();
-    $categoriesblogs = categoryBlog::all(); 
-    $categories = Category::all();
-    $subscriptions = Subscription::where('is_active', 1)->get();
-    $livres = Livre::with('categorie', 'auteur')->latest('date_ajout')->get();
+        public function index()
+    {
+        $blogs = Blog::latest()->take(3)->get();
+        return view('FrontOffice.Accueil', compact('blogs'));
+    }
 
-    return view('FrontOffice.Accueil', compact('blogs','categories', 'subscriptions', 'livres','categoriesblogs'));
-
-
-}
+   
 }

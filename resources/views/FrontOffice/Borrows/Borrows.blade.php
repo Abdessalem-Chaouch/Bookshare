@@ -40,7 +40,7 @@
                                              class="cover-img">
                                     </td>
                                     <td>{{ $borrow->livre->titre }}</td>
-                                    <td>{{ $borrow->auteur->name ?? 'Unknown' }}</td>
+                                   <td>{{ $borrow->user ? $borrow->user->name : 'Unknown' }}</td>
                                     <td>{{ $borrow->date_debut->format('d M Y') }}</td>
                                     <td>{{ $borrow->date_fin->format('d M Y') }}</td>
                                     <td>

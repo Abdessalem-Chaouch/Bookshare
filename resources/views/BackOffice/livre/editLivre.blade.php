@@ -33,15 +33,21 @@
                 </div>
 
                 {{-- Author --}}
-                <div class="mb-3">
-                    <label class="form-label">Author</label>
-                    <input type="text" name="auteur"
-                           class="form-control @error('auteur') is-invalid @enderror"
-                           value="{{ old('auteur', $livre->auteur->name) }}">
-                    @error('auteur')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+            <div class="mb-3">
+    <label class="form-label">Author</label>
+    <select name="user_id" class="form-select @error('user_id') is-invalid @enderror" required>
+        <option value="">-- Select an Author --</option>
+        @foreach($auteurs as $auteur)
+            <option value="{{ $auteur->id }}" {{ old('user_id', $livre->user_id) == $auteur->id ? 'selected' : '' }}>
+                {{ $auteur->name }} {{ $auteur->prenom }}
+            </option>
+        @endforeach
+    </select>
+    @error('user_id')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
+
 
                 {{-- Description --}}
                 <div class="mb-3">
@@ -91,18 +97,7 @@
                     @enderror
                 </div>
 
-                {{-- Availability --}}
-                <div class="mb-3">
-                    <label class="form-label">Availability</label>
-                    <select name="disponibilite" class="form-select @error('disponibilite') is-invalid @enderror" required>
-                        <option value="disponible" {{ old('disponibilite', $livre->disponibilite)=='disponible'?'selected':'' }}>Available</option>
-                        <option value="emprunte" {{ old('disponibilite', $livre->disponibilite)=='emprunte'?'selected':'' }}>Borrowed</option>
-                        <option value="reserve" {{ old('disponibilite', $livre->disponibilite)=='reserve'?'selected':'' }}>Reserved</option>
-                    </select>
-                    @error('disponibilite')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+               
 
                 {{-- Stock --}}
                 <div class="mb-3">
