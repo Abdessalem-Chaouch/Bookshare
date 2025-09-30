@@ -37,8 +37,8 @@
                     </div>
                     <div class="col-md-3">
                         <select name="sort" class="form-select">
-                            <option value="asc" {{ request('sort', 'asc') == 'asc' ? 'selected' : '' }}>🔤 A-Z</option>
-                            <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>🔤 Z-A</option>
+                            <option value="asc" {{ request('sort', 'asc') == 'asc' ? 'selected' : '' }}> A-Z</option>
+                            <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}> Z-A</option>
                         </select>
                     </div>
                 </div>

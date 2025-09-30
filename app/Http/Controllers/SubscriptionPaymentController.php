@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Subscription;
 use App\Models\AuthorSubscription;
+use App\Models\SubscriptionPayment;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 use Illuminate\Support\Str;
-use App\Models\SubscriptionPayment as Payment;
-class PaymentController extends Controller
+
+class SubscriptionPaymentController extends Controller
 {
     public function showPaymentForm(Subscription $subscription)
     {
@@ -36,13 +36,11 @@ class PaymentController extends Controller
             return redirect()->route('login');
         }
 
-        // Créer l'enregistrement de paiement
-        $payment = Payment::create([
-            'payment_id' => 'TXN_' . Str::random(10),
-            'livre_id' => null, // Null pour les abonnements
+        // Créer l'enregistrement de paiement d'abonnement
+        $payment = SubscriptionPayment::create([
+            'payment_id' => 'SUB_' . Str::random(10),
             'user_id' => $user->id,
-            'product_name' => $subscription->name,
-            'quantity' => 1, // Quantité par défaut pour les abonnements
+            'subscription_id' => $subscription->id,
             'amount' => $subscription->price,
             'currency' => 'TND',
             'payer_name' => $request->cardholder_name,
@@ -51,7 +49,7 @@ class PaymentController extends Controller
             'payment_method' => 'card'
         ]);
 
-        // Simulation du paiement (remplacer par vraie intégration Stripe/PayPal)
+        // Simulation du paiement
         $paymentSuccess = $this->simulatePayment($request->all(), $subscription->price);
 
         if ($paymentSuccess) {
@@ -84,19 +82,16 @@ class PaymentController extends Controller
 
     public function history()
     {
-        $payments = auth()->user()->payments()->with('subscription')->orderBy('created_at', 'desc')->get();
+        $payments = auth()->user()->subscriptionPayments()->with('subscription')->orderBy('created_at', 'desc')->get();
         return view('BackOffice.payments.history', compact('payments'));
     }
 
     private function simulatePayment($paymentData, $amount)
     {
-        // Simulation simple - en production, intégrer Stripe/PayPal
-        // Vérifier que les données de carte ne sont pas vides
         if (empty($paymentData['card_number']) || empty($paymentData['cvv'])) {
             return false;
         }
 
-        // Simulation : 95% de chance de succès
         return rand(1, 100) <= 95;
     }
 }

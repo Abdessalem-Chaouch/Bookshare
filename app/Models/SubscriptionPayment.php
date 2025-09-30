@@ -5,16 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Subscription_Payment extends Model
+class SubscriptionPayment extends Model
 {
     protected $fillable = [
+        'payment_id',
         'user_id',
         'subscription_id',
         'amount',
-        'payment_method',
-        'transaction_id',
-        'status',
-        'payment_data'
+        'currency',
+        'payer_name',
+        'payer_email',
+        'payment_status',
+        'payment_method'
     ];
 
     protected $casts = [
@@ -34,13 +36,12 @@ class Subscription_Payment extends Model
 
     public function isCompleted()
     {
-        return $this->status === 'completed';
+        return $this->payment_status === 'completed';
     }
 
     public function isFailed()
     {
-        return $this->status === 'failed';
-
+        return $this->payment_status === 'failed';
     }
   
 }

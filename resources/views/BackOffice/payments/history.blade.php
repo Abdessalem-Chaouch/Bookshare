@@ -36,10 +36,10 @@
                                 </td>
                                 <td>
                                     <i class="bx bx-credit-card me-1"></i>
-                                    Card ****{{ $payment->payment_data['card_last_four'] ?? '****' }}
+                                    Card ********
                                 </td>
                                 <td>
-                                    @switch($payment->status)
+                                    @switch($payment->payment_status)
                                         @case('completed')
                                             <span class="badge bg-success">SUCCESS</span>
                                             @break
@@ -49,15 +49,12 @@
                                         @case('pending')
                                             <span class="badge bg-warning">PENDING</span>
                                             @break
-                                        @case('refunded')
-                                            <span class="badge bg-info">REFUNDED</span>
-                                            @break
                                         @default
-                                            <span class="badge bg-secondary">{{ $payment->status }}</span>
+                                            <span class="badge bg-secondary">{{ strtoupper($payment->payment_status) }}</span>
                                     @endswitch
                                 </td>
                                 <td>
-                                    <code>{{ $payment->transaction_id }}</code>
+                                    <code>{{ $payment->payment_id }}</code>
                                 </td>
                             </tr>
                             @endforeach

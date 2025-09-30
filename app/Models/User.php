@@ -94,9 +94,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Payment::class);
     }
-    public function notifications()
-{
-    return $this->morphMany(DatabaseNotification::class, 'notifiable')->orderBy('created_at', 'desc');
-}
 
+    public function subscriptionPayments()
+    {
+        return $this->hasMany(SubscriptionPayment::class);
+    }
+
+    public function notifications()
+    {
+        return $this->morphMany(DatabaseNotification::class, 'notifiable')->orderBy('created_at', 'desc');
+    }
 }

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Twilio\Rest\Client;
+use Illuminate\Support\Facades\Log;
 
 class BlogController extends Controller
 {
@@ -120,6 +121,7 @@ class BlogController extends Controller
         }
 
         $title = $blog->title;
+        $blog->load('user');
         $author = $blog->user->name ?? 'Auteur inconnu';
 
         $blog->delete();
@@ -166,14 +168,23 @@ class BlogController extends Controller
     }
     private function sendSms($message, $to)
     {
-        $sid = env('TWILIO_SID');
-        $token = env('TWILIO_TOKEN');
-        $from = env('TWILIO_FROM');
+        try {
+            $sid = env('TWILIO_SID');
+            $token = env('TWILIO_TOKEN');
+            $from = env('TWILIO_FROM');
 
-        $client = new Client($sid, $token);
-        $client->messages->create($to, [
-            'from' => $from,
-            'body' => $message
-        ]);
+            if (!$sid || !$token || !$from) {
+                return;
+            }
+
+            $client = new Client($sid, $token);
+            $client->messages->create($to, [
+                'from' => $from,
+                'body' => $message
+            ]);
+        } catch (\Exception $e) {
+            // Log error but don't break the application
+            Log::error('SMS sending failed: ' . $e->getMessage());
+        }
     }
 }
