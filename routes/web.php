@@ -26,7 +26,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaypalController;
 
 use App\Http\Controllers\ReviewController;
-
+use App\Http\Controllers\NotificationController;
 
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
@@ -41,7 +41,8 @@ Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
 
 
 Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles');
-
+// routes/web.php
+Route::get('/articles/search', [BlogController::class, 'search']);
 Route::get('/article/{id}', [BlogController::class, 'show'])->name('articleDetail');
 //store routes
 Route::get('/stores', [StoreController::class, 'indexFront'])->name('stores');
@@ -74,6 +75,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/borrows/{livreId}', [BorrowController::class, 'store'])->name('borrows.store');
    Route::post('/borrows/{livreId}/pay', [BorrowController::class, 'payAndBorrow'])->name('borrows.pay');
     Route::get('/borrows/success', [BorrowController::class, 'success'])->name('borrows.success');
+// web.php
+Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.list');
+Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])->name('notifications.delete');
+Route::post('/notifications/clear', [NotificationController::class, 'clearAll'])->name('notifications.clear');
 
 });
 
@@ -84,6 +89,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/rates', [RateController::class, 'index'])->name('rates.index');
     Route::post('/livres/{id}/rate', [RateController::class, 'store'])->name('rates.store');
+//Route::post('/rates/{livre}', [RateController::class, 'store'])->name('rates.store')->middleware('auth');
 
     // Paiement des abonnements - accessible à tous les utilisateurs connectés
     Route::get('/payment/{subscription}', [\App\Http\Controllers\SubscriptionPaymentController::class, 'showPaymentForm'])->name('payment.form');
@@ -140,8 +146,10 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
             return view('BackOffice.utilisateur.listeUtilisateur', compact('users'));
         })->name('listeUtilisateur');
 
+       Route::get('/listeUtilisateur', [UsersController::class, 'index'])->name('listeUtilisateur');   
 
         Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
+        Route::get('/transactions', [App\Http\Controllers\PaypalController::class, 'transactions'])->name('transactions');
         
         // Subscription Management
         Route::resource('subscriptions', \App\Http\Controllers\SubscriptionController::class);
@@ -172,7 +180,6 @@ Route::get('/mes-livres', [LivreController::class, 'mesLivres'])->name('mesLivre
     Route::get('/livresf/{livre}', [LivreController::class, 'showf'])->name('livres.showf');
 
 });
-        Route::get('/transactions', [App\Http\Controllers\PaypalController::class, 'transactions'])->name('transactions');
 
 
 

@@ -39,7 +39,7 @@
                                              class="cover-img">
                                     </td>
                                     <td>{{ $payment->livre->titre }}</td>
-                                    <td>{{ $payment->livre->auteur }}</td>
+                                    <td>{{ $payment->livre->user ? $payment->livre->user->name : 'Auteur inconnu' }}</td>
                                     <td>{{ $payment->livre->prix ? $payment->livre->prix . ' DT' : 'Not specified' }}</td>
                                     <td>{{ $payment->created_at->format('d M Y') }}</td>
                                     <td>

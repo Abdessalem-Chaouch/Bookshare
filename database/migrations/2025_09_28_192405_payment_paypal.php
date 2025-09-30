@@ -17,7 +17,7 @@ return new class extends Migration
     $table->unsignedBigInteger('livre_id');
     $table->unsignedBigInteger('user_id');
     $table->string('product_name');
-    $table->integer('quantity');
+    $table->integer('quantity')->default(1);
     $table->decimal('amount', 10, 2); // prix unitaire
     $table->string('currency');
     $table->string('payer_name');

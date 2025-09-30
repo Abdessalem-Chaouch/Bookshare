@@ -72,7 +72,8 @@
 
 	@include("FrontOffice.Categories.CategoriesSection", ['categories' => $categories])
 	@include("FrontOffice.Subscriptions.SubscriptionsSection", ['subscriptions' => $subscriptions])
-	@include("FrontOffice.Livres.LivreContenu")
+	@include('FrontOffice.Livres.LivreContenu', ['livres' => $livres])
+
 	<section id="quotation" class="align-center pb-5 mb-5">
 		<div class="inner-content">
 			<h2 class="section-title divider">Quote of the day</h2>

@@ -4,20 +4,27 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Blog;
-use App\Models\Subscription;
+use App\Models\categoryBlog;
 use App\Models\Livre;
+use App\Models\Subscription;
 use Illuminate\Http\Request;
 
 class FrontOfficeController extends Controller
 {
-    public function accueil()
-    {
-        $categories = Category::all();
-        $blogs = Blog::latest()->take(3)->get();
-        $subscriptions = Subscription::where('is_active', true)->get();
-        $livres = Livre::with('categorie')->latest('date_ajout')->take(6)->get();
-        return view('FrontOffice.Accueil', compact('categories', 'blogs', 'subscriptions', 'livres'));
-    }
+public function accueil()
+{
+    $categoriesblogs = categoryBlog::all(); 
+    $categories = Category::all();
+    $blogs = Blog::latest()->take(3)->get();
+    $subscriptions = Subscription::where('is_active', true)->get();
+    
+    $livres = Livre::with('categorie', 'user')
+        ->latest('date_ajout')
+        ->get();
+
+    return view('FrontOffice.Accueil', compact('livres','categories', 'blogs', 'subscriptions','categoriesblogs'));
+}
+
 
     public function categories(Request $request)
     {
@@ -26,7 +33,7 @@ class FrontOfficeController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $searchType = $request->get('search_type', 'name');
-            
+
             if ($searchType == 'name') {
                 $query->where('name', 'LIKE', "%{$search}%");
             } else {

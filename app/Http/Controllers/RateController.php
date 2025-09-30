@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 use App\Models\Rate;
 use App\Models\Livre;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RateController extends Controller
 {
     // Afficher toutes les évaluations
     public function index()
     {
-        $rates = Rate::with(['user', 'livre'])->latest()->get();
+        $rates = Rate::with(relations: ['user', 'livre'])->latest()->get();
         return view('BackOffice.rate.index', compact('rates'));
     }
 
@@ -23,7 +24,7 @@ class RateController extends Controller
         ]);
 
         Rate::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::user()->id,
             'livre_id' => $livreId,
             'note' => $request->note,
             'commentaire' => $request->commentaire,

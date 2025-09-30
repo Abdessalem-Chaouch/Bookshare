@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class SubscriptionPayment extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'payment_id',
         'user_id',
@@ -18,7 +16,12 @@ class SubscriptionPayment extends Model
         'payer_name',
         'payer_email',
         'payment_status',
-        'payment_method',
+        'payment_method'
+    ];
+
+    protected $casts = [
+        'payment_data' => 'array',
+       'amount' => 'decimal:2'
     ];
 
     public function user()
@@ -30,4 +33,15 @@ class SubscriptionPayment extends Model
     {
         return $this->belongsTo(Subscription::class);
     }
+
+    public function isCompleted()
+    {
+        return $this->payment_status === 'completed';
+    }
+
+    public function isFailed()
+    {
+        return $this->payment_status === 'failed';
+    }
+  
 }

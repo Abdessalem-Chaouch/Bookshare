@@ -42,6 +42,9 @@
                     </tbody>
                 </table>
             </div>
+            <div class="mt-3">
+        {{ $borrows->links('pagination::bootstrap-5') }}
+    </div>
         </div>
     </div>
 </div>

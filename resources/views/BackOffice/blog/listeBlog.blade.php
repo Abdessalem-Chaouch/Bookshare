@@ -3,9 +3,9 @@
 
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="d-flex justify-content-between align-items-center py-3 mb-4">
-        <h4 class="fw-bold"><span class="text-muted fw-light">Tables /</span> Liste des Blogs</h4>
+        <h4 class="fw-bold"><span class="text-muted fw-light">Tables /</span> List of Blogs</h4>
         <a href="{{ route('AjouterBlog') }}" class="btn btn-primary">
-            <i class="bx bx-plus me-1"></i>Ajouter Blog
+            <i class="bx bx-plus me-1"></i>Add Blog
         </a>
     </div>
     @if(session('success'))
@@ -28,12 +28,12 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Titre</th>
-                        <th>Contenu</th>
-                        <th>Auteur</th>
-                        <th>Categorie</th>
+                        <th>Title</th>
+                        <th>Content</th>
+                        <th>Author</th>
+                        <th>Category</th>
                         <th>Image</th>
-                        <th>Créé le</th>
+                        <th>Created At</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -54,7 +54,7 @@
                                 @if(strlen($content) > $limit)
                                 <span class="short-text">{{ substr($content, 0, $limit) }}</span>
                                 <span class="full-text d-none">{{ $content }}</span>
-                                <a href="javascript:void(0)" class="toggle-text"> voir plus</a>
+                                <a href="javascript:void(0)" class="toggle-text"> see more</a>
                                 @else
                                 {{ $content }}
                                 @endif
@@ -87,13 +87,13 @@
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="{{ route('blogs.edit', $blog->id) }}">
-                                        <i class="bx bx-edit-alt me-1"></i> Modifier
+                                        <i class="bx bx-edit-alt me-1"></i> Edit
                                     </a>
                                     <form action="{{ route('blogs.delete', $blog->id) }}" method="POST" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button class="dropdown-item text-danger" onclick="return confirm('Voulez-vous vraiment supprimer ce blog ?')">
-                                            <i class="bx bx-trash me-1"></i> Supprimer
+                                            <i class="bx bx-trash me-1"></i> Delete
                                         </button>
                                     </form>
                                 </div>
@@ -107,9 +107,9 @@
                         <td colspan="5" class="text-center py-4">
                             <div class="text-muted">
                                 <i class="bx bx-category bx-lg mb-2"></i>
-                                <p>Aucun blog trouvé</p>
+                                <p>No blog found</p>
                                 <a href="{{ route('AjouterBlog') }}" class="btn btn-primary btn-sm">
-                                    Ajouter le premier blog
+                                   Add the first blog
                                 </a>
                             </div>
                         </td>

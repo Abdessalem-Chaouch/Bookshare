@@ -34,7 +34,7 @@ class StoreController extends Controller
             'owner_name' => 'nullable|string|max:255',
             'location'   => 'required|string|max:255',
             'contact'    => 'nullable|string|max:255',
-            'store_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'store_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20048',
         ]);
 
         //  Map form fields directly to DB columns
@@ -78,26 +78,37 @@ class StoreController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        $request->validate([
-            'store_name' => 'required|string|max:255',
-            'owner_name' => 'nullable|string|max:255',
-            'location'   => 'required|string|max:255',
-            'contact'    => 'nullable|string|max:255',
-            'store_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+  public function update(Request $request, string $id)
+{
+    $request->validate([
+        'store_name' => 'required|string|max:255',
+        'owner_name' => 'nullable|string|max:255',
+        'location'   => 'required|string|max:255',
+        'contact'    => 'nullable|string|max:255',
+        'store_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20048',
+    ]);
 
-        $data = $request->only(['store_name', 'owner_name', 'location', 'contact']);
-        if ($request->hasFile('store_image')) {
-            $data['store_image'] = $request->file('store_image')->store('stores', 'public');
+    $store = Store::findOrFail($id);
+
+    // Récupérer les champs à mettre à jour
+    $data = $request->only(['store_name', 'owner_name', 'location', 'contact']);
+
+    // Si une nouvelle image est uploadée
+    if ($request->hasFile('store_image')) {
+        // Supprimer l'ancienne image si elle existe
+        if ($store->store_image && \Storage::disk('public')->exists($store->store_image)) {
+            \Storage::disk('public')->delete($store->store_image);
         }
 
-        $store = Store::findOrFail($id);
-        $store->update($request->all());
-
-        return redirect()->route('listeMagasin')->with('success', 'Item mis à jour avec succès !');
+        // Stocker la nouvelle image
+        $data['store_image'] = $request->file('store_image')->store('stores', 'public');
     }
+
+    $store->update($data);
+
+    return redirect()->route('listeMagasin')->with('success', 'Item mis à jour avec succès !');
+}
+
 
     /**
      * Remove the specified resource from storage.

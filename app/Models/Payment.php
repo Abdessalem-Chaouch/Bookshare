@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 class Payment extends Model
 {
     use HasFactory;
@@ -22,13 +23,17 @@ class Payment extends Model
         'payment_method',
     ];
 
-
-
-     public function livre()
+    /**
+     * Relation avec le livre
+     */
+    public function livre()
     {
         return $this->belongsTo(Livre::class, 'livre_id');
     }
 
+    /**
+     * Relation avec l’utilisateur
+     */
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

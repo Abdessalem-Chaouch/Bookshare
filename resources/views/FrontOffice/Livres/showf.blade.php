@@ -29,7 +29,7 @@
                         <div class="product-entry d-flex align-items-center justify-content-between">
                             <h2 class="section-title divider">{{ $livre->titre }}</h2>
 
-                            @auth
+                          @auth
                             <!-- Rate Button -->
                             <button type="button" class="btn btn-rate" data-bs-toggle="modal" data-bs-target="#rateModal">
                                 ⭐ Rate
@@ -38,19 +38,19 @@
                         </div>
 
                         <div class="products-content mt-3">
-                            <p><strong>Author:</strong> {{ $livre->auteur->name ?? $livre->auteur ?? 'Unknown' }}</p>
+                           <p><strong>Author:</strong> {{ $livre->user ? $livre->user->name : 'Auteur inconnu' }}</p>
+
                             <p><strong>Category:</strong> {{ $livre->categorie?->name ?? '—' }}</p>
                             <p><strong>Description:</strong> {{ $livre->description ?? 'No description available.' }}</p>
                             <p><strong>ISBN:</strong> {{ $livre->isbn ?? '—' }}</p>
                             <p><strong>Price:</strong> ${{ number_format($livre->prix, 2) }}</p>
                             <p><strong>Stock:</strong> {{ $livre->stock }}</p>
                             <p><strong>Availability:</strong>
-                                @if($livre->disponibilite == 'disponible')
-                                    <span class="badge bg-success">Available</span>
-                                @elseif($livre->disponibilite == 'emprunte')
-                                    <span class="badge bg-warning">Borrowed</span>
+                                @if($livre->stock == '0'|| $livre->stock == 0 )
+                                    <span class="badge bg-warning">Unavailable</span>
                                 @else
-                                    <span class="badge bg-secondary">Reserved</span>
+                                    <span class="badge bg-success">Available</span>
+                               
                                 @endif
                             </p>
                             <p><strong>Date Added:</strong> {{ $livre->date_ajout ?? '—' }}</p>
@@ -111,15 +111,15 @@
     </div>
 
     {{-- Display all ratings --}}
-    <div class="mt-3">
-       <strong>Ratings & Comments : </strong>
-         <!-- Show Reviews Button -->
-            @if($livre->rates->count() > 0)
-            <button type="button" class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#reviewsModal">
-                SHOW REVIEWS
-            </button>
-            @endif
-    </div>
+<div class="mt-3">
+   <strong>Ratings & Comments : </strong>
+     <!-- Show Reviews Button -->
+        @if($livre->rates->count() > 0)
+        <button type="button" class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#reviewsModal">
+            SHOW REVIEWS
+        </button>
+        @endif
+</div>
 
 
 
@@ -276,12 +276,6 @@
 
 
 <style>
-.single-image {
-    width: 100%;
-    height: 400px;
-    object-fit: cover;
-    display: block;
-}
 .products-content p {
     margin-bottom: 8px;
 }
@@ -319,13 +313,6 @@
 .rating-stars label:hover,
 .rating-stars label:hover ~ label {
     color: #ffb400; /* couleur des étoiles sélectionnées */
-}
-.action-buttons {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    display: flex;
-    gap: 10px;
 }
 </style>
 @endsection
