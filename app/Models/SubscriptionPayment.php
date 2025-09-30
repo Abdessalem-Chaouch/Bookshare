@@ -4,16 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-class Payment extends Model
+
+class SubscriptionPayment extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'payment_id',
-        'livre_id',
         'user_id',
-        'product_name',
-        'quantity',
+        'subscription_id',
         'amount',
         'currency',
         'payer_name',
@@ -22,15 +21,13 @@ class Payment extends Model
         'payment_method',
     ];
 
-
-
-     public function livre()
-    {
-        return $this->belongsTo(Livre::class, 'livre_id');
-    }
-
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
+    }
+
+    public function subscription()
+    {
+        return $this->belongsTo(Subscription::class);
     }
 }

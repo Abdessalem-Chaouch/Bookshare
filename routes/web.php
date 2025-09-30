@@ -86,9 +86,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/livres/{id}/rate', [RateController::class, 'store'])->name('rates.store');
 
     // Paiement des abonnements - accessible à tous les utilisateurs connectés
-    Route::get('/payment/{subscription}', [\App\Http\Controllers\PaymentController::class, 'showPaymentForm'])->name('payment.form');
-    Route::post('/payment/{subscription}', [\App\Http\Controllers\PaymentController::class, 'processPayment'])->name('payment.process');
-    Route::get('/payment-history', [\App\Http\Controllers\PaymentController::class, 'history'])->name('payment.history');
+    Route::get('/payment/{subscription}', [\App\Http\Controllers\SubscriptionPaymentController::class, 'showPaymentForm'])->name('payment.form');
+    Route::post('/payment/{subscription}', [\App\Http\Controllers\SubscriptionPaymentController::class, 'processPayment'])->name('payment.process');
+    Route::get('/payment-history', [\App\Http\Controllers\SubscriptionPaymentController::class, 'history'])->name('payment.history');
 });
 // ========================
 // 🔒 Routes du Back Office
