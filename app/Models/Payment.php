@@ -14,6 +14,7 @@ class Payment extends Model
         'livre_id',
         'user_id',
         'product_name',
+        'quantity',
         'amount',
         'currency',
         'payer_name',

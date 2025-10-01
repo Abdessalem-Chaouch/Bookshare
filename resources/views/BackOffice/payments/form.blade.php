@@ -2,7 +2,9 @@
 @section('content')
 <link href="{{ asset('css/payment.css') }}" rel="stylesheet">
 
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12">
     <h4 class="fw-bold py-3 mb-4">Subscription Payment</h4>
 
     @if(session('error'))
@@ -121,6 +123,8 @@
         </div>
     </div>
 </div>
+        </div>
+    </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -159,4 +163,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-@endsection
+</div>
+
+<script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
+<script src="{{ asset('assets/vendor/libs/popper/popper.js') }}"></script>
+<script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script>
+</body>
+</html>
