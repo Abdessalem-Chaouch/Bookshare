@@ -12,15 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('livres', function (Blueprint $table) {
-            // Supprimer la colonne auteur
-            $table->dropColumn('auteur');
+            // Supprimer la colonne 'auteur' seulement si elle existe
+            if (Schema::hasColumn('livres', 'auteur')) {
+                $table->dropColumn('auteur');
+            }
 
-            // Ajouter user_id (nullable pour éviter conflit avec données existantes)
-            $table->foreignId('user_id')
-                  ->nullable()           // ← important
-                  ->after('categorie_id')
-                  ->constrained('users')
-                  ->cascadeOnDelete();
+            // Ajouter 'user_id' seulement si elle n'existe pas
+            if (!Schema::hasColumn('livres', 'user_id')) {
+                $table->foreignId('user_id')
+                      ->nullable() // important pour éviter conflits avec données existantes
+                      ->after('categorie_id')
+                      ->constrained('users')
+                      ->cascadeOnDelete();
+            }
         });
     }
 
@@ -30,12 +34,16 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('livres', function (Blueprint $table) {
-            // Supprimer la clé étrangère et la colonne user_id
-            $table->dropForeign(['user_id']);
-            $table->dropColumn('user_id');
+            // Supprimer la colonne 'user_id' et sa clé étrangère seulement si elle existe
+            if (Schema::hasColumn('livres', 'user_id')) {
+                $table->dropForeign(['user_id']);
+                $table->dropColumn('user_id');
+            }
 
-            // Remettre auteur (nullable comme avant)
-            $table->string('auteur')->nullable();
+            // Remettre 'auteur' seulement si elle n'existe pas
+            if (!Schema::hasColumn('livres', 'auteur')) {
+                $table->string('auteur')->nullable();
+            }
         });
     }
 };

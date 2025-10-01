@@ -1,4 +1,4 @@
-@extends('baseB')
+@extends('baseF')
 @section('content')
 <link href="{{ asset('css/payment.css') }}" rel="stylesheet">
 
