@@ -12,8 +12,22 @@
                         <h5 class="mb-0">New Category</h5>
                     </div>
                     <div class="card-body">
+
+                        <!-- Affichage global des erreurs -->
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         <form action="{{ route('categories.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
+                            
+                            <!-- Name -->
                             <div class="row mb-3">
                                 <label class="col-sm-2 col-form-label" for="name">Name</label>
                                 <div class="col-sm-10">
@@ -28,6 +42,7 @@
                                 </div>
                             </div>
 
+                            <!-- Description -->
                             <div class="row mb-3">
                                 <label class="col-sm-2 form-label" for="description">Description</label>
                                 <div class="col-sm-10">
@@ -42,13 +57,15 @@
                                 </div>
                             </div>
 
+                            <!-- Image -->
                             <div class="row mb-3">
                                 <label class="col-sm-2 col-form-label" for="image">Image</label>
                                 <div class="col-sm-10">
                                     <div class="input-group">
                                         <input type="file" class="form-control @error('image') is-invalid @enderror" 
                                                id="image" name="image" accept="image/*" style="display: none;">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('image').click()">
+                                        <button type="button" class="btn btn-outline-secondary" 
+                                                onclick="document.getElementById('image').click()">
                                             Choose file
                                         </button>
                                         <span class="form-control" id="file-name">No file chosen</span>
@@ -59,6 +76,7 @@
                                 </div>
                             </div>
 
+                            <!-- Buttons -->
                             <div class="row justify-content-end">
                                 <div class="col-sm-10">
                                     <button type="submit" class="btn btn-primary">Add</button>
@@ -74,9 +92,11 @@
     <div class="content-backdrop fade"></div>
 </div>
 
+<!-- Script pour afficher le nom du fichier choisi -->
 <script>
 document.getElementById('image').addEventListener('change', function() {
-    document.getElementById('file-name').textContent = this.files.length > 0 ? this.files[0].name : 'No file chosen';
+    const fileName = this.files.length > 0 ? this.files[0].name : 'No file chosen';
+    document.getElementById('file-name').textContent = fileName;
 });
 </script>
 
