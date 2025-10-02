@@ -73,23 +73,10 @@
 <script>
 // Force dropdown functionality
 document.addEventListener('DOMContentLoaded', function() {
-    const dropdownToggle = document.getElementById('profileDropdown');
-    if (dropdownToggle) {
-        dropdownToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            const dropdownMenu = this.nextElementSibling;
-            if (dropdownMenu) {
-                dropdownMenu.classList.toggle('show');
-            }
-        });
-    }
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-        const dropdown = document.querySelector('.dropdown-menu.show');
-        if (dropdown && !e.target.closest('.dropdown')) {
-            dropdown.classList.remove('show');
-        }
+    // Initialize all dropdowns
+    const dropdowns = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+    dropdowns.forEach(function(dropdown) {
+        new bootstrap.Dropdown(dropdown);
     });
 });
 </script>

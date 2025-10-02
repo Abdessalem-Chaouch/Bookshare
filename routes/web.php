@@ -96,6 +96,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/payment/{subscription}', [\App\Http\Controllers\SubscriptionPaymentController::class, 'processPayment'])->name('payment.process');
     Route::get('/payment-history', [\App\Http\Controllers\SubscriptionPaymentController::class, 'history'])->name('payment.history');
 });
+
+// Webhook pour les paiements
+Route::post('/webhook/payment', [\App\Http\Controllers\SubscriptionPaymentController::class, 'webhook'])->name('payment.webhook');
+
 // ========================
 // 🔒 Routes du Back Office
 // ========================
