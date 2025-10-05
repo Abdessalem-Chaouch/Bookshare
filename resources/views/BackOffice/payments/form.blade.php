@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -108,6 +109,16 @@
 <body>
 <div class="payment-container">
     <h2 class="text-center mb-4">Subscription Payment</h2>
+
+@extends('baseF')
+@section('content')
+<link href="{{ asset('css/payment.css') }}" rel="stylesheet">
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12">
+    <h4 class="fw-bold py-3 mb-4">Subscription Payment</h4>
+
 
     @if(session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>

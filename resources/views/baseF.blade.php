@@ -12,13 +12,12 @@
     <meta name="keywords" content="">
     <meta name="description" content="">
     <link rel="icon" type="image/png" href="../assets/img/libroLogo.png">
-    <!-- Bootstrap CSS -->
-    <!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- ✅ Bootstrap (une seule version) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('css/normalize.css') }}">
@@ -27,45 +26,36 @@
     <link rel="stylesheet" href="{{ asset('style.css') }}">
 </head>
 
-
 <body data-bs-spy="scroll" data-bs-target="#header" tabindex="0">
     @include("FrontOffice.navbar")
 
-        @yield('content')
+    @yield('content')
 
     @if(session('success'))
-    <div class="alert alert-success text-center" 
+        <div class="alert alert-success text-center"
              style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 250px;">
-    
-        {{ session('success') }}
-    </div>
-@endif
+            {{ session('success') }}
+        </div>
+    @endif
 
-@if(session('error'))
-    <div class="alert alert-danger text-center"
+    @if(session('error'))
+        <div class="alert alert-danger text-center"
              style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 250px;">
-    >
-        {{ session('error') }}
-    </div>
-@endif
-
-
-
+            {{ session('error') }}
+        </div>
+    @endif
 
     @include("FrontOffice.footer")
 
     <!-- jQuery -->
     <script src="{{ asset('js/jquery-1.11.0.min.js') }}"></script>
 
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
-        crossorigin="anonymous"></script>
+    <!-- ✅ Bootstrap JS Bundle (une seule version) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Template JS -->
     <script src="{{ asset('js/plugins.js') }}"></script>
-    <script src="{{ asset('js/script.js') }}"></script>
-
+    <script src="{{ asset('js/scrip
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -80,7 +70,28 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownToggle = document.getElementById('profileDropdown');
+            if (dropdownToggle) {
+                dropdownToggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const dropdownMenu = this.nextElementSibling;
+                    if (dropdownMenu) {
+                        dropdownMenu.classList.toggle('show');
+                    }
+                });
+            }
+
+            document.addEventListener('click', function (e) {
+                const dropdown = document.querySelector('.dropdown-menu.show');
+                if (dropdown && !e.target.closest('.dropdown')) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        });
+    </script>
+
 
 </body>
-
 </html>
