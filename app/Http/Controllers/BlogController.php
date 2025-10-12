@@ -18,9 +18,15 @@ class BlogController extends Controller
 {
     public function index()
     {
-        $blogs = Blog::with(['category', 'likes', 'comments'])->latest()->get();
+        // Avec withCount pour comments et likes
+        $blogs = Blog::with(['category', 'likes'])
+            ->withCount(['comments', 'likes'])
+            ->latest()
+            ->get();
+
         return view('BackOffice.blog.listeBlog', compact('blogs'));
     }
+
 
     public function indexFront(Request $request)
     {
@@ -195,5 +201,15 @@ class BlogController extends Controller
             // Log error but don't break the application
             Log::error('SMS sending failed: ' . $e->getMessage());
         }
+    }
+    public function showComments($id)
+    {
+        $blog = Blog::with('comments.user')->findOrFail($id);
+        return view('BackOffice.blog.comments', compact('blog'));
+    }
+    public function show1($id)
+    {
+        $blog = Blog::with(['comments.user', 'likes.user', 'category', 'user'])->findOrFail($id);
+        return view('BackOffice.blog.detail', compact('blog'));
     }
 }

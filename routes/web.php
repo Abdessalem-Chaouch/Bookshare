@@ -130,6 +130,9 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         Route::get('/EditBlog/{blog}', [BlogController::class, 'edit'])->name('blogs.edit');
         Route::put('/EditBlog/{blog}', [BlogController::class, 'update'])->name('blogs.update');
         Route::delete('/DeleteBlog/{blog}', [BlogController::class, 'destroy'])->name('blogs.delete');
+        Route::get('/blogs/{id}/comments', [BlogController::class, 'showComments'])->name('blogs.comments');
+        Route::get('/blogs/{id}', [BlogController::class, 'show1'])->name('blogs.show1');
+
 
         // Magasin Management
         Route::get('/AjouterMagasin', fn() => view('BackOffice.magasin.ajouterMagasin'))->name('AjouterMagasin');
