@@ -19,6 +19,7 @@ Version: 1.1
   --header-height: 160px;
   --header-height-min: 80px;
 }
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 /* on mobile devices below 600px
  */

@@ -23,7 +23,7 @@
                             <i class="icon icon-clipboard"></i>
                             <span>Cart</span>
                             <span id="cart-count" class="cart-badge">
-                                {{ \App\Models\Cart::where('utilisateur_id', Auth::id())->sum('quantite') }}
+                                {{ \App\Models\Cart::where('user_id', Auth::id())->sum('quantite') }}
                             </span>
                         </a>
 
@@ -196,6 +196,11 @@
                                         <li>
                                             <a class="dropdown-item" href="{{ route('borrows') }}">
                                                 <i class="bi bi-book"></i> My Borrows
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('borrows') }}">
+                                                <i class="bi bi-book"></i> My Purchases
                                             </a>
                                         </li>
                                         <li><hr class="dropdown-divider"></li>

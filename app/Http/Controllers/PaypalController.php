@@ -10,6 +10,8 @@ use App\Models\Livre;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator; 
+use Carbon\Carbon;
+
 class PaypalController extends Controller
 {
 public function transactions(Request $request)
@@ -101,7 +103,6 @@ public function success(Request $request)
                 'livre_id'       => $item['livre_id'],
                 'user_id'        => $userId,
                 'product_name'   => $item['product_name'],
-                'quantity'       => 1, // quantité par défaut
                 'amount'         => $item['amount'] , // prix unitaire
                 'currency'       => $response['purchase_units'][0]['payments']['captures'][0]['amount']['currency_code'],
                 'payer_name'     => $response['payer']['name']['given_name'],
@@ -133,19 +134,68 @@ public function cancel()
     return view('FrontOffice.Payments.cancel');
 }
 
+
+
 public function myBooks()
 {
     $userId = auth()->id();
 
-    // Fetch all payments with their related book
+    // Get payments with related livre, only keep those with a livre
     $payments = \App\Models\Payment::where('user_id', $userId)
         ->with('livre')
-        ->get();
+        ->get()
+        ->filter(fn($p) => $p->livre !== null)
+        ->unique(fn($p) => $p->livre->id);
+
+    // Prepare groups
+    $recentBooks = collect();
+    $lastWeekBooks = collect();
+    $lastMonthBooks = collect();
+    $notReadYet = collect();
+
+    foreach ($payments as $payment) {
+        $lastReadRaw = $payment->livre->last_read;
+        if (!$lastReadRaw) {
+            $notReadYet->push($payment);
+            continue;
+        }
+
+        $lastRead = Carbon::parse($lastReadRaw);
+        $diffDays = $lastRead->diffInDays(now());
+
+        if ($diffDays <= 7) {
+            $recentBooks->push($payment);
+        } elseif ($diffDays <= 30) {
+            $lastWeekBooks->push($payment);
+        } else {
+            $lastMonthBooks->push($payment);
+        }
+    }
+
+    // Sort groups by last_read desc when relevant (and by created_at fallback)
+    $sortByLastReadDesc = function($collection) {
+        return $collection->sortByDesc(function($p){
+            return $p->livre->last_read ? strtotime($p->livre->last_read) : strtotime($p->created_at);
+        })->values();
+    };
+
+    $recentBooks = $sortByLastReadDesc($recentBooks);
+    $lastWeekBooks = $sortByLastReadDesc($lastWeekBooks);
+    $lastMonthBooks = $sortByLastReadDesc($lastMonthBooks);
+
+    // notReadYet: sort by purchase date (created_at) desc
+    $notReadYet = $notReadYet->sortByDesc(fn($p) => $p->created_at)->values();
 
     return view('FrontOffice.Livres.myBooks', [
-        'payments' => $payments
+        'recentBooks' => $recentBooks,
+        'lastWeekBooks' => $lastWeekBooks,
+        'lastMonthBooks' => $lastMonthBooks,
+        'notReadYet' => $notReadYet,
     ]);
 }
+
+
+
 public function livre()
 {
   return $this->belongsTo(\App\Models\Livre::class, 'livre_id');

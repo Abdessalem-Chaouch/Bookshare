@@ -8,63 +8,38 @@ use Illuminate\Support\Facades\Auth;
 
 class BookmarkController extends Controller
 {
-    public function save(Request $request)
+    public function saveBookmark(Request $request)
     {
         $data = $request->validate([
             'book_url' => 'required|string',
-            'page' => 'required|integer',
+            'page'     => 'required|integer',
             'scroll_y' => 'nullable|integer',
+            'scroll_x' => 'nullable|integer',
         ]);
 
         $bookmark = Bookmark::updateOrCreate(
             ['user_id' => Auth::id(), 'book_url' => $data['book_url']],
-            ['page' => $data['page'], 'scroll_y' => $data['scroll_y'] ?? 0]
+            [
+                'page'     => $data['page'],
+                'scroll_y' => $data['scroll_y'] ?? 0,
+                'scroll_x' => $data['scroll_x'] ?? 0,
+            ]
         );
 
-        return response()->json(['success' => true, 'bookmark' => $bookmark]);
+        return response()->json([
+            'success'  => true,
+            'bookmark' => $bookmark
+        ]);
     }
 
-public function load(Request $request)
-{
-    $bookUrl = $request->query('book_url');
+    public function load(Request $request)
+    {
+        $bookUrl = $request->query('book_url');
 
-    $bookmark = Bookmark::where('user_id', Auth::id())
-        ->where('book_url', $bookUrl)
-        ->first();
+        $bookmark = Bookmark::where('user_id', Auth::id())
+            ->where('book_url', $bookUrl)
+            ->first();
 
-    return response()->json($bookmark);
-}
-
-public function saveLine(Request $request)
-{
-    $userId = auth()->id();
-    if (!$userId) {
-        return response()->json(['error' => 'User not authenticated'], 401);
+        return response()->json($bookmark);
     }
-
-    $data = $request->validate([
-        'book_url'  => 'required|string',
-        'scroll_x'  => 'nullable|integer',
-        'scroll_y'  => 'nullable|integer',
-    ]);
-
-    $bookmark = Bookmark::updateOrCreate(
-        [
-            'user_id' => $userId,
-            'book_url' => $data['book_url'],
-        ],
-        [
-            // ne pas écraser si null
-            'scroll_x' => $data['scroll_x'] ?? 0,
-            'scroll_y' => $data['scroll_y'] ?? 0,
-        ]
-    );
-
-    return response()->json([
-        'success' => true,
-        'bookmark' => $bookmark
-    ]);
-}
-
-
 }

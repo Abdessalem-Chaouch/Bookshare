@@ -63,4 +63,10 @@ class Livre extends Model
     {
         return $this->hasMany(Borrow::class);
     }
+
+    public function notes()
+{
+    return $this->hasMany(Note::class);
+}
+
 }

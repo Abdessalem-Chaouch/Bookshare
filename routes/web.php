@@ -28,7 +28,7 @@ use App\Http\Controllers\PaypalController;
 
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
-
+ use App\Http\Controllers\NoteController;
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
@@ -72,14 +72,34 @@ Route::middleware(['auth'])->group(function () {
 
 });
 Route::middleware('auth')->group(function () {
-    Route::post('/bookmark/save', [BookmarkController::class, 'save']);
-    Route::post('/bookmark/save-line', [BookmarkController::class, 'saveLine']);
-
-Route::get('/bookmark/load', [BookmarkController::class, 'load'])->name('bookmark.load');
+    Route::post('/bookmark/save', [BookmarkController::class, 'saveBookmark']);
+    Route::get('/bookmark/load', [BookmarkController::class, 'load'])->name('bookmark.load');
 Route::get('/livres/{livre}/reader', [LivreController::class, 'showReader'])->name('livres.reader');
+Route::post('/livres/{id}/update-read-time', [LivreController::class, 'updateReadTime'])->name('livres.updateReadTime');
+Route::post('/livres/{id}/reset-read-time', [LivreController::class, 'resetReadTime']);
+Route::get('/notes-popup', function () {
+    return view('FrontOffice.Livres.notes-popup'); // page blade avec juste le contenu du popup
+});
+Route::get('/reading-popup', function () {
+    return view('FrontOffice.Livres.progress'); // page blade avec juste le contenu du popup
+});
+Route::get('/search-popup', function () {
+    return view('FrontOffice.Livres.search'); // page blade avec juste le contenu du popup
+});
+Route::get('/translate-popup', function () {
+    return view('FrontOffice.Livres.translate'); // page blade avec juste le contenu du popup
+});
+});
+Route::middleware('auth')->group(function () {
+   
+Route::get('/books/{book}/notes', [NoteController::class, 'getBookNotes']);
+Route::post('/save-note', [NoteController::class, 'store']);
+Route::get('/get-note', [NoteController::class, 'getNote']);
 
+ 
 });
 
+Route::post('/speak', [LivreController::class, 'speak']);
 Route::middleware(['auth'])->group(function () {
     Route::get('/borrows', [BorrowController::class, 'index'])->name('borrows');
     Route::post('/borrows/{livreId}', [BorrowController::class, 'store'])->name('borrows.store');
