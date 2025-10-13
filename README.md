@@ -28,7 +28,7 @@
 ## ⚙ Installation
 
 1. Clone the repository:  
-git clone https://github.com/Slouumaa/Bookshare.git
+git clone https://github.com/Abdessalem-Chaouch/Bookshare.git
 cd LibroLink
 
 2. Install dependencies:
@@ -61,7 +61,7 @@ php artisan serve
 - [Yosr Charek](https://github.com/YOSRcharek)
 - [Doua Baghdadi](https://github.com/Douabaghdadi)
 - [Aymen Khalifa](https://github.com/aymen-khelifa)
-- [Abdessalem Chaouch](https://github.com/Slouumaa)
+- [Abdessalem Chaouch](https://github.com/Abdessalem-Chaouch)
 
 ## 👨‍💻 Coach
 - [Ghada Ben Khalifa](https://github.com/BenKhalifaGHADA)
