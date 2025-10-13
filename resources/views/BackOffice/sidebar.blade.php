@@ -203,6 +203,20 @@
                 <div data-i18n="Account Settings">Subscriptions</div>
             </a>
         </li>
+        
+        <li class="menu-item {{ request()->routeIs('admin.author-subscriptions') ? 'active' : '' }}">
+            <a href="{{ route('admin.author-subscriptions') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user-check"></i>
+                <div data-i18n="Account Settings">Author Subscriptions</div>
+            </a>
+        </li>
+        
+        <li class="menu-item {{ request()->routeIs('admin.author-transactions') ? 'active' : '' }}">
+            <a href="{{ route('admin.author-transactions') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-receipt"></i>
+                <div data-i18n="Account Settings">Author Transactions</div>
+            </a>
+        </li>
 
         @endif
 

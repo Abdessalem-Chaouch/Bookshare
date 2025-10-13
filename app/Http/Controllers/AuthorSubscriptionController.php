@@ -17,6 +17,15 @@ class AuthorSubscriptionController extends Controller
         return view('BackOffice.author-subscriptions.index', compact('subscriptions', 'currentSubscription'));
     }
 
+    public function adminIndex()
+    {
+        $authorSubscriptions = AuthorSubscription::with(['user', 'subscription'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('BackOffice.author-subscriptions.admin-index', compact('authorSubscriptions'));
+    }
+
     public function subscribe(Request $request, Subscription $subscription)
     {
         $user = auth()->user();
@@ -38,5 +47,17 @@ class AuthorSubscriptionController extends Controller
         ]);
 
         return redirect()->route('author.subscriptions')->with('success', 'Abonnement activé avec succès!');
+    }
+
+    public function transactions()
+    {
+        $transactions = \App\Models\SubscriptionPayment::with(['user', 'subscription'])
+            ->whereHas('user', function($query) {
+                $query->where('role', 'auteur');
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('BackOffice.author-subscriptions.transactions', compact('transactions'));
     }
 }

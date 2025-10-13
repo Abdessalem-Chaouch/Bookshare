@@ -157,6 +157,10 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         
         // Subscription Management
         Route::resource('subscriptions', \App\Http\Controllers\SubscriptionController::class);
+        
+        // Author Subscriptions Management
+        Route::get('/admin/author-subscriptions', [\App\Http\Controllers\AuthorSubscriptionController::class, 'adminIndex'])->name('admin.author-subscriptions');
+        Route::get('/admin/author-transactions', [\App\Http\Controllers\AuthorSubscriptionController::class, 'transactions'])->name('admin.author-transactions');
 
     });
 
