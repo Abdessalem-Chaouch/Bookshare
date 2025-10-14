@@ -119,7 +119,7 @@ public function success(Request $request)
         }
 
         // 🔽 Vider le panier de l’utilisateur
-        \App\Models\Cart::where('user_id', $userId)->delete();
+        \App\Models\Cart::where('utilisateur_id', $userId)->delete();
 
         session()->forget('items');
         return view('FrontOffice.Payments.success');

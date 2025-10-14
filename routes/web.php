@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
 });
 Route::middleware(['auth'])->group(function () {
     Route::get('/my-books', [PaypalController::class, 'myBooks'])->name('myBooks');
+    Route::get('/recommendation', [\App\Http\Controllers\RecommendationController::class, 'getSubscriptionRecommendation'])->name('recommendation');
 });
 
 
@@ -161,7 +162,11 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         
         // Author Subscriptions Management
         Route::get('/admin/author-subscriptions', [\App\Http\Controllers\AuthorSubscriptionController::class, 'adminIndex'])->name('admin.author-subscriptions');
+        Route::delete('/admin/author-subscriptions/{id}', [\App\Http\Controllers\AuthorSubscriptionController::class, 'destroy'])->name('admin.author-subscriptions.destroy');
         Route::get('/admin/author-transactions', [\App\Http\Controllers\AuthorSubscriptionController::class, 'transactions'])->name('admin.author-transactions');
+        Route::post('/admin/author-subscriptions/refresh-stats', [\App\Http\Controllers\AuthorSubscriptionController::class, 'refreshStats'])->name('admin.author-subscriptions.refresh-stats');
+        Route::get('/admin/author-subscriptions/ai-analysis', [\App\Http\Controllers\AuthorSubscriptionController::class, 'aiAnalysis'])->name('admin.author-subscriptions.ai-analysis');
+
 
     });
 
@@ -176,6 +181,8 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
 
         // Abonnements Auteur
         Route::get('/mes-abonnements', [\App\Http\Controllers\AuthorSubscriptionController::class, 'index'])->name('author.subscriptions');
+        Route::post('/mes-abonnements/change', [\App\Http\Controllers\AuthorSubscriptionController::class, 'changeSubscription'])->name('author.subscriptions.change');
+        Route::post('/mes-abonnements/unsubscribe', [\App\Http\Controllers\AuthorSubscriptionController::class, 'unsubscribe'])->name('author.subscriptions.unsubscribe');
 
 
     });
@@ -195,10 +202,9 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
 
     Route::middleware(['role:admin,auteur'])->group(function () {
 
-        // Livre Management (avec vérification d'abonnement pour les auteurs)
-        Route::middleware(['App\Http\Middleware\CheckActiveSubscription'])->group(function () {
-            Route::get('/AjouterLivre', fn() => view('BackOffice.livre.ajouterLivre'))->name('AjouterLivre');
-        });
+        // Livre Management
+        Route::get('/AjouterLivre', [LivreController::class, 'create'])->name('AjouterLivre');
+        Route::post('/livres', [LivreController::class, 'store'])->name('livres.store');
         Route::get('/listeLivre', fn() => view('BackOffice.livre.listeLivre'))->name('listeLivre');
 
         // Livre Management

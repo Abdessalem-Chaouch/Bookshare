@@ -73,6 +73,8 @@ const totalSlides = {{ count($subscriptions) }};
 const slidesPerView = 3;
 const maxSlide = Math.max(0, totalSlides - slidesPerView);
 
+
+
 function slideSubscriptions(direction) {
     const track = document.getElementById('subscriptionTrack');
     

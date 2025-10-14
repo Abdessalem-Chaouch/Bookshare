@@ -78,11 +78,19 @@
                             position: absolute;
                             top: -5px;
                             right: -5px;
-                            background: #9c9259; /* couleur primaire de ton projet */
+                            background: #9c9259;
                             color: #fff;
                             border-radius: 50%;
                             padding: 2px 6px;
                             font-size: 0.75rem;
+                        }
+                        .dropdown-menu.show {
+                            display: block !important;
+                            position: absolute !important;
+                            z-index: 1000 !important;
+                        }
+                        .dropdown {
+                            position: relative !important;
                         }
                         </style>
 

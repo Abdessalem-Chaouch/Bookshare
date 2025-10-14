@@ -61,36 +61,33 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Force dropdown functionality
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all dropdowns
-    const dropdowns = document.querySelectorAll('[data-bs-toggle="dropdown"]');
-    dropdowns.forEach(function(dropdown) {
-        new bootstrap.Dropdown(dropdown);
+    // Fix dropdown pour tous les profils
+    const dropdowns = ['profileDropdownAdmin', 'profileDropdownAuteur', 'profileDropdownUser'];
+    
+    dropdowns.forEach(id => {
+        const toggle = document.getElementById(id);
+        if (toggle) {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                const menu = this.nextElementSibling;
+                if (menu) {
+                    menu.classList.toggle('show');
+                }
+            });
+        }
+    });
+    
+    // Fermer dropdown en cliquant ailleurs
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+            document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
     });
 });
 </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const dropdownToggle = document.getElementById('profileDropdown');
-            if (dropdownToggle) {
-                dropdownToggle.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const dropdownMenu = this.nextElementSibling;
-                    if (dropdownMenu) {
-                        dropdownMenu.classList.toggle('show');
-                    }
-                });
-            }
-
-            document.addEventListener('click', function (e) {
-                const dropdown = document.querySelector('.dropdown-menu.show');
-                if (dropdown && !e.target.closest('.dropdown')) {
-                    dropdown.classList.remove('show');
-                }
-            });
-        });
-    </script>
 
 
 </body>

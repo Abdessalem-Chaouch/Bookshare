@@ -15,16 +15,13 @@ class LivreController extends Controller
   public function index()
 {
     // Récupérer les livres avec leur catégorie
-    $livres = Livre::with('categorie')->latest('date_ajout')->get();
+    $livres = Livre::with('categorie')->latest('created_at')->get();
 
     return view('BackOffice.livre.listeLivre', compact('livres'));
 }
 public function indexf()
 {
-    $livres = Livre::with('categorie', 'user')
-                   ->latest('date_ajout')
-                   ->get();
-
+    $livres = Livre::all();
     return view('FrontOffice.livres.LivrePage', compact('livres'));
 }
 
@@ -38,8 +35,7 @@ public function mesLivres()
         return redirect()->route('login')->with('error', 'Vous devez être connecté.');
     }
 
-    $livres = Livre::where('user_id', $user->id)
-                   ->with('categorie')
+    $livres = Livre::with('categorie')
                    ->get();
 
     return view('BackOffice.livre.mesLivres', compact('livres'));
@@ -48,6 +44,14 @@ public function mesLivres()
 
   public function create()
 {
+    $user = auth()->user();
+    
+    // Vérifier si l'auteur a un abonnement actif (seulement pour l'ajout)
+    if ($user->isAuteur() && !$user->hasActiveSubscription()) {
+        return redirect()->route('dashboardAuteur')
+            ->with('error', 'Vous devez avoir un abonnement actif pour ajouter des livres.');
+    }
+    
     $categories = Category::all();
     $auteurs = User::where('role', 'auteur')->get();
 
@@ -56,6 +60,14 @@ public function mesLivres()
 
    public function store(Request $request)
 {
+    $user = auth()->user();
+    
+    // Vérifier si l'auteur a un abonnement actif
+    if ($user->isAuteur() && !$user->hasActiveSubscription()) {
+        return redirect()->route('dashboardAuteur')
+            ->with('error', 'Vous devez avoir un abonnement actif pour ajouter des livres.');
+    }
+    
   $validated = $request->validate([
     'titre' => 'required|string|max:255',
     'user_id' => 'required|exists:users,id',
@@ -86,14 +98,29 @@ return redirect()->route('livres.index')->with('success', 'Livre ajouté avec su
 
     public function edit(Livre $livre)
     {
-         $auteurs = User::where('role', 'auteur')->get();
-
+        $user = auth()->user();
+        
+        // Vérifier si l'auteur a un abonnement actif pour éditer
+        if ($user->isAuteur() && !$user->hasActiveSubscription()) {
+            return redirect()->route('dashboardAuteur')
+                ->with('error', 'Vous devez avoir un abonnement actif pour modifier des livres.');
+        }
+        
+        $auteurs = User::where('role', 'auteur')->get();
         $categories = Category::all();
         return view('BackOffice.livre.editLivre', compact('livre', 'categories','auteurs'));
     }
 
  public function update(Request $request, Livre $livre)
 {
+    $user = auth()->user();
+    
+    // Vérifier si l'auteur a un abonnement actif pour modifier
+    if ($user->isAuteur() && !$user->hasActiveSubscription()) {
+        return redirect()->route('dashboardAuteur')
+            ->with('error', 'Vous devez avoir un abonnement actif pour modifier des livres.');
+    }
+    
     $data = $request->validate([
         'titre' => 'required|string|max:255',
         'user_id' => 'required|exists:users,id', // remplacer 'auteur'

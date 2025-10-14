@@ -12,7 +12,7 @@ class Livre extends Model
     protected $table = 'livres';
     protected $primaryKey = 'id';
     public $incrementing = true;
-    public $timestamps = false; // la table utilise date_ajout, pas created_at/updated_at
+    public $timestamps = true; // Activer les timestamps Laravel
 
     protected $fillable = [
         'titre',

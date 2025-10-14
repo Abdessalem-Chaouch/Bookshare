@@ -232,7 +232,7 @@
         </a>
         <ul class="menu-sub">
             <li class="menu-item {{ request()->routeIs('AjouterLivre') ? 'active' : '' }}">
-                <a href="{{ route('AjouterLivre') }}" class="menu-link">
+                <a href="#" onclick="checkSubscription()" class="menu-link">
                     <div data-i18n="Account">Add Book</div>
                 </a>
             </li>
@@ -244,14 +244,7 @@
             </li>
         </ul>
     </li>
-    <li class="menu-header small text-uppercase"><span class="menu-header-text">Payments</span></li>
 
-        <li class="menu-item {{ request()->routeIs('transaction') ? 'active' : '' }}">
-            <a href="{{ route('transactions') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-money"></i>
-                <div data-i18n="Account Settings">Transactions</div>
-            </a>
-        </li>
 
         @endif
   
