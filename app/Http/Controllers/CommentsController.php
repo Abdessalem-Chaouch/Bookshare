@@ -16,7 +16,7 @@ class CommentsController extends Controller
         $comment = Comment::create([
             'user_id' => Auth::id(),
             'blog_id' => $blogId,
-            'content' => $request->content,
+            'content' => $request->input('content'),
         ]);
 
         return response()->json([
@@ -38,18 +38,23 @@ class CommentsController extends Controller
         }
 
         $request->validate(['content' => 'required|string|max:1000']);
-        $comment->update(['content' => $request->content]);
+        $comment->update(['content' => $request->input('content')]);
 
         return response()->json(['comment' => $comment]);
     }
 
-    public function destroy(Comment $comment)
-    {
-        if ($comment->user_id !== Auth::id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+public function destroy(Comment $comment)
+{
+    $user = Auth::user();
 
-        $comment->delete();
-        return response()->json(['success' => true]);
+    // Vérifie si l'utilisateur connecté est soit l'auteur du commentaire, soit un administrateur
+    if ($comment->user_id !== $user->id && $user->role !== 'admin') {
+        return response()->json(['error' => 'Unauthorized'], 403);
     }
+
+    $comment->delete();
+
+    return response()->json(['success' => true]);
+}
+
 }

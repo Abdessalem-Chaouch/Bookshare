@@ -78,14 +78,18 @@
                                 </a>
 
                                 <!-- Edit -->
-                                <a href="#" onclick="checkSubscriptionForEdit({{ $livre->id }})" class="btn btn-sm btn-icon me-1" title="Edit">
+                                <a href="{{ route('livres.edit', $livre->id) }}" class="btn btn-sm btn-icon me-1" title="Edit">
                                     <i class="bx bx-edit-alt"></i>
                                 </a>
 
                                 <!-- Delete -->
-                                <button onclick="checkSubscriptionForDelete({{ $livre->id }})" class="btn btn-sm btn-icon me-1" title="Delete">
-                                    <i class="bx bx-trash"></i>
-                                </button>
+                                <form action="{{ route('livres.destroy', $livre->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-icon me-1" title="Delete">
+                                        <i class="bx bx-trash"></i>
+                                    </button>
+                                </form>
 
                                 <!-- Download PDF -->
                                 @if($livre->pdf_path)
@@ -106,81 +110,5 @@
         </div>
     </div>
 </div>
-
-@if(auth()->user()->isAuteur())
-<!-- Modal pour abonnement requis - Edit -->
-<div class="modal fade" id="editSubscriptionModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Abonnement requis</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="text-center">
-                    <i class="bx bx-lock-alt bx-lg text-warning mb-3"></i>
-                    <h6>Vous devez avoir un abonnement actif pour modifier vos livres.</h6>
-                    <p class="text-muted">Choisissez un plan d'abonnement pour débloquer cette fonctionnalité.</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <a href="{{ route('author.subscriptions') }}" class="btn btn-primary">Voir les abonnements</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal pour abonnement requis - Delete -->
-<div class="modal fade" id="deleteSubscriptionModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Abonnement requis</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="text-center">
-                    <i class="bx bx-lock-alt bx-lg text-danger mb-3"></i>
-                    <h6>Vous devez avoir un abonnement actif pour supprimer vos livres.</h6>
-                    <p class="text-muted">Choisissez un plan d'abonnement pour débloquer cette fonctionnalité.</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <a href="{{ route('author.subscriptions') }}" class="btn btn-primary">Voir les abonnements</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-function checkSubscriptionForEdit(livreId) {
-    @if(!auth()->user()->hasActiveSubscription())
-        const modal = new bootstrap.Modal(document.getElementById('editSubscriptionModal'));
-        modal.show();
-    @else
-        window.location.href = '/livres/' + livreId + '/edit';
-    @endif
-}
-
-function checkSubscriptionForDelete(livreId) {
-    @if(!auth()->user()->hasActiveSubscription())
-        const modal = new bootstrap.Modal(document.getElementById('deleteSubscriptionModal'));
-        modal.show();
-    @else
-        if(confirm('Êtes-vous sûr de vouloir supprimer ce livre ?')) {
-            // Créer et soumettre le formulaire de suppression
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/livres/' + livreId;
-            form.innerHTML = '@csrf @method("DELETE")';
-            document.body.appendChild(form);
-            form.submit();
-        }
-    @endif
-}
-</script>
-@endif
 
 @endsection

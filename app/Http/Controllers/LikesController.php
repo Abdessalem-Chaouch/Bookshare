@@ -19,6 +19,17 @@ class LikesController extends Controller
             $blog->likes()->create(['user_id' => $user->id]);
         }
 
-        return response()->json(['likes_count' => $blog->likes()->count()]);
+        // Récupérer la liste des utilisateurs ayant liké
+        $users = $blog->likes()->with('user')->get()->map(function($like) {
+            return [
+                'id' => $like->user->id,
+                'name' => $like->user->name ?? 'Anonymous',
+            ];
+        });
+
+        return response()->json([
+            'likes_count' => $blog->likes()->count(),
+            'users' => $users
+        ]);
     }
 }

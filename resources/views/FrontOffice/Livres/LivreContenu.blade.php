@@ -12,8 +12,9 @@
 
                 <div class="product-list" data-aos="fade-up">
                     <div class="row">
-                        @if($livres->count() > 0)
-                            @foreach($livres as $livre)
+
+
+                        @foreach($livres as $livre)
                         <div class="col-md-3">
                             <div class="product-item">
                                 <figure class="product-style">
@@ -33,12 +34,10 @@
         </figcaption>
     </div>
 </div>
-                            @endforeach
-                        @else
-                            <div class="col-12">
-                                <p class="text-center">Aucun livre trouvé. Nombre de livres: {{ $livres->count() }}</p>
-                            </div>
-                        @endif
+@endforeach
+
+
+
 
                         <script>
                             document.querySelectorAll('.add-to-cart').forEach(btn => {

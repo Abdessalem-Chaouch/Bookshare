@@ -152,6 +152,57 @@
                                              style="width:40px; height:40px; object-fit:cover;">
                                         <span class="ms-2">{{ Auth::user()->name }}</span>
                                     </a>
+                        @auth
+                            @if(Auth::user()->role === 'auteur')
+                                <!-- Dropdown Auteur -->
+                                <div class="dropdown d-inline-block align-items-center">
+                                    <a class="nav-link dropdown-toggle align-items-center" href="#" id="profileDropdownAuteur"
+                                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img src="{{ auth()->user()->photo_profil
+                                                    ? asset('storage/' . auth()->user()->photo_profil)
+                                                    : asset('images/default-avatar.jpg') }}"
+                                             alt="Profile"
+                                             class="rounded-circle"
+                                             style="width:40px; height:40px; object-fit:cover;">
+                                        <span class="ms-2">{{ Auth::user()->name }}</span>
+                                    </a>
+
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdownAuteur">
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('profil.index') }}">
+                                                <i class="bi bi-person"></i> Profil
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('dashboardAuteur') }}">
+                                                <i class="bi bi-gear"></i> Dashboard
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                                @csrf
+                                                <button class="dropdown-item text-danger" type="submit">
+                                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            @elseif(Auth::user()->role === 'admin')
+                                <!-- Dropdown Admin -->
+                                <div class="dropdown d-inline-block align-items-center">
+                                    <a class="nav-link dropdown-toggle align-items-center" href="#" id="profileDropdownAdmin"
+                                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img src="{{ auth()->user()->photo_profil
+                                                    ? asset('storage/' . auth()->user()->photo_profil)
+                                                    : asset('images/default-avatar.jpg') }}"
+                                             alt="Profile"
+                                             class="rounded-circle"
+                                             style="width:40px; height:40px; object-fit:cover;">
+                                        <span class="ms-2">{{ Auth::user()->name }}</span>
+                                    </a>
 
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdownAdmin">
                                         <li>
@@ -250,6 +301,19 @@
                         </a>
                     </div>
                 </div>
+    <!-- Header principal -->
+    <header id="header">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Logo -->
+                <div class="col-md-2">
+                    <div class="main-logo">
+                        <a href="{{ route('accueil') }}" class="logo-link d-flex align-items-center">
+                            <img src="{{asset('assets/img/libroLogo.png')}}" alt="logo" style="width:50px; height:60px; margin-right:10px;">
+                            <span class="logo-text">LibroLink</span>
+                        </a>
+                    </div>
+                </div>
 
                 <!-- Navbar -->
                 <div class="col-md-10">
@@ -275,7 +339,43 @@
                                     <a href="{{ route('aboutus') }}" class="nav-link">About us</a>
                                 </li>
                             </ul>
+                <!-- Navbar -->
+                <div class="col-md-10">
+                    <nav id="navbar">
+                        <div class="main-menu stellarnav">
+                            <ul class="menu-list">
+                                <li class="menu-item {{ request()->routeIs('accueil') ? 'active' : '' }}">
+                                    <a href="{{ route('accueil') }}">Home</a>
+                                </li>
+                                <li class="menu-item {{ request()->routeIs('front.categories') ? 'active' : '' }}">
+                                    <a href="{{ route('front.categories') }}" class="nav-link">Categories</a>
+                                </li>
+                                <li class="menu-item {{ request()->routeIs('livresf') ? 'active' : '' }}">
+                                    <a href="{{ route('livresf') }}">Books</a>
+                                </li>
+                                <li class="menu-item {{ request()->routeIs('articles') ? 'active' : '' }}">
+                                    <a href="{{ route('articles') }}" class="nav-link">Blogs</a>
+                                </li>
+                                <li class="menu-item {{ request()->routeIs('stores') ? 'active' : '' }}">
+                                    <a href="{{ route('stores') }}" class="nav-link">Stores</a>
+                                </li>
+                                <li class="menu-item {{ request()->routeIs('aboutus') ? 'active' : '' }}">
+                                    <a href="{{ route('aboutus') }}" class="nav-link">About us</a>
+                                </li>
+                            </ul>
 
+                            <div class="hamburger">
+                                <span class="bar"></span>
+                                <span class="bar"></span>
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+</div><!-- header-wrap -->
                             <div class="hamburger">
                                 <span class="bar"></span>
                                 <span class="bar"></span>

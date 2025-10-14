@@ -50,9 +50,9 @@
                                     </td>
                                     <td>
                                         @if($borrow->status === 'active')
-                                            <a href="{{ route('livres.viewpdf', $borrow->livre->id) }}" 
+                                            <a href="{{ route('livres.reader', $borrow->livre->id) }}" 
                                                class="btn btn-outline-accent2 mb-1">
-                                                View
+                                                Read
                                             </a>
                                            
                                         @else

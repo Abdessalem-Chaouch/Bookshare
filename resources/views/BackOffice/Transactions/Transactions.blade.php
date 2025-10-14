@@ -12,12 +12,10 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Payment ID</th>
                             <th>Book</th>
                             <th>User</th>
                             <th>Amount</th>
                             <th>Currency</th>
-                            <th>Payer Name</th>
                             <th>Payer Email</th>
                             <th>Status</th>
                             <th>Payment Method</th>
@@ -27,12 +25,10 @@
                     <tbody class="table-border-bottom-0">
                         @foreach($payments as $payment)
                         <tr>
-                            <td>{{ $payment->payment_id }}</td>
                             <td>{{ $payment->product_name }}</td>
                             <td>{{ $payment->payer_name }}</td>
                             <td>{{ number_format($payment->amount, 2) }}</td>
                             <td>{{ $payment->currency }}</td>
-                            <td>{{ $payment->payer_name }}</td>
                             <td>{{ $payment->payer_email }}</td>
                             <td>
                                 @if($payment->payment_status == 'COMPLETED')
