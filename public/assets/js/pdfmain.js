@@ -28,17 +28,59 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
 
     const bookmark = initBookmark({ pageFlip, containerId: 'book-container', bookUrl: pdfUrl });
-    await bookmark.loadBookmark();
+   // await bookmark.loadBookmark();
 
     // Lecture locale simple
-    document.getElementById('readPageBtn')?.addEventListener('click', () => {
-        const text = allPagesText[pageFlip.getCurrentPageIndex()];
-        if (!text) return alert('Page vide');
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'fr-FR';
-        speechSynthesis.cancel();
-        speechSynthesis.speak(utterance);
-    });
+ const btnRead = document.getElementById('readPageBtn');
+const btnPause = document.getElementById('pauseBtn');
+const audioIcon = btnRead.querySelector('i');
+
+let currentUtterance = null;
+let isPaused = false;
+
+// Exemple de texte
+
+let currentPage = 0;
+
+function startReading() {
+    const text = allPagesText[currentPage];
+    if (!text) return alert("Page vide");
+
+    currentUtterance = new SpeechSynthesisUtterance(text);
+    currentUtterance.lang = 'fr-FR';
+
+    currentUtterance.onstart = () => {
+        audioIcon.className = 'fa-solid fa-pause-circle';
+    };
+    currentUtterance.onend = () => {
+        audioIcon.className = 'fa-solid fa-play-circle';
+        currentUtterance = null;
+    };
+
+    speechSynthesis.speak(currentUtterance);
+    isPaused = false;
+}
+
+// Play / Resume button
+btnRead.addEventListener('click', () => {
+    if (speechSynthesis.speaking && isPaused) {
+        speechSynthesis.resume();
+        isPaused = false;
+        audioIcon.className = 'fa-solid fa-pause-circle';
+    } else if (!speechSynthesis.speaking) {
+        startReading();
+    }
+});
+
+// Pause button
+btnPause.addEventListener('click', () => {
+    if (speechSynthesis.speaking && !isPaused) {
+        speechSynthesis.pause();
+        isPaused = true;
+        audioIcon.className = 'fa-solid fa-play-circle';
+    }
+});
+
 
     // Auto-save bookmark
     pageFlip.on('flip', () => {
@@ -59,15 +101,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     showNotesPopup(totalPages, pageFlip);
     initAINarrator(allPagesText, pageFlip);
 
-    // === Gestion AI Summary ===
+// Faire fonctionner le bouton avec ta navbar existante
+
+
+    const summarizeBtn = document.getElementById('summarizeBtn');
+
+    // Au clic sur le bouton "Summarize", on affiche la navbar
+    summarizeBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // empêche de fermer le menu immédiatement
+        toggleNavbar();
+    });
+
+    // Fonction toggle pour afficher/cacher la navbar
     function toggleNavbar() {
-        document.getElementById('aiNavbar').classList.toggle('show');
+        const navbar = document.getElementById('aiNavbar');
+        navbar.classList.toggle('show');
     }
 
+    // Fermer le résumé
     function closeSummary() {
         document.getElementById('summarySidebar').classList.remove('open');
     }
 
+    // Ouvrir le résumé selon le type choisi
     async function openSummary(type) {
         document.getElementById('aiNavbar').classList.remove('show');
         const sidebar = document.getElementById('summarySidebar');
@@ -77,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         container.innerHTML = `<div class="message ai"><p>⏳ Generating summary...</p></div>`;
         sidebar.classList.add('open');
 
-        if (type === 'all') {
+        if(type === 'all') {
             title.textContent = '📚 All Pages Summary';
             await summarizeWholeBook(allPagesText, container);
         } else {
@@ -86,14 +142,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Cacher navbar si clic à l’extérieur
+    // Fermer la navbar si clic à l’extérieur
     document.addEventListener('click', (e) => {
         const navbar = document.getElementById('aiNavbar');
-        const aiBtn = document.querySelector('.ai-main-btn');
-        if (!navbar.contains(e.target) && !aiBtn.contains(e.target)) navbar.classList.remove('show');
+        if (!navbar.contains(e.target) && e.target.id !== 'summarizeBtn') {
+            navbar.classList.remove('show');
+        }
     });
 
-    // ✅ Rendez ces fonctions accessibles depuis ton HTML
+    // Rendre les fonctions accessibles globalement
     window.toggleNavbar = toggleNavbar;
     window.openSummary = openSummary;
     window.closeSummary = closeSummary;

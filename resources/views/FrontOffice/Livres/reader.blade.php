@@ -13,10 +13,7 @@
 </div>
 
 
-<div id="summaryContainer" style="margin-top:10px; padding:10px; border:1px solid #ccc;"></div>
-
-
-<audio id="narratorPlayer" controls style="display:none; margin-top:10px;"></audio>
+<audio id="narratorPlayer" class="tool-btn" controls style="display:none;  position:absolute; top:340px; right:80px;"></audio>
 
 <!-- FLOATING TOOLBAR (auto-hide) -->
 
@@ -190,42 +187,34 @@
   <button id="btnTheme" style="color: #d1a085;"  class="tool-btn" title="Toggle theme"><i id="themeIcon" class="fa-solid fa-moon"></i></button>
   <button id="btnSound" style="color: #d1a085;" class="tool-btn" title="Toggle page sound"><i id="soundIcon" class="fa-solid fa-volume-high"></i></button>
   <button id="btnBookmark" style="color: #d1a085;" class="tool-btn" title="Mark the page"><i id="bookmarkIcon" class="fa-regular fa-bookmark"></i></button>
-<!-- Détection de voix / Parler -->
-<button id="btnVoiceDetect" style="color: #d1a085;" class="tool-btn" title="Voice Detection">
-  <i class="fa-solid fa-microphone"></i>
-</button>
+<button id="btnVoiceDetect" style="color: #d1a085;" class="tool-btn" title="Voice Detection"><i class="fa-solid fa-microphone"></i></button>
 <button id="readPageBtn" style="color: #d1a085;" class="tool-btn" title="Play Audio"> <i class="fa-solid fa-play-circle"></i></button>
-<button id="summarizeBtn" style="color: #d1a085;" class="tool-btn" title="Summarize"><i class="fa-solid fa-file-lines"></i></button>
+<button id="pauseBtn" style="color: #d1a085;" class="tool-btn" title="Pause Audio">
+    <i class="fa-solid fa-pause-circle"></i>
+</button>
+<button id="summarizeBtn" style="color: #d1a085;" class="tool-btn" title="Summarize">
+    <i class="fa-solid fa-file-lines"></i>
+</button>
 
-</div>
-
-
-<div class="resumer-content">
-    <div class="decorative-corner top-left"></div>
-    <div class="decorative-corner bottom-right"></div>
-
-    <div class="ai-button-container">
-        <button class="ai-main-btn" onclick="toggleNavbar()">
-            <span>🤖</span>
-            AI Assistant
+<!-- AI Navigation Bar -->
+<div id="aiNavbar" class="ai-navbar">
+    <div class="resumer-resumer-navbar-content">
+        <h4>Choose AI Action</h4>
+        <button class="resumer-nav-option" onclick="openSummary('all')">
+            <span>📚</span>
+            Summarize All Pages
+        </button>
+        <button class="resumer-nav-option" onclick="openSummary('page')">
+            <span>📖</span>
+            Summarize This Page
         </button>
     </div>
-
-    <!-- AI Navigation Bar -->
-    <div id="aiNavbar" class="ai-navbar">
-        <div class="resumer-resumer-navbar-content">
-            <h4>Choose AI Action</h4>
-            <button class="resumer-nav-option" onclick="openSummary('all')">
-                <span>📚</span>
-                Summarize All Pages
-            </button>
-            <button class="resumer-nav-option" onclick="openSummary('page')">
-                <span>📖</span>
-                Summarize This Page
-            </button>
-        </div>
-    </div>
 </div>
+
+
+</div>
+
+
 
 <!-- Summary Chat Sidebar -->
 <div id="summarySidebar">

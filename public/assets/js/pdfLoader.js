@@ -56,49 +56,58 @@ export async function loadAndRenderPDF(containerId, pdfUrl, pageCounterId, bookU
         startPage
     });
 
-    // Charger PDF en images
+    // ===== Chargement PDF optimisé =====
     let pdfDoc = null;
     try {
         const loadingTask = pdfjsLib.getDocument(pdfUrl);
         pdfDoc = await loadingTask.promise;
         const totalPages = pdfDoc.numPages;
 
+        // Rendu parallèle pour accélérer le chargement
+        const renderPromises = [];
         for (let i = 1; i <= totalPages; i++) {
-            const page = await pdfDoc.getPage(i);
-            const scale = 4;
-            const viewport = page.getViewport({ scale });
-            const canvas = document.createElement('canvas');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            const ctx = canvas.getContext('2d');
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            await page.render({ canvasContext: ctx, viewport }).promise;
+            renderPromises.push(
+                (async (pageIndex) => {
+                    const page = await pdfDoc.getPage(pageIndex);
+                    const scale = 2.5; // qualité raisonnable
+                    const viewport = page.getViewport({ scale });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    await page.render({ canvasContext: ctx, viewport }).promise;
 
-            const textContent = await page.getTextContent();
-            const text = textContent.items.map(item => item.str).join(' ');
-            allPagesText.push(text);
-            if (i === 1) currentPageIndex = 0;
+                    const textContent = await page.getTextContent();
+                    const text = textContent.items.map(item => item.str).join(' ');
 
-            images.push(canvas.toDataURL('image/png'));
+                    allPagesText[pageIndex - 1] = text;
+                    images[pageIndex - 1] = canvas.toDataURL('image/png');
+
+                    if (pageIndex === 1) currentPageIndex = 0;
+                })(i)
+            );
         }
+        await Promise.all(renderPromises);
+
     } catch (err) {
         console.error('PDF render error', err);
         alert('Erreur lors du chargement du PDF.');
         return;
     }
 
-    // Charger images dans PageFlip
-    let initDone = false;
+    // Charger toutes les images dans PageFlip
     pageFlip.loadFromImages(images);
 
+    // ===== Initialisation PageFlip =====
     await new Promise(resolve => {
+        let initDone = false;
         pageFlip.on('init', () => {
             const total = pageFlip.getPageCount();
             pageCounter.textContent = `${startPage + 1} / ${total}`;
             sidebarMarkPage.textContent = startPage + 1;
 
-            // 🔹 Flip à la page sauvegardée **après que tout soit chargé**
             if (startPage > 0 && startPage < total) {
                 pageFlip.flipToPage(startPage);
                 currentPageIndex = startPage;
@@ -143,7 +152,6 @@ export async function loadAndRenderPDF(containerId, pdfUrl, pageCounterId, bookU
     btnZoomIn.addEventListener('click', (e) => { e.preventDefault(); zoom = Math.min(2.4, +(zoom + 0.2).toFixed(2)); applyZoom(); });
     btnZoomOut.addEventListener('click', (e) => { e.preventDefault(); zoom = Math.max(0.6, +(zoom - 0.2).toFixed(2)); applyZoom(); });
 
-    // Fullscreen
     btnFullscreen.addEventListener('click', async () => {
         const fullscreenWrapper = document.getElementById('fullscreenWrapper');
         const navbar = document.querySelector('nav');
