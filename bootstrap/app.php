@@ -11,11 +11,19 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias([
+    $middleware->alias([
         'role' => \App\Http\Middleware\RoleMiddleware::class,
         'dashboard.access' => \App\Http\Middleware\CheckDashboardAccess::class,
+        'cors' => \Illuminate\Http\Middleware\HandleCors::class, // <-- ajoute ça
+    ]);
+
+    $middleware->validateCsrfTokens(except: [
+        '/speak',
     ]);
     })
+   
+    
+
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

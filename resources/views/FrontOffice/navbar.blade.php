@@ -198,6 +198,11 @@
                                                 <i class="bi bi-book"></i> My Borrows
                                             </a>
                                         </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('purchases') }}">
+                                                <i class="bi bi-book"></i> My Purchases
+                                            </a>
+                                        </li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <form method="POST" action="{{ route('logout') }}" class="d-inline">

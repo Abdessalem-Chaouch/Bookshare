@@ -18,6 +18,7 @@ class User extends Authenticatable
         'role',
         'facebook_id',
         'google_id',
+         'voice_id', 'voice_path',
     ];
 
     protected $hidden = [

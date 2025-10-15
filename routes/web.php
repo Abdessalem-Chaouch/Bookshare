@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\LivreController;
+use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\RateController;
 
 use App\Http\Controllers\ProfilController;
@@ -27,6 +28,9 @@ use App\Http\Controllers\PaypalController;
 
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
+ use App\Http\Controllers\NoteController;
+use App\Http\Controllers\VoiceController;
+use App\Http\Controllers\AudioController;
 use App\Http\Controllers\RecommendationController;
 use Illuminate\Support\Facades\Http;
 
@@ -82,19 +86,50 @@ Route::middleware('auth')->group(function () {
 });
 Route::middleware(['auth'])->group(function () {
     Route::get('/my-books', [PaypalController::class, 'myBooks'])->name('myBooks');
+
+});
+Route::middleware('auth')->group(function () {
+    Route::post('/bookmark/save', [BookmarkController::class, 'saveBookmark']);
+    Route::get('/bookmark/load', [BookmarkController::class, 'load'])->name('bookmark.load');
+Route::get('/livres/{livre}/reader', [LivreController::class, 'showReader'])->name('livres.reader');
+Route::post('/livres/{id}/update-read-time', [LivreController::class, 'updateReadTime'])->name('livres.updateReadTime');
+Route::post('/livres/{id}/reset-read-time', [LivreController::class, 'resetReadTime']);
+Route::get('/notes-popup', function () {
+    return view('FrontOffice.Livres.notes-popup'); // page blade avec juste le contenu du popup
+});
+Route::get('/reading-popup', function () {
+    return view('FrontOffice.Livres.progress'); // page blade avec juste le contenu du popup
+});
+Route::get('/search-popup', function () {
+    return view('FrontOffice.Livres.search'); // page blade avec juste le contenu du popup
+});
+Route::get('/translate-popup', function () {
+    return view('FrontOffice.Livres.translate'); // page blade avec juste le contenu du popup
+});
+});
+Route::middleware('auth')->group(function () {
+   
+Route::get('/books/{book}/notes', [NoteController::class, 'getBookNotes']);
+Route::post('/save-note', [NoteController::class, 'store']);
+Route::get('/get-note', [NoteController::class, 'getNote']);
+
+ 
 });
 
-
+Route::post('/speak', [LivreController::class, 'speak']);
 Route::middleware(['auth'])->group(function () {
     Route::get('/borrows', [BorrowController::class, 'index'])->name('borrows');
     Route::post('/borrows/{livreId}', [BorrowController::class, 'store'])->name('borrows.store');
     Route::post('/borrows/{livreId}/pay', [BorrowController::class, 'payAndBorrow'])->name('borrows.pay');
     Route::get('/borrows/success', [BorrowController::class, 'success'])->name('borrows.success');
+   Route::get('/purchases', [App\Http\Controllers\PaypalController::class, 'transactionsFront'])->name('purchases');
+
     // web.php
     Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.list');
     Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])->name('notifications.delete');
     Route::post('/notifications/clear', [NotificationController::class, 'clearAll'])->name('notifications.clear');
 });
+
 
 
 Route::middleware(['auth'])->group(function () {

@@ -19,6 +19,7 @@ Version: 1.1
   --header-height: 160px;
   --header-height-min: 80px;
 }
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 /* on mobile devices below 600px
  */
@@ -2515,3 +2516,121 @@ footer#footer {
     width: 100%;
   }
 }
+
+
+.dark-mode {
+    background-color: #1D150A;
+    color: #EAE3DF;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Exemple pour adapter d’autres éléments */
+.dark-mode .card,
+.dark-mode .table {
+    background-color: #2a2117 !important;
+    color: #EAE3DF !important;
+}
+
+.dark-mode .table thead {
+    background-color: #3a2f23 !important;
+}
+
+.dark-mode a,
+.dark-mode i {
+    color: #d1a085 !important;
+}
+
+
+#bookChatContainer {
+    position: fixed;
+    bottom: 20px;       /* distance depuis le bas */
+    right: 20px;        /* distance depuis la droite */
+    width: 300px;       /* largeur du chat */
+    max-height: 400px;  /* hauteur max */
+    background-color: #f8f8f8; /* fond clair */
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Albert Sans', sans-serif;
+    z-index: 9999;      /* au-dessus des autres éléments */
+}
+
+#chatMessages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 14px;
+    background-color: #fff;
+}
+
+#chatMessages .chat-user {
+    text-align: right;
+    margin: 4px 0;
+    background-color: #9c9259;
+    color: white;
+    padding: 5px 8px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+#chatMessages .chat-bot {
+    text-align: left;
+    margin: 4px 0;
+    background-color: #eae3df;
+    color: #111;
+    padding: 5px 8px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+#chatInput {
+    border: none;
+    border-top: 1px solid #ccc;
+    padding: 8px;
+    width: calc(100% - 70px);
+    font-size: 14px;
+    outline: none;
+}
+
+#chatSendBtn {
+    width: 60px;
+    border: none;
+    background-color: #9c9259;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+#chatSendBtn:hover {
+    background-color: #81744a;
+}
+
+#bookChatContainer input, #bookChatContainer button {
+    font-family: 'Albert Sans', sans-serif;
+}
+.messagerie {
+    width: 400px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    background: #f9f9f9;
+    margin-left: 150px;
+}
+
+.messages {
+    height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.message {
+    margin: 5px 0;
+    padding: 5px 10px;
+    border-radius: 8px;
+}
+
+.message.user { background: #d1e7ff; text-align: right; }
+.message.ai { background: #e2e2e2; text-align: left; }

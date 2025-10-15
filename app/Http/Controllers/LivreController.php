@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-
+use Spatie\PdfToImage\Pdf;
+use Illuminate\Support\Facades\Http;
+// ou une autre librairie pour compter les pages
 class LivreController extends Controller
 {
     
@@ -64,8 +66,8 @@ public function mesLivres()
     'categorie_id' => 'required|exists:categories,id',
     'prix' => 'required|numeric|min:0',
     'stock' => 'required|integer|min:0',
-    'photo_couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20048',
-    'pdf_contenu' => 'nullable|mimes:pdf|max:20480', 
+    'photo_couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:200048',
+    'pdf_contenu' => 'nullable|mimes:pdf|max:2000480', 
 ]);
 
 
@@ -102,7 +104,7 @@ return redirect()->route('livres.index')->with('success', 'Livre ajouté avec su
         'categorie_id' => 'nullable|exists:categories,id',
         'stock' => 'required|integer|min:0',
         'photo_couverture' => 'nullable|image|max:2048',
-        'pdf_contenu' => 'nullable|file|mimes:pdf|max:20480',
+        'pdf_contenu' => 'nullable|file|mimes:pdf|max:2000480',
         'prix' => 'nullable|numeric|min:0',
     ]);
 
@@ -187,5 +189,115 @@ public function showf(Livre $livre)
 
     return view('FrontOffice.livres.showf', compact('livre'));
 }
+
+public function showReader($id)
+    {
+        $livre = Livre::findOrFail($id);
+
+        if ($livre->pdf_contenu && Storage::disk('public')->exists($livre->pdf_contenu)) {
+            $pdfUrl = asset('storage/' . $livre->pdf_contenu);
+            $title = $livre->titre ?? 'Lecture du livre';
+
+            // Temps de lecture existant dans la base (en minutes)
+            $readingTimeMinutes = $livre->reading_time ?? 0;
+            $readingTimeSeconds = $readingTimeMinutes * 60; // convertir en secondes pour JS
+
+            // Format lisible pour affichage
+            if ($readingTimeMinutes < 60) {
+                $readingTimeReadable = $readingTimeMinutes . ' min';
+            } else {
+                $hours = floor($readingTimeMinutes / 60);
+                $minutes = $readingTimeMinutes % 60;
+                $readingTimeReadable = $hours . ' h ' . $minutes . ' min';
+            }
+
+            // Nombre de pages (approximation)
+            $totalPages = 0;
+            try {
+                $pdf = \Spatie\PdfToText\Pdf::getText(storage_path('app/public/' . $livre->pdf_contenu));
+                $totalPages = substr_count($pdf, '%PDF') ?? 0; // approximation
+            } catch (\Exception $e) {
+                $totalPages = 0;
+            }
+                    $livre->last_read = now();
+                        $livre->save();
+    
+            return view('FrontOffice.Livres.reader', compact(
+                'pdfUrl',
+                'title',
+                'readingTimeReadable',
+                'readingTimeSeconds',
+                'totalPages',
+                'livre' // pour récupérer l'id si nécessaire en JS
+            ));
+        }
+
+        return abort(404, 'Le fichier PDF de ce livre est introuvable.');
+    }
+
+public function updateReadTime(Request $request, $id)
+{
+    $livre = Livre::findOrFail($id);
+
+    // secondes passées envoyées depuis le front
+    $seconds = $request->input('seconds', 0);
+
+    // lecture actuelle en secondes
+    $currentSeconds = ($livre->reading_time ?? 0) * 60;
+
+    // on ajoute les secondes
+    $newSeconds = $currentSeconds + $seconds;
+
+    // on sauvegarde en minutes arrondies
+    $livre->reading_time = ceil($newSeconds / 60);
+    $livre->save();
+
+    return response()->json(['success' => true, 'reading_time' => $livre->reading_time]);
+}
+// Nouveau endpoint pour reset
+public function resetReadTime($id)
+{
+    $livre = Livre::findOrFail($id);
+
+    // Remet la lecture à 0 minutes
+    $livre->reading_time = 0;
+    $livre->save();
+
+    return response()->json(['success' => true, 'reading_time' => $livre->reading_time]);
+}
+
+
+ public function speak(Request $request)
+    {
+        $text = $request->input('text');
+        $lang = $request->input('lang', null);
+
+        if (!$text) {
+            return response()->json(['error' => 'No text provided'], 400);
+        }
+
+        try {
+            Log::info("Sending text to Flask: " . substr($text, 0, 50));
+
+            $response = Http::timeout(20)->post('http://127.0.0.1:5000/speak', [
+                'text' => $text,
+                'lang' => $lang,
+            ]);
+
+            if (!$response->ok()) {
+                Log::error("Flask error: " . $response->status());
+                return response()->json(['error' => 'Flask TTS error'], 500);
+            }
+
+            Log::info("Received audio from Flask ✅");
+
+            return response($response->body(), 200)
+                ->header('Content-Type', 'audio/mpeg');
+
+        } catch (\Exception $e) {
+            Log::error("Speak failed: " . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 
 }

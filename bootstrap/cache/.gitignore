@@ -1,2 +1,5 @@
-*
-!.gitignore
+# Ignorer le dossier models
+Bookshare/Ai/models/
+
+# Ignorer le dossier load_booksum
+Bookshare/Ai/load_booksum/
