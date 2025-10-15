@@ -5,7 +5,8 @@ import { initNotesPopup } from './notes.js';
 import { initSearchPopup } from './searchpopup.js';
 import { initTranslatePopup } from './translate.js';
 import { showNotesPopup } from './shownotepopup.js';
-import {initAINarrator,initVoiceCommands,summarizeCurrentPage,summarizeWholeBook} from './aiNarrator.js'
+import {initAINarrator,initVoiceAssistant,summarizeCurrentPage,summarizeWholeBook} from './aiNarrator.js'
+import {initChatUI} from './chatAssistant.js'
 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -37,6 +38,7 @@ const audioIcon = btnRead.querySelector('i');
 
 let currentUtterance = null;
 let isPaused = false;
+const currentLang = navigator.language.startsWith('fr') ? 'fr' : 'en';
 
 // Exemple de texte
 
@@ -93,7 +95,8 @@ btnPause.addEventListener('click', () => {
 
     const totalPages = pageFlip.getPageCount();
 
-    initVoiceCommands(pageFlip, allPagesText);
+    initVoiceAssistant(pageFlip, allPagesText, currentLang);
+//initChatAssistant(pageFlip, allPagesText, currentLang);
     initReadingPopup(pdfUrl, coverUrl, livre, totalPages);
     initNotesPopup(totalPages);
     initSearchPopup();
@@ -154,4 +157,50 @@ btnPause.addEventListener('click', () => {
     window.toggleNavbar = toggleNavbar;
     window.openSummary = openSummary;
     window.closeSummary = closeSummary;
+ //initChatUI('messageInput', 'sendMessageBtn', 'messages', allPagesText);
+
+
+
+
+ async function askBookQuestion(pdfUrl, question) {
+    const res = await fetch("http://127.0.0.1:5000/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pdf: pdfUrl, question: question })
+    });
+    const data = await res.json();
+    return data.answer;
+}
+
+function addMessageToChat(text, sender="bot") {
+    const messagesContainer = document.getElementById("messages");
+    const msgDiv = document.createElement("div");
+    msgDiv.className = sender === "bot" ? "message bot" : "message user";
+    msgDiv.innerText = text;
+    messagesContainer.appendChild(msgDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+document.getElementById("sendMessageBtn").addEventListener("click", async () => {
+    const input = document.getElementById("messageInput");
+    const question = input.value.trim();
+    if (!question) return;
+
+    addMessageToChat(question, "user");
+    input.value = "";
+
+    // Utiliser le PDF défini dans BookConfig
+    const pdfUrl = window.BookConfig.pdfUrl;
+
+    try {
+        const answer = await askBookQuestion(pdfUrl, question);
+        addMessageToChat(answer, "bot");
+    } catch (e) {
+        addMessageToChat("❌ Erreur lors de la requête : " + e.message, "bot");
+    }
+});
+
+
+
+
 });

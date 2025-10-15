@@ -29,6 +29,8 @@ use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
  use App\Http\Controllers\NoteController;
+use App\Http\Controllers\VoiceController;
+use App\Http\Controllers\AudioController;
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
@@ -105,12 +107,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/borrows/{livreId}', [BorrowController::class, 'store'])->name('borrows.store');
     Route::post('/borrows/{livreId}/pay', [BorrowController::class, 'payAndBorrow'])->name('borrows.pay');
     Route::get('/borrows/success', [BorrowController::class, 'success'])->name('borrows.success');
+   Route::get('/purchases', [App\Http\Controllers\PaypalController::class, 'transactionsFront'])->name('purchases');
+
     // web.php
     Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.list');
     Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])->name('notifications.delete');
     Route::post('/notifications/clear', [NotificationController::class, 'clearAll'])->name('notifications.clear');
 
 });
+
 
 
 Route::middleware(['auth'])->group(function () {

@@ -22,7 +22,7 @@ export function initAINarrator(allPagesText, pageFlip) {
             }
 
             // Sinon, fetch le TTS et joue
-            const res = await fetch('http://127.0.0.1:8000/speak', {
+            const res = await fetch('http://127.0.0.1:5000/speak', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text })
@@ -53,51 +53,76 @@ export function initAINarrator(allPagesText, pageFlip) {
 
 
     // ======== Voice Commands ========
-    
-export function initVoiceCommands(pageFlip, allPagesText) {
+export function initVoiceAssistant(pageFlip, allPagesText, currentLang) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return alert("⚠️ SpeechRecognition non supporté");
+    if (!SpeechRecognition) {
+        alert("⚠️ La reconnaissance vocale n'est pas supportée par votre navigateur.");
+        return;
+    }
 
+    // === 🎙️ Initialisation ===
     const recognition = new SpeechRecognition();
-    recognition.lang = 'fr-FR';
+    recognition.lang = currentLang || 'fr-FR';
     recognition.continuous = true;
-    recognition.interimResults = false; // <-- mettre false pour fiabilité
+    recognition.interimResults = false;
 
     const voiceBtn = document.getElementById('btnVoiceDetect');
     const voiceIcon = voiceBtn?.querySelector('i');
     let listening = false;
+    let currentUtterance = null;
 
-    const nextAliases = ['page suivante', 'suivante'];
-    const prevAliases = ['page précédente', 'précédente'];
-    const readAliases = ['lire page', 'lire cette page', 'lecture'];
-    const pauseAliases = ['pause lecture', 'pause'];
-    const stopAliases = ['stop lecture', 'arrêter', 'stop'];
-    const noteAliases = ['mettre une note', 'ajouter une note'];
+    // === 🗣️ Commandes reconnues ===
+    const commands = {
+        read: ['lire', 'lecture', 'commencer lecture', 'lancer lecture', 'lis la page'],
+        pause: ['pause', 'pause lecture', 'mets en pause', 'arrête un peu'],
+        stop: ['stop', 'arrête', 'stop lecture', 'arrête lecture'],
+        next: ['page suivante', 'suivante', 'page d’après', 'suivant'],
+        prev: ['page précédente', 'précédente', 'page d’avant', 'avant'],
+        note: ['ajouter une note', 'mettre une note', 'note cette page', 'note', 'écrire une note'],
+        fullscreen: ['plein écran', 'agrandir écran', 'maximiser', 'mettre en plein écran'],
+        zoomin: ['zoomer', 'agrandir', 'zoom avant', 'agrandir écran'],
+        zoomout: ['dézoomer', 'réduire', 'zoom arrière', 'rétrécir', 'réduire écran'],
+        themeDark: ['mode sombre', 'thème sombre', 'activer mode sombre'],
+        themeLight: ['mode clair', 'quitter le mode sombre', 'repasser en mode clair'],
+        sound: ['activer son', 'désactiver son', 'couper le son', 'remettre le son', 'son']
+    };
 
+    // === 🧩 Fonctions d’actions ===
     function readCurrentPage() {
         const currentIndex = pageFlip.getCurrentPageIndex();
-        const page1 = allPagesText[currentIndex] || '';
-        const page2 = allPagesText[currentIndex + 1] || '';
-        let text = (page1 + ' ' + page2).trim();
-
-        text = text.replace(/©/g, '')
-                   .replace(/®/g, '')
-                   .replace(/[^\p{L}\p{N}\s.,;:!?'-]/gu, '')
-                   .replace(/\s{2,}/g, ' ')
-                   .trim();
-
-        if (!text) return alert('Texte vide après nettoyage');
-
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'fr-FR';
-        utterance.rate = 1.2;
+        const text = (allPagesText[currentIndex] || '').replace(/[^\p{L}\p{N}\s.,;:!?'-]/gu, '');
+        if (!text) return alert('⚠️ Aucune lecture disponible pour cette page.');
         speechSynthesis.cancel();
-        speechSynthesis.speak(utterance);
+        currentUtterance = new SpeechSynthesisUtterance(text);
+        currentUtterance.lang = currentLang;
+        currentUtterance.rate = 1.1;
+        speechSynthesis.speak(currentUtterance);
     }
 
+    function pauseSpeech() { if (speechSynthesis.speaking && !speechSynthesis.paused) speechSynthesis.pause(); }
+    function stopSpeech() { if (speechSynthesis.speaking || speechSynthesis.paused) speechSynthesis.cancel(); }
+
+    function toggleFullscreen() { document.getElementById('btnFullscreen')?.click(); }
+    function zoomIn() { document.getElementById('btnZoomIn')?.click(); }
+    function zoomOut() { document.getElementById('btnZoomOut')?.click(); }
+    function toggleSound() { document.getElementById('btnSound')?.click(); }
+    function flipNext() { pageFlip.flipNext(); }
+    function flipPrev() { pageFlip.flipPrev(); }
+
+    // === 🎨 Thèmes ===
+    function activateDarkTheme() {
+        const btn = document.getElementById('btnTheme');
+        if (btn && !document.body.classList.contains('dark')) btn.click();
+    }
+    function activateLightTheme() {
+        const btn = document.getElementById('btnTheme');
+        if (btn && document.body.classList.contains('dark')) btn.click();
+    }
+
+    // === 📝 Gestion des notes vocales ===
     function handleVoiceNote(transcript) {
         let pageIndex = pageFlip.getCurrentPageIndex();
-        const pageMatch = transcript.match(/page (\d+)/);
+        const pageMatch = transcript.match(/page\s*(\d+)/i);
         if (pageMatch) pageIndex = parseInt(pageMatch[1], 10) - 1;
 
         let noteText = transcript.replace(/.*note(s)?( à la page \d+)?/i, '').trim();
@@ -124,12 +149,21 @@ export function initVoiceCommands(pageFlip, allPagesText) {
         })
         .then(res => res.json())
         .then(data => {
-            if (data.success) console.log('Note sauvegardée ✅', data);
+            if (data.success) console.log('📝 Note sauvegardée ✅', data);
             else console.warn('Erreur sauvegarde note:', data);
         })
         .catch(err => console.error('Erreur fetch note:', err));
     }
 
+    // === 🧠 Fonction de correspondance ===
+    function matchCommand(transcript, keywords) {
+        return keywords.some(keyword => {
+            const normKeyword = keyword.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return transcript.includes(normKeyword);
+        });
+    }
+
+    // === 🎧 Résultat vocal ===
     recognition.onresult = (event) => {
         const transcript = Array.from(event.results)
             .map(r => r[0].transcript)
@@ -137,33 +171,61 @@ export function initVoiceCommands(pageFlip, allPagesText) {
             .toLowerCase()
             .trim();
 
-        console.log('[Voice Command]', transcript);
+        let clean = transcript
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^\w\s]/g, "")
+            .trim();
 
-        if (nextAliases.some(a => transcript.includes(a))) pageFlip.flipNext();
-        else if (prevAliases.some(a => transcript.includes(a))) pageFlip.flipPrev();
-        else if (readAliases.some(a => transcript.includes(a))) readCurrentPage();
-        else if (pauseAliases.some(a => transcript.includes(a))) speechSynthesis.pause();
-        else if (stopAliases.some(a => transcript.includes(a))) speechSynthesis.cancel();
-        else if (noteAliases.some(a => transcript.includes(a))) handleVoiceNote(transcript);
+        console.log('[🎤 Input]', transcript);
+        console.log('🧹 Cleaned:', clean);
+
+        // === 🎯 Actions ===
+        if (matchCommand(clean, commands.stop)) { console.log("🎯 stop"); stopSpeech(); }
+        else if (matchCommand(clean, commands.pause)) { console.log("🎯 pause"); pauseSpeech(); }
+        else if (matchCommand(clean, commands.read)) { console.log("🎯 lecture"); readCurrentPage(); }
+        else if (matchCommand(clean, commands.next)) { console.log("🎯 suivante"); flipNext(); }
+        else if (matchCommand(clean, commands.prev)) { console.log("🎯 précédente"); flipPrev(); }
+        else if (matchCommand(clean, commands.zoomin)) { console.log("🎯 zoom avant"); zoomIn(); }
+        else if (matchCommand(clean, commands.zoomout)) { console.log("🎯 zoom arrière"); zoomOut(); }
+        else if (matchCommand(clean, commands.fullscreen)) { console.log("🎯 plein écran"); toggleFullscreen(); }
+        else if (matchCommand(clean, commands.themeDark)) { console.log("🎯 mode sombre"); activateDarkTheme(); }
+        else if (matchCommand(clean, commands.themeLight)) { console.log("🎯 mode clair"); activateLightTheme(); }
+        else if (matchCommand(clean, commands.sound)) { console.log("🎯 son"); toggleSound(); }
+        else if (matchCommand(clean, commands.note)) { console.log("🎯 note"); handleVoiceNote(transcript); }
     };
 
-    recognition.onerror = (e) => console.error('Voice command error:', e);
-    recognition.onend = () => { if (listening) recognition.start(); };
+    // === ⚠️ Gestion erreurs ===
+    recognition.onerror = (e) => {
+        if (e.error !== 'no-speech') console.error('Voice error:', e);
+    };
 
+    recognition.onend = () => {
+        // 🔇 Ne redémarre pas automatiquement
+        console.log("🎙️ Reconnaissance arrêtée (attente d’un clic utilisateur)");
+    };
+
+    // === 🎙️ Bouton d’activation manuelle ===
     voiceBtn?.addEventListener('click', () => {
         listening = !listening;
         if (listening) {
-            recognition.start();
-            if (voiceIcon) voiceIcon.className = 'fa-solid fa-microphone';
+            try {
+                recognition.start();
+                voiceIcon.className = 'fa-solid fa-microphone';
+                console.log("🎧 Assistant vocal activé");
+            } catch (err) {
+                console.warn("⚠️ Erreur démarrage micro:", err);
+            }
         } else {
             recognition.stop();
-            if (voiceIcon) voiceIcon.className = 'fa-solid fa-microphone-slash';
+            stopSpeech(); // 🛑 Stoppe aussi la lecture audio
+            voiceIcon.className = 'fa-solid fa-microphone-slash';
+            console.log("🛑 Assistant vocal désactivé (écoute + synthèse arrêtées)");
         }
     });
-
-    const readBtn = document.getElementById('readPageBtn');
-    if (readBtn) readBtn.addEventListener('click', readCurrentPage);
 }
+
+
+
 
 // aiSummary.js
 

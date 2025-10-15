@@ -199,7 +199,7 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="{{ route('borrows') }}">
+                                            <a class="dropdown-item" href="{{ route('purchases') }}">
                                                 <i class="bi bi-book"></i> My Purchases
                                             </a>
                                         </li>

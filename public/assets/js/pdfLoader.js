@@ -186,13 +186,22 @@ export async function loadAndRenderPDF(containerId, pdfUrl, pageCounterId, bookU
         } catch (err) { console.warn('Fullscreen failed', err); }
     });
 
-    btnTheme.addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
-        const isDark = document.body.classList.contains('dark-mode');
-        themeIcon.classList.toggle('fa-moon', !isDark);
-        themeIcon.classList.toggle('fa-sun', isDark);
-    });
+// Charger le thème sauvegardé (si déjà choisi)
+if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark-mode');
+    themeIcon.classList.replace('fa-moon', 'fa-sun');
+}
 
+btnTheme.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+
+    themeIcon.classList.toggle('fa-moon', !isDark);
+    themeIcon.classList.toggle('fa-sun', isDark);
+
+    // Sauvegarder le thème dans le navigateur
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+});
     btnSound.addEventListener('click', () => {
         soundEnabled = !soundEnabled;
         soundIcon.classList.toggle('fa-volume-xmark', !soundEnabled);

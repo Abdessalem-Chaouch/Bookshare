@@ -45,6 +45,33 @@ public function transactions(Request $request)
 
     return view('BackOffice.Transactions.Transactions', compact('payments'));
 }
+public function transactionsFront(Request $request)
+{
+    $user = Auth::user();
+
+    if ($user->role === 'admin') {
+        $payments = Payment::orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->appends($request->all());
+    } elseif ($user->role === 'auteur') {
+        $payments = Payment::whereIn('livre_id', function($query) use ($user) {
+                $query->select('id')
+                    ->from('livres')
+                    ->where('user_id', $user->id);
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->appends($request->all());
+    } else {
+        // Paiements effectués par l'utilisateur connecté
+        $payments = Payment::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->appends($request->all());
+    }
+
+    return view('FrontOffice.Payments.Transactions', compact('payments'));
+}
 
 public function paypal(Request $request)
     {

@@ -12,6 +12,7 @@
   <div id="pageCounter" class="page-counter">0 / 0</div>
 </div>
 
+   
 
 <audio id="narratorPlayer" class="tool-btn" controls style="display:none;  position:absolute; top:340px; right:80px;"></audio>
 
@@ -228,8 +229,96 @@
     </div>
 </div>
 
-
+<!--<div id="messagerieContainer" class="messagerie">
+    <div id="messages" class="messages"></div>
+    <input type="text" id="messageInput" placeholder="Posez votre question ici..." />
+    <button id="sendMessageBtn">Envoyer</button>
 </div>
+
+-->
+
+
+ <!-- Chat <button class="chat-toggle-btn" onclick="toggleChat()">
+    <i class="fa-solid fa-book-open"></i>
+</button>
+
+
+   
+    <div id="chatSidebar">
+        <div class="chat-header">
+            <h3>📖 Chat Assistant Book</h3>
+            <button class="close-btn" onclick="closeChat()">&times;</button>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai">
+                Hello! I'm your Chat Assistant Book. I'm here to help you with any questions or assistance you need. How can I help you today?
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="chat-input-container" style="padding: 20px;
+            background: transparent;
+            border-top: 1px solid #d4c4a8;
+            position: relative;
+            z-index: 1;">
+            <div style="position: relative; display: flex; align-items: center; gap: 10px;">
+               <input 
+                  type="text"       
+                  id="chatInput" 
+                  placeholder="Type your message here..." 
+                  style="
+                      width: calc(100% - 60px);
+                      padding: 14px 20px;
+                      border: 2px solid #8b7355;
+                      border-radius: 25px;
+                      font-size: 14px;
+                      outline: none;
+                      transition: all 0.3s ease;
+                      background: #faf7f0;
+                      color: #3d2914;
+                      box-shadow: inset 0 2px 5px rgba(139,115,85,0.1);
+                      box-sizing: border-box;
+                      "
+                    >
+<button 
+    class="send-btn"
+    style="
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #8b7355;
+        color: #faf7f0;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(139,115,85,0.3);
+        font-size: 16px;
+    "
+>➤</button>
+
+            </div>
+        </div>
+    </div>
+Sidebar -->
+
+
+
+
 <script>
     window.BookConfig = {
         pdfUrl: @json($pdfUrl),
