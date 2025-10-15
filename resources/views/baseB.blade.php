@@ -92,42 +92,7 @@
 
     <!-- GitHub Buttons (optional) -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
-    
-    @if(auth()->user()->isAuteur())
-    <!-- Modal pour abonnement requis -->
-    <div class="modal fade" id="subscriptionModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Abonnement requis</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="text-center">
-                        <i class="bx bx-lock-alt bx-lg text-warning mb-3"></i>
-                        <h6>Vous devez avoir un abonnement actif pour ajouter des livres.</h6>
-                        <p class="text-muted">Choisissez un plan d'abonnement pour débloquer cette fonctionnalité.</p>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <a href="{{ route('author.subscriptions') }}" class="btn btn-primary">Voir les abonnements</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-    function checkSubscription() {
-        @if(!auth()->user()->hasActiveSubscription())
-            const modal = new bootstrap.Modal(document.getElementById('subscriptionModal'));
-            modal.show();
-        @else
-            window.location.href = '{{ route("AjouterLivre") }}';
-        @endif
-    }
-    </script>
-    @endif
+    <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js" charset="utf-8"></script>
 
 </body>
 

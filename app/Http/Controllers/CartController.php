@@ -12,7 +12,7 @@ class CartController extends Controller
     public function index()
     {
         $cartItems = Cart::with('livre')
-            ->where('utilisateur_id', Auth::id())
+            ->where('user_id', Auth::id())
             ->get();
 
         return view('FrontOffice.Carts.carts', compact('cartItems'));
@@ -37,7 +37,7 @@ public function add(Request $request)
 
     $userId = Auth::id();
 
-    $cartItem = Cart::where('utilisateur_id', $userId)
+    $cartItem = Cart::where('user_id', $userId)
         ->where('livre_id', $bookId)
         ->first();
 
@@ -48,12 +48,12 @@ public function add(Request $request)
 
     // Otherwise, add it to the cart
     Cart::create([
-        'utilisateur_id' => $userId,
+        'user_id' => $userId,
         'livre_id' => $bookId,
         'quantite' => 1,
     ]);
 
-    $count = Cart::where('utilisateur_id', $userId)->sum('quantite');
+    $count = Cart::where('user_id', $userId)->sum('quantite');
 
     return response()->json([
         'count' => $count,
@@ -85,7 +85,7 @@ public function checkout()
 {
     $userId = Auth::id();
     $cartItems = Cart::with('livre')
-        ->where('utilisateur_id', $userId)
+        ->where('user_id', $userId)
         ->get();
 
     if ($cartItems->isEmpty()) {
@@ -95,19 +95,19 @@ public function checkout()
     $total = $cartItems->sum(fn($i) => $i->livre->prix * $i->quantite) + 5;
 
     // Exemple : vider le panier après checkout
-    Cart::where('utilisateur_id', $userId)->delete();
+    Cart::where('user_id', $userId)->delete();
 
     return redirect()->route('cart.index')->with('success', "Commande validée ! Total payé : $total DT");
 }
 public function count()
 {
-    $count = Cart::where('utilisateur_id', Auth::id())->sum('quantite');
+    $count = Cart::where('user_id', Auth::id())->sum('quantite');
     return response()->json(['count' => $count]);
 }
 public function clear()
 {
     $userId = Auth::id();
-    Cart::where('utilisateur_id', $userId)->delete();
+    Cart::where('user_id', $userId)->delete();
 
     return response()->json([
         'count' => 0,
