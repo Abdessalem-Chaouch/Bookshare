@@ -51,6 +51,19 @@
             </div>
         </div>
     </div>
+    
+    <div id="ai-recommendation" class="alert alert-primary border-0 shadow-sm mb-4">
+        <div class="d-flex align-items-center mb-2">
+            <i class="bx bx-brain text-primary me-2" style="font-size: 20px;"></i>
+            <strong>🤖 Recommandation AI</strong>
+        </div>
+        <div id="recommendation-text">
+            <div class="d-flex align-items-center">
+                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                <span>Analyse en cours...</span>
+            </div>
+        </div>
+    </div>
     @endif
 
     @if($currentSubscription)
@@ -102,45 +115,57 @@
             </div>
         </div>
     @else
-        <!-- Afficher tous les plans si pas d'abonnement -->
-        <div class="row g-4">
-            @foreach($subscriptions as $index => $subscription)
-            <div class="col-lg-4 col-md-6">
-                <div class="card h-100 border-0 shadow-sm position-relative" style="transition: transform 0.3s ease, box-shadow 0.3s ease;">
-                    <div class="card-body p-4 text-center">
-                        <div class="mb-4">
-                            <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                 style="width: 80px; height: 80px;">
-                                <span class="fs-1">{{ $index == 0 ? '⭐' : ($index == 1 ? '👑' : '💎') }}</span>
+        <!-- Carousel pour les plans d'abonnement -->
+        <div class="subscription-carousel-container position-relative">
+            <button class="carousel-arrow carousel-arrow-left" onclick="slideSubscriptions(-1)">
+                <i class="bx bx-chevron-left"></i>
+            </button>
+            
+            <div class="subscription-carousel overflow-hidden">
+                <div class="subscription-track d-flex" id="subscriptionTrack" style="transition: transform 0.5s ease;">
+                    @foreach($subscriptions as $index => $subscription)
+                    <div class="subscription-slide flex-shrink-0" style="width: calc(100% / 3); padding: 0 10px;">
+                        <div class="card h-100 border-0 shadow-sm position-relative" style="transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                            <div class="card-body p-4 text-center">
+                                <div class="mb-4">
+                                    <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                         style="width: 80px; height: 80px;">
+                                        <span class="fs-1">{{ $index == 0 ? '⭐' : ($index == 1 ? '👑' : '💎') }}</span>
+                                    </div>
+                                    <h4 class="fw-bold mb-1">{{ $subscription->name }}</h4>
+                                    <p class="text-muted mb-3">{{ $subscription->description }}</p>
+                                    
+                                    <div class="mb-3">
+                                        <span class="display-4 fw-bold text-primary">${{ number_format($subscription->price, 0) }}</span>
+                                        <span class="text-muted">/ {{ $subscription->duration_days }} days</span>
+                                    </div>
+                                </div>
+
+                                <ul class="list-unstyled text-start mb-4">
+                                    @foreach($subscription->features as $feature)
+                                    <li class="d-flex align-items-center mb-2">
+                                        <span class="text-success me-2 fs-5">✅</span>
+                                        <span>{{ $feature }}</span>
+                                    </li>
+                                    @endforeach
+                                </ul>
                             </div>
-                            <h4 class="fw-bold mb-1">{{ $subscription->name }}</h4>
-                            <p class="text-muted mb-3">{{ $subscription->description }}</p>
-                            
-                            <div class="mb-3">
-                                <span class="display-4 fw-bold text-primary">${{ number_format($subscription->price, 0) }}</span>
-                                <span class="text-muted">/ {{ $subscription->duration_days }} days</span>
+
+                            <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                                <a href="{{ route('payment.form', $subscription) }}" 
+                                   class="btn btn-outline-primary w-100 py-3 fw-bold">
+                                    💳 Choose Plan
+                                </a>
                             </div>
                         </div>
-
-                        <ul class="list-unstyled text-start mb-4">
-                            @foreach($subscription->features as $feature)
-                            <li class="d-flex align-items-center mb-2">
-                                <span class="text-success me-2 fs-5">✅</span>
-                                <span>{{ $feature }}</span>
-                            </li>
-                            @endforeach
-                        </ul>
                     </div>
-
-                    <div class="card-footer bg-transparent border-0 p-4 pt-0">
-                        <a href="{{ route('payment.form', $subscription) }}" 
-                           class="btn btn-outline-primary w-100 py-3 fw-bold">
-                            💳 Choose Plan
-                        </a>
-                    </div>
+                    @endforeach
                 </div>
             </div>
-            @endforeach
+            
+            <button class="carousel-arrow carousel-arrow-right" onclick="slideSubscriptions(1)">
+                <i class="bx bx-chevron-right"></i>
+            </button>
         </div>
     @endif
 </div>
@@ -153,6 +178,59 @@
 
 .card.border-primary {
     border: 2px solid var(--bs-primary) !important;
+}
+
+.subscription-carousel-container {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.carousel-arrow:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.carousel-arrow-left {
+    left: -25px;
+}
+
+.carousel-arrow-right {
+    right: -25px;
+}
+
+@media (max-width: 768px) {
+    .subscription-slide {
+        width: calc(100% / 2) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .subscription-slide {
+        width: 100% !important;
+    }
+    
+    .carousel-arrow {
+        display: none;
+    }
 }
 </style>
 
@@ -179,10 +257,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <form action="{{ route('author.subscriptions.change') }}" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-warning">Changer d'abonnement</button>
-                </form>
+                <a href="{{ route('author.subscriptions.change') }}" class="btn btn-warning">Changer d'abonnement</a>
             </div>
         </div>
     </div>
@@ -197,15 +272,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div id="ai-recommendation-unsub" class="alert alert-warning mb-3">
-                    <div class="d-flex align-items-center">
-                        <i class="bx bx-brain" style="font-size: 24px; margin-right: 10px;"></i>
-                        <div>
-                            <strong>🤖 Recommandation AI</strong>
-                            <div id="recommendation-text-unsub">Analyse de votre profil en cours...</div>
-                        </div>
-                    </div>
-                </div>
                 <p>Voulez-vous vraiment vous désabonner ?</p>
                 <p class="text-muted">Votre abonnement sera désactivé et vous perdrez l'accès aux fonctionnalités premium.</p>
             </div>
@@ -221,6 +287,50 @@
 </div>
 
 <script>
+let currentSlide = 0;
+const totalSlides = {{ count($subscriptions) }};
+const slidesPerView = 3;
+const maxSlide = Math.max(0, totalSlides - slidesPerView);
+
+function slideSubscriptions(direction) {
+    const track = document.getElementById('subscriptionTrack');
+    if (!track) return;
+    
+    currentSlide += direction;
+    
+    if (currentSlide < 0) {
+        currentSlide = 0;
+    } else if (currentSlide > maxSlide) {
+        currentSlide = maxSlide;
+    }
+    
+    const slideWidth = 100 / slidesPerView;
+    const translateX = -currentSlide * slideWidth;
+    track.style.transform = `translateX(${translateX}%)`;
+    
+    updateArrows();
+}
+
+function updateArrows() {
+    const leftArrow = document.querySelector('.carousel-arrow-left');
+    const rightArrow = document.querySelector('.carousel-arrow-right');
+    
+    if (leftArrow) leftArrow.style.opacity = currentSlide === 0 ? '0.5' : '1';
+    if (rightArrow) rightArrow.style.opacity = currentSlide === maxSlide ? '0.5' : '1';
+}
+
+// Load recommendation on page load if no subscription
+@if(!$currentSubscription)
+document.addEventListener('DOMContentLoaded', function() {
+    loadRecommendation('recommendation-text');
+    updateArrows();
+});
+@else
+document.addEventListener('DOMContentLoaded', function() {
+    updateArrows();
+});
+@endif
+
 function confirmChangeSubscription() {
     loadRecommendation('recommendation-text');
     const modal = new bootstrap.Modal(document.getElementById('changeSubscriptionModal'));
@@ -228,7 +338,6 @@ function confirmChangeSubscription() {
 }
 
 function confirmUnsubscribe() {
-    loadRecommendation('recommendation-text-unsub');
     const modal = new bootstrap.Modal(document.getElementById('unsubscribeModal'));
     modal.show();
 }
@@ -240,10 +349,14 @@ function loadRecommendation(targetId) {
             if (data.success) {
                 const recommendationText = document.getElementById(targetId);
                 recommendationText.innerHTML = `
-                    <div><strong>Historique:</strong> ${Math.round(data.data.current_usage.emprunts_mois)} emprunts de livres/mois</div>
-                    <div><strong>Budget livres:</strong> ${Math.round(data.data.current_usage.budget_livres)}€/mois</div>
-                    <div><strong>Recommandé:</strong> ${data.data.recommendation}</div>
-                    <div style="color: #0066cc; font-weight: bold;">${data.data.action}</div>
+                    <div class="mb-2">
+                        <strong>Historique:</strong> ${Math.round(data.data.current_usage.emprunts_mois)} emprunts/mois | 
+                        <strong>Budget:</strong> ${Math.round(data.data.current_usage.budget_livres)}€/mois
+                    </div>
+                    <div class="mb-2">
+                        <strong>Recommandé:</strong> <span class="text-primary">${data.data.recommendation}</span>
+                    </div>
+                    <div class="text-success fw-bold">${data.data.action}</div>
                 `;
             }
         })

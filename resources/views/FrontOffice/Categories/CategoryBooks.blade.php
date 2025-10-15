@@ -37,7 +37,7 @@
                         </figure>
                         <figcaption>
                             <h3><a href="{{ route('livres.showf', $livre->id) }}">{{ $livre->titre }}</a></h3>
-                            <span>by {{ $livre->auteur }}</span>
+                            <span>by {{ $livre->user->name ?? 'Unknown Author' }}</span>
                             @if($livre->prix)
                                 <div class="item-price">{{ number_format($livre->prix, 2) }} €</div>
                             @endif

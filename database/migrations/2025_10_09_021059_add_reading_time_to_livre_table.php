@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-<<<<<<<< HEAD:database/migrations/2025_09_26_183425_add_facebook_id_to_users_table.php
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('facebook_id')->nullable()->after('email');
-========
-       Schema::table('livres', function (Blueprint $table) {
+        Schema::table('livres', function (Blueprint $table) {
             $table->string('reading_time')->nullable();
->>>>>>>> origin/main:database/migrations/2025_10_09_021059_add_reading_time_to_livre_table.php
         });
 
     }
@@ -27,13 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-<<<<<<<< HEAD:database/migrations/2025_09_26_183425_add_facebook_id_to_users_table.php
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('facebook_id');
-========
-        Schema::table('livre', function (Blueprint $table) {
-            //
->>>>>>>> origin/main:database/migrations/2025_10_09_021059_add_reading_time_to_livre_table.php
+        Schema::table('livres', function (Blueprint $table) {
+            $table->dropColumn('reading_time');
         });
     }
 };

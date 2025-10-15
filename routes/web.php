@@ -22,6 +22,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\NoteController;
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
@@ -188,7 +189,8 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
 
         // Abonnements Auteur
         Route::get('/mes-abonnements', [\App\Http\Controllers\AuthorSubscriptionController::class, 'index'])->name('author.subscriptions');
-        Route::post('/mes-abonnements/change', [\App\Http\Controllers\AuthorSubscriptionController::class, 'changeSubscription'])->name('author.subscriptions.change');
+        Route::get('/mes-abonnements/change', [\App\Http\Controllers\AuthorSubscriptionController::class, 'changeSubscription'])->name('author.subscriptions.change');
+        Route::post('/mes-abonnements/change/{subscription}', [\App\Http\Controllers\AuthorSubscriptionController::class, 'processChangeSubscription'])->name('author.subscriptions.process-change');
         Route::post('/mes-abonnements/unsubscribe', [\App\Http\Controllers\AuthorSubscriptionController::class, 'unsubscribe'])->name('author.subscriptions.unsubscribe');
     });
 

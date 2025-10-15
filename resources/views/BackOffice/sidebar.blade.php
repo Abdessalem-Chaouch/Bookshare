@@ -2,17 +2,10 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
         <a href="{{ route('accueil') }}" class="app-brand-link">
-        <a href="{{ route('accueil') }}" class="app-brand-link">
-
             <span class="app-brand-logo demo">
                 <img alt="icon" src="{{asset('assets/img/libroLogo.png')}}" style="width:40px; height:40px; margin-right:10px;">
             </span>
             <span class="app-brand-text demo menu-text fw-bolder ms-2">LibroLink</span>
-            <span class="app-brand-logo demo">
-                <img alt="icon" src="{{asset('assets/img/libroLogo.png')}}" style="width:40px; height:40px; margin-right:10px;">
-            </span>
-            <span class="app-brand-text demo menu-text fw-bolder ms-2">LibroLink</span>
-
         </a>
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
             <i class="bx bx-chevron-left bx-sm align-middle"></i>
@@ -51,14 +44,6 @@
                 <div data-i18n="Analytics">My Subscriptions</div>
             </a>
         </li>
-        
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Subscriptions</span></li>
-        <li class="menu-item {{ request()->routeIs('author.subscriptions') ? 'active' : '' }}">
-            <a href="{{ route('author.subscriptions') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-credit-card"></i>
-                <div data-i18n="Analytics">My Subscriptions</div>
-            </a>
-        </li>
         @endif
         @endauth
 
@@ -85,12 +70,10 @@
             </ul>
         </li>
 
-
         <!-- Gestion des magasins -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Stores Managements</span></li>
         <li class="menu-item {{ request()->routeIs('AjouterMagasin', 'listeMagasin') ? 'open active' : '' }}">
             <a href="javascript:void(0)" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-store"></i>
                 <i class="menu-icon tf-icons bx bx-store"></i>
                 <div data-i18n="User interface">Stores</div>
             </a>
@@ -110,25 +93,7 @@
 
         <!-- Gestion des Blogs -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Blogs Managements</span></li>
-                <li class="menu-item {{ request()->routeIs('categoryBlog.create', 'categoryBlog.index') ? 'open active' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-copy"></i>
-                <div data-i18n="Form Elements">Category Blogs</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('categoryBlog.create') ? 'active' : '' }}">
-                    <a href="{{ route('categoryBlog.create') }}" class="menu-link">
-                        <div data-i18n="Basic Inputs">Add Category Blog</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('categoryBlog.index') ? 'active' : '' }}">
-                    <a href="{{ route('categoryBlog.index') }}" class="menu-link">
-                        <div data-i18n="Input groups">Category Blog List</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-                <li class="menu-item {{ request()->routeIs('categoryBlog.create', 'categoryBlog.index') ? 'open active' : '' }}">
+        <li class="menu-item {{ request()->routeIs('categoryBlog.create', 'categoryBlog.index') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-copy"></i>
                 <div data-i18n="Form Elements">Category Blogs</div>
@@ -149,7 +114,6 @@
         <li class="menu-item {{ request()->routeIs('AjouterBlog', 'listeBlog') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-news"></i>
-                <i class="menu-icon tf-icons bx bx-news"></i>
                 <div data-i18n="Form Elements">Blogs</div>
             </a>
             <ul class="menu-sub">
@@ -165,16 +129,11 @@
                 </li>
             </ul>
         </li>
-        @endif
 
-        <!-- ✅ Partie visible pour ADMIN ET AUTEUR : Gestion des Livres -->
-        @if(auth()->user()->isAdmin())
-        @if(auth()->user()->isAdmin())
         <!-- Gestion des catégories -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Books Managements</span></li>
         <li class="menu-item {{ request()->routeIs('AjouterCategorie', 'listeCategorie') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-category"></i>
                 <i class="menu-icon tf-icons bx bx-category"></i>
                 <div data-i18n="Misc">Categories</div>
             </a>
@@ -195,7 +154,6 @@
         <li class="menu-item {{ request()->routeIs('AjouterLivre', 'listeLivre') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-book"></i>
-                <i class="menu-icon tf-icons bx bx-book"></i>
                 <div data-i18n="Account Settings">Books</div>
             </a>
             <ul class="menu-sub">
@@ -209,22 +167,14 @@
                         <div data-i18n="Notifications">Books List</div>
                     </a>
                 </li>
-
-
-
-
-
-
             </ul>
         </li>
        <li class="menu-item {{ request()->routeIs('borrowsBook') ? 'active' : '' }}">
-                    <a href="{{ route('borrowsBook') }}" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-book-open"></i>
-
-                        <div data-i18n="Notifications">Borrows </div>
-                    </a>
+            <a href="{{ route('borrowsBook') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-book-open"></i>
+                <div data-i18n="Notifications">Borrows </div>
+            </a>
         </li>
-
 
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Payments</span></li>
 
@@ -259,53 +209,36 @@
         @endif
 
         @if(auth()->user()->isAuteur())
-
-
-
-    <!-- Gestion des livres -->
-    <li class="menu-item {{ request()->routeIs('AjouterLivre', 'listeLivre', 'mesLivres') ? 'open active' : '' }}">
-        <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-book"></i>
-            <div data-i18n="Account Settings">Books</div>
-        </a>
-        <ul class="menu-sub">
-            <li class="menu-item {{ request()->routeIs('AjouterLivre') ? 'active' : '' }}">
-                <a href="#" onclick="checkSubscription()" class="menu-link">
-                    <div data-i18n="Account">Add Book</div>
-                </a>
-            </li>
-           
-            <li class="menu-item {{ request()->routeIs('mesLivres') ? 'active' : '' }}">
-                <a href="{{ route('mesLivres') }}" class="menu-link">
-                    <div data-i18n="Profile">My Books</div>
-                </a>
-            </li>
-        </ul>
-    </li>
-
-
+        <!-- Gestion des livres -->
+        <li class="menu-item {{ request()->routeIs('AjouterLivre', 'listeLivre', 'mesLivres') ? 'open active' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-book"></i>
+                <div data-i18n="Account Settings">Books</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('AjouterLivre') ? 'active' : '' }}">
+                    <a href="#" onclick="checkSubscription()" class="menu-link">
+                        <div data-i18n="Account">Add Book</div>
+                    </a>
+                </li>
+               
+                <li class="menu-item {{ request()->routeIs('mesLivres') ? 'active' : '' }}">
+                    <a href="{{ route('mesLivres') }}" class="menu-link">
+                        <div data-i18n="Profile">My Books</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
         @endif
-  
-
-  
-
     </ul>
-          <li>
-
-    <div class="text-center">
-        <a href="{{ route('accueil') }}" class="btn btn-primary">
-            <i class="bx bx-arrow-back me-1"></i> Go Back Home
-        </a>
+    
+    <!-- Go Back Home Button at bottom -->
+    <div class="position-absolute bottom-0 w-100 p-3">
+        <div class="text-center">
+            <a href="{{ route('accueil') }}" class="btn btn-primary w-100">
+                <i class="bx bx-arrow-back me-1"></i> Go Back Home
+            </a>
+        </div>
     </div>
-</li>
-          <li>
-
-    <div class="text-center">
-        <a href="{{ route('accueil') }}" class="btn btn-primary">
-            <i class="bx bx-arrow-back me-1"></i> Go Back Home
-        </a>
-    </div>
-</li>
 </aside>
 <!-- / Menu -->
-

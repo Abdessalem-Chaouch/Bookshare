@@ -27,51 +27,6 @@
                             </span>
                         </a>
 
-                           <!-- Notification Dropdown -->
-                        <div class="dropdown d-inline-block position-relative">
-                            <a href="#" class="for-buy position-relative dropdown-toggle" id="notificationDropdown"
-                               data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-bell" style="font-size: 1.2rem;"></i>
-                                @if(Auth::user() && Auth::user()->unreadNotifications->count() > 0)
-                                    <span id="notification-count" class="cart-badge">
-                                        {{ Auth::user()->unreadNotifications->count() }}
-                                    </span>
-                                @endif
-                            </a>
-
-                            <ul class="dropdown-menu dropdown-menu-end p-0 shadow"
-                                aria-labelledby="notificationDropdown"
-                                style="width: 300px; max-height: 400px; overflow-y: auto;">
-                                
-                                <!-- Header -->
-                                <li class="px-3 py-2 border-bottom bg-light d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold">Notifications</span>
-                                    <form action="{{ route('notifications.clear') }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Clear All</button>
-                                    </form>
-                                </li>
-
-                                <!-- Notifications list -->
-                                @forelse($notifications as $notification)
-                                    <li class="px-3 py-2 border-bottom d-flex justify-content-between align-items-start">
-                                        <div>
-                                            {{ $notification->data['message'] }}
-                                            <br>
-                                            <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
-                                        </div>
-                                        <form action="{{ route('notifications.delete', $notification->id) }}" method="POST" class="ms-2">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-secondary">&times;</button>
-                                        </form>
-                                    </li>
-                                @empty
-                                    <li class="px-3 py-2"><span class="text-muted">Aucune notification</span></li>
-                                @endforelse
-                            </ul>
-                        </div>
-
                         <!-- CSS pour badge -->
                         <style>
                         .cart-badge {
@@ -84,14 +39,6 @@
                             padding: 2px 6px;
                             font-size: 0.75rem;
                         }
-                        .dropdown-menu.show {
-                            display: block !important;
-                            position: absolute !important;
-                            z-index: 1000 !important;
-                        }
-                        .dropdown {
-                            position: relative !important;
-                        }
                         </style>
 
                         @guest
@@ -101,57 +48,6 @@
                             </a>
                         @endguest
 
-                        @auth
-                            @if(Auth::user()->role === 'auteur')
-                                <!-- Dropdown Auteur -->
-                                <div class="dropdown d-inline-block align-items-center">
-                                    <a class="nav-link dropdown-toggle align-items-center" href="#" id="profileDropdownAuteur"
-                                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <img src="{{ auth()->user()->photo_profil
-                                                    ? asset('storage/' . auth()->user()->photo_profil)
-                                                    : asset('images/default-avatar.jpg') }}"
-                                             alt="Profile"
-                                             class="rounded-circle"
-                                             style="width:40px; height:40px; object-fit:cover;">
-                                        <span class="ms-2">{{ Auth::user()->name }}</span>
-                                    </a>
-
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdownAuteur">
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('profil.index') }}">
-                                                <i class="bi bi-person"></i> Profil
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('dashboardAuteur') }}">
-                                                <i class="bi bi-gear"></i> Dashboard
-                                            </a>
-                                        </li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <form method="POST" action="{{ route('logout') }}" class="d-inline">
-                                                @csrf
-                                                <button class="dropdown-item text-danger" type="submit">
-                                                    <i class="bi bi-box-arrow-right"></i> Logout
-                                                </button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
-
-                            @elseif(Auth::user()->role === 'admin')
-                                <!-- Dropdown Admin -->
-                                <div class="dropdown d-inline-block align-items-center">
-                                    <a class="nav-link dropdown-toggle align-items-center" href="#" id="profileDropdownAdmin"
-                                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <img src="{{ auth()->user()->photo_profil
-                                                    ? asset('storage/' . auth()->user()->photo_profil)
-                                                    : asset('images/default-avatar.jpg') }}"
-                                             alt="Profile"
-                                             class="rounded-circle"
-                                             style="width:40px; height:40px; object-fit:cover;">
-                                        <span class="ms-2">{{ Auth::user()->name }}</span>
-                                    </a>
                         @auth
                             @if(Auth::user()->role === 'auteur')
                                 <!-- Dropdown Auteur -->
@@ -301,19 +197,6 @@
                         </a>
                     </div>
                 </div>
-    <!-- Header principal -->
-    <header id="header">
-        <div class="container-fluid">
-            <div class="row">
-                <!-- Logo -->
-                <div class="col-md-2">
-                    <div class="main-logo">
-                        <a href="{{ route('accueil') }}" class="logo-link d-flex align-items-center">
-                            <img src="{{asset('assets/img/libroLogo.png')}}" alt="logo" style="width:50px; height:60px; margin-right:10px;">
-                            <span class="logo-text">LibroLink</span>
-                        </a>
-                    </div>
-                </div>
 
                 <!-- Navbar -->
                 <div class="col-md-10">
@@ -339,43 +222,7 @@
                                     <a href="{{ route('aboutus') }}" class="nav-link">About us</a>
                                 </li>
                             </ul>
-                <!-- Navbar -->
-                <div class="col-md-10">
-                    <nav id="navbar">
-                        <div class="main-menu stellarnav">
-                            <ul class="menu-list">
-                                <li class="menu-item {{ request()->routeIs('accueil') ? 'active' : '' }}">
-                                    <a href="{{ route('accueil') }}">Home</a>
-                                </li>
-                                <li class="menu-item {{ request()->routeIs('front.categories') ? 'active' : '' }}">
-                                    <a href="{{ route('front.categories') }}" class="nav-link">Categories</a>
-                                </li>
-                                <li class="menu-item {{ request()->routeIs('livresf') ? 'active' : '' }}">
-                                    <a href="{{ route('livresf') }}">Books</a>
-                                </li>
-                                <li class="menu-item {{ request()->routeIs('articles') ? 'active' : '' }}">
-                                    <a href="{{ route('articles') }}" class="nav-link">Blogs</a>
-                                </li>
-                                <li class="menu-item {{ request()->routeIs('stores') ? 'active' : '' }}">
-                                    <a href="{{ route('stores') }}" class="nav-link">Stores</a>
-                                </li>
-                                <li class="menu-item {{ request()->routeIs('aboutus') ? 'active' : '' }}">
-                                    <a href="{{ route('aboutus') }}" class="nav-link">About us</a>
-                                </li>
-                            </ul>
 
-                            <div class="hamburger">
-                                <span class="bar"></span>
-                                <span class="bar"></span>
-                                <span class="bar"></span>
-                            </div>
-                        </div>
-                    </nav>
-                </div>
-            </div>
-        </div>
-    </header>
-</div><!-- header-wrap -->
                             <div class="hamburger">
                                 <span class="bar"></span>
                                 <span class="bar"></span>

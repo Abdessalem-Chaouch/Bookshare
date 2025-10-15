@@ -7,17 +7,9 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-<<<<<<< HEAD
-        "guzzlehttp/guzzle": "^7.10",
-        "laravel/framework": "^12.0",
-        "laravel/socialite": "^5.23",
-        "laravel/tinker": "^2.10.1",
-        "paypal/paypal-checkout-sdk": "^1.0",
-        "srmklive/paypal": "^3.0",
-        "twilio/sdk": "^8.8"
-=======
         "cloudinary-labs/cloudinary-laravel": "^3.0",
         "google/apiclient": "2.15",
+        "guzzlehttp/guzzle": "^7.10",
         "laravel/framework": "^12.0",
         "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.10.1",
@@ -29,7 +21,6 @@
         "srmklive/paypal": "^3.0",
         "twilio/sdk": "^8.8",
         "uploadcare/uploadcare-php": "^4.2"
->>>>>>> origin/main
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
