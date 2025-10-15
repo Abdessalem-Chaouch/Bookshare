@@ -27,6 +27,21 @@ use App\Http\Controllers\PaypalController;
 
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\RecommendationController;
+use Illuminate\Support\Facades\Http;
+
+Route::get('/test-recommendation', function () {
+    // Exemple d’articles likés simulés
+    $liked = [1];
+
+    // Envoi à Flask
+    $response = Http::post('http://127.0.0.1:5000/recommend', [
+        'liked_articles' => $liked
+    ]);
+
+    // Retourne la réponse brute pour test
+    return $response->json();
+});
 
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
