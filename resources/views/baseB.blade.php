@@ -92,6 +92,7 @@
 
     <!-- GitHub Buttons (optional) -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js" charset="utf-8"></script>
 
 </body>
 

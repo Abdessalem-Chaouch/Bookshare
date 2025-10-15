@@ -21,8 +21,9 @@
   <script src="https://unpkg.com/epubjs/dist/epub.min.js"></script>
 <script src="https://unpkg.com/page-flip/dist/page-flip.min.js"></script>
   <script src="https://unpkg.com/pdfjs-dist/build/pdf.min.js"></script>
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/libroLogo.png') }}">
 
-    <!-- ✅ Bootstrap (une seule version) -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Bootstrap Icons -->
@@ -49,41 +50,49 @@
 </head>
 
 <body data-bs-spy="scroll" data-bs-target="#header" tabindex="0">
+
+    <!-- Navbar -->
     @include("FrontOffice.navbar")
 
+    <!-- Contenu principal -->
     @yield('content')
 
+    <!-- Alertes -->
     @if(session('success'))
-        <div class="alert alert-success text-center"
-             style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 250px;">
-            {{ session('success') }}
-        </div>
+    <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3"
+        role="alert" style="z-index: 9999;">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     @endif
 
     @if(session('error'))
-        <div class="alert alert-danger text-center"
-             style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 250px;">
-            {{ session('error') }}
-        </div>
+    <div class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-3"
+        role="alert" style="z-index: 9999;">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     @endif
 
+    <!-- Footer -->
     @include("FrontOffice.footer")
 
     <!-- jQuery -->
     <script src="{{ asset('js/jquery-1.11.0.min.js') }}"></script>
 
-    <!-- ✅ Bootstrap JS Bundle (une seule version) -->
+    <!-- Bootstrap JS Bundle (inclut Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Template JS -->
     <script src="{{ asset('js/plugins.js') }}"></script>
     <script src="{{ asset('js/script.js') }}"></script>
 
+    <!-- Dropdown custom pour profil -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const dropdownToggle = document.getElementById('profileDropdown');
             if (dropdownToggle) {
-                dropdownToggle.addEventListener('click', function (e) {
+                dropdownToggle.addEventListener('click', function(e) {
                     e.preventDefault();
                     const dropdownMenu = this.nextElementSibling;
                     if (dropdownMenu) {
@@ -92,7 +101,7 @@
                 });
             }
 
-            document.addEventListener('click', function (e) {
+            document.addEventListener('click', function(e) {
                 const dropdown = document.querySelector('.dropdown-menu.show');
                 if (dropdown && !e.target.closest('.dropdown')) {
                     dropdown.classList.remove('show');
@@ -100,6 +109,7 @@
             });
         });
     </script>
-
+    <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js" charset="utf-8"></script>
 </body>
+
 </html>

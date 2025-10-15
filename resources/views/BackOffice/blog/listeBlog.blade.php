@@ -33,7 +33,9 @@
                         <th>Author</th>
                         <th>Category</th>
                         <th>Image</th>
-                        <th>Created At</th>
+                        <th>Likes</th>
+                        <th>Comments</th>
+                        <th>detail</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -70,14 +72,34 @@
                         <!-- Image -->
                         <td>
                             @if($blog->image)
-                            <img src="{{ asset('uploads/' . $blog->image) }}" alt="Image Blog" class="rounded" width="50">
+                            <img src="{{ asset($blog->image) }}" alt="Image Blog" class="rounded" width="50">
                             @else
                             N/A
                             @endif
                         </td>
 
-                        <!-- Date de création -->
-                        <td>{{ $blog->created_at->format('d/m/Y H:i') }}</td>
+                        <td>
+                            @if($blog->likes_count > 0)
+                            {{ $blog->likes_count }} likes
+                            @else
+                            No likes
+                            @endif
+                        </td>
+                        <td>
+                            @if($blog->comments_count > 0)
+
+                            {{ $blog->comments_count }} comments
+
+                            @else
+                            No comments
+                            @endif
+                        </td>
+                        <td> <a href="{{ route('blogs.show1', $blog->id) }}">
+                                see more
+                            </a>
+                        </td>
+
+
 
                         <!-- Actions -->
                         <td>
@@ -109,7 +131,7 @@
                                 <i class="bx bx-category bx-lg mb-2"></i>
                                 <p>No blog found</p>
                                 <a href="{{ route('AjouterBlog') }}" class="btn btn-primary btn-sm">
-                                   Add the first blog
+                                    Add the first blog
                                 </a>
                             </div>
                         </td>

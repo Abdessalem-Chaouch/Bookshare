@@ -76,17 +76,25 @@
 
                             <!-- Image -->
                             <div class="row mb-3">
-                                <label class="col-sm-2 form-label" for="image">Image</label>
+                                <label class="col-sm-2 form-label">Image</label>
                                 <div class="col-sm-10">
-                                    @if($blog->image)
-                                    <img src="{{ asset('uploads/' . $blog->image) }}" alt="Blog image" class="rounded mb-2" width="100">
-                                    @endif
-                                    <input type="file" name="image" class="form-control" id="image">
+                                    <input
+                                        type="hidden"
+                                        role="uploadcare-uploader"
+                                        name="image"
+                                        class="@error('image') is-invalid @enderror"
+                                        data-public-key="{{ config('services.uploadcare.public_key') }}"
+                                        data-images-only="true"
+                                        data-clearable="true"
+                                        data-crop="free"
+                                        value="{{ old('image', $blog->image) }}" 
+                                    >
                                     @error('image')
                                     <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
                             </div>
+
 
                             <!-- Buttons -->
                             <div class="row justify-content-end">

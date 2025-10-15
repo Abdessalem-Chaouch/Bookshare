@@ -40,6 +40,25 @@ Version: 1.1
 .logo-link:hover .logo-text {
     color: #daa556; /* couleur au hover */
 }
+.like-btn i {
+    color: #c5a992; /* couleur par défaut pour icône non likée */
+}
+
+.like-count {
+    cursor: pointer;
+    text-decoration: underline;
+    color: #c5a992; /* couleur par défaut du compteur non liké */
+}
+
+.like-btn.liked i {
+    color: black; /* icône likée */
+}
+
+.like-btn.liked + .like-count {
+    color: black; /* compteur liké */
+    font-weight: bold;
+}
+
 /* Theme Colors */
 :root {
   --accent-color: #C5A992;
