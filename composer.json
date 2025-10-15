@@ -7,12 +7,16 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "cloudinary-labs/cloudinary-laravel": "^3.0",
+        "google/apiclient": "2.15",
         "laravel/framework": "^12.0",
         "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.10.1",
+        "masbug/flysystem-google-drive-ext": "^2.4",
         "paypal/paypal-checkout-sdk": "^1.0",
         "srmklive/paypal": "^3.0",
-        "twilio/sdk": "^8.8"
+        "twilio/sdk": "^8.8",
+        "uploadcare/uploadcare-php": "^4.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

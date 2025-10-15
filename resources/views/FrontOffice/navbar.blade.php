@@ -23,7 +23,7 @@
                             <i class="icon icon-clipboard"></i>
                             <span>Cart</span>
                             <span id="cart-count" class="cart-badge">
-                                {{ \App\Models\Cart::where('utilisateur_id', Auth::id())->sum('quantite') }}
+                                {{ \App\Models\Cart::where('user_id', Auth::id())->sum('quantite') }}
                             </span>
                         </a>
 

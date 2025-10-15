@@ -51,5 +51,10 @@ return [
         'secret' => env('PAYPAL_SECRET'),
         'mode' => env('PAYPAL_MODE', 'sandbox'), // 'sandbox' or 'live'
     ],
+    'uploadcare' => [
+        'public_key' => env('UPLOADCARE_PUBLIC_KEY'),
+        'secret_key' => env('UPLOADCARE_SECRET_KEY'),
+    ],
+
 
 ];

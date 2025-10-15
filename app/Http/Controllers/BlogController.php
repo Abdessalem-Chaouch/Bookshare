@@ -8,23 +8,33 @@ use App\Models\categoryBlog;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Twilio\Rest\Client;
 use Illuminate\Support\Facades\Log;
+use Uploadcare\Api;
+use Uploadcare\Configuration;
 
 class BlogController extends Controller
 {
     public function index()
     {
-        $blogs = Blog::with(['category', 'likes', 'comments'])->latest()->get();
+        // Avec withCount pour comments et likes
+        $blogs = Blog::with(['category', 'likes'])
+            ->withCount(['comments', 'likes'])
+            ->latest()
+            ->get();
+
         return view('BackOffice.blog.listeBlog', compact('blogs'));
     }
 
+
     public function indexFront(Request $request)
     {
-        // Récupérer toutes les catégories depuis le modèle categoryBlog
-        $categoriesblogs = categoryBlog::all();
+        // Récupérer toutes les catégories
+        $categoriesblogs = CategoryBlog::all();
 
+        // Préparer la query des blogs (avec relations)
         $query = Blog::with(['category', 'likes', 'comments'])->latest();
 
         // Filtrer par catégorie si demandé
@@ -34,7 +44,51 @@ class BlogController extends Controller
 
         $blogs = $query->get();
 
-        return view('FrontOffice.Articles.ArticlePage', compact('blogs', 'categoriesblogs'));
+        // Par défaut, collection vide pour recommandations
+        $recommendedArticles = collect();
+
+        // Si utilisateur connecté -> appel Flask pour recommandations
+        if (Auth::check()) {
+            try {
+                $response = Http::timeout(5)->post('http://127.0.0.1:5000/recommend', [
+                    'user_id' => Auth::id()
+                ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+
+                    if (!empty($data['recommendations'])) {
+                        // Convertir en collection d'objets simples compatibles Blade
+                        $recommendedArticles = collect($data['recommendations'])->map(function ($item) {
+                            $category = CategoryBlog::find($item['category_id']); // récupérer la catégorie
+                            return (object) [
+                                'id' => $item['id'],
+                                'title' => $item['title'] ?? '',
+                                'content' => $item['content'] ?? '',
+                                'image' => $item['image'] ?? null,
+                                'category' => $category,
+                                'created_at' => isset($item['created_at']) ? \Carbon\Carbon::parse($item['created_at']) : null,
+                            ];
+                        });
+                    }
+                } else {
+                    Log::warning('Flask recommend returned non-success: ' . $response->status());
+                }
+            } catch (\Exception $e) {
+                Log::error('Erreur appel Flask recommend: ' . $e->getMessage());
+            }
+        }
+
+        // Supprimer les articles recommandés de la liste principale
+        $recommendedIds = $recommendedArticles->pluck('id')->toArray();
+        $otherArticles = $blogs->whereNotIn('id', $recommendedIds);
+
+        // Retourner la vue avec deux listes séparées
+        return view('FrontOffice.Articles.ArticlePage', [
+            'recommendedArticles' => $recommendedArticles,
+            'blogs' => $otherArticles,
+            'categoriesblogs' => $categoriesblogs,
+        ]);
     }
 
 
@@ -45,34 +99,41 @@ class BlogController extends Controller
         return view('BackOffice.blog.ajouterBlog', compact('categories'));
     }
 
+
     public function store(Request $request)
     {
+        // Validation
         $request->validate([
-            'title'       => 'required|max:255',
-            'content'     => 'required',
-            'image'       => 'required|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'title'       => 'required|string|max:255',
+            'content'     => 'required|string',
+            'image'       => 'required|string', // maintenant c'est une URL publique
             'category_id' => 'nullable|exists:category_blogs,id',
         ]);
 
-        $imageName = time() . '.' . $request->image->extension();
-        $request->image->move(public_path('uploads'), $imageName);
+        if (!Auth::check()) {
+            return back()->with('error', 'Vous devez être connecté pour ajouter un blog.');
+        }
 
+        // Créer le blog
         $blog = Blog::create([
             'title'       => $request->title,
-            'content'     => $request->content,
-            'image'       => $imageName,
+            'content'     => $request->input('content'),
+            'image'       => $request->image, // URL Uploadcare
             'user_id'     => Auth::id(),
-            'category_id' => $request->category_id,
+            'category_id' => $request->category_id ?? null,
         ]);
 
-        // Envoyer mail à tous les utilisateurs
+        // Optionnel : envoyer mail
         $users = User::all();
         foreach ($users as $user) {
+
             Mail::to($user->email)->send(new NewBlogMail($blog));
         }
 
-        return redirect()->route('listeBlog')->with('success', 'Blog created successfully and users have been notified.');
+        return redirect()->route('listeBlog')
+            ->with('success', 'Blog créé avec succès et image uploadée sur Uploadcare !');
     }
+
     public function edit(Blog $blog)
     {
         if ($blog->user_id !== Auth::id()) {
@@ -83,35 +144,34 @@ class BlogController extends Controller
         return view('BackOffice.blog.editerBlog', compact('blog', 'categories'));
     }
 
-    public function update(Request $request, Blog $blog)
-    {
-        if ($blog->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $request->validate([
-            'title'       => 'required|max:255',
-            'content'     => 'required',
-            'image'       => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
-            'category_id' => 'nullable|exists:category_blogs,id',
-        ]);
-
-        if ($request->hasFile('image')) {
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('uploads'), $imageName);
-        } else {
-            $imageName = $blog->image;
-        }
-
-        $blog->update([
-            'title'       => $request->title,
-            'content'     => $request->content,
-            'image'       => $imageName,
-            'category_id' => $request->category_id,
-        ]);
-
-        return redirect()->route('listeBlog')->with('success', 'Blog successfully updated ✅');
+public function update(Request $request, Blog $blog)
+{
+    if ($blog->user_id !== Auth::id()) {
+        abort(403);
     }
+
+    // Validation
+    $request->validate([
+        'title'       => 'required|string|max:255',
+        'content'     => 'required|string',
+        'image'       => 'nullable|string', // URL publique comme dans store
+        'category_id' => 'nullable|exists:category_blogs,id',
+    ]);
+
+    // Si l'utilisateur a fourni une nouvelle image, on la prend sinon on garde l'ancienne
+    $image = $request->image ?? $blog->image;
+
+    $blog->update([
+        'title'       => $request->title,
+        'content'     => $request->input('content'),
+        'image'       => $image,
+        'category_id' => $request->category_id,
+    ]);
+
+    return redirect()->route('listeBlog')
+                     ->with('success', 'Blog successfully updated ✅');
+}
+
 
     public function destroy(Blog $blog)
     {
@@ -186,5 +246,15 @@ class BlogController extends Controller
             // Log error but don't break the application
             Log::error('SMS sending failed: ' . $e->getMessage());
         }
+    }
+    public function showComments($id)
+    {
+        $blog = Blog::with('comments.user')->findOrFail($id);
+        return view('BackOffice.blog.comments', compact('blog'));
+    }
+    public function show1($id)
+    {
+        $blog = Blog::with(['comments.user', 'likes.user', 'category', 'user'])->findOrFail($id);
+        return view('BackOffice.blog.detail', compact('blog'));
     }
 }
