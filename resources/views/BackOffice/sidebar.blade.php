@@ -2,7 +2,12 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
         <a href="{{ route('accueil') }}" class="app-brand-link">
+        <a href="{{ route('accueil') }}" class="app-brand-link">
 
+            <span class="app-brand-logo demo">
+                <img alt="icon" src="{{asset('assets/img/libroLogo.png')}}" style="width:40px; height:40px; margin-right:10px;">
+            </span>
+            <span class="app-brand-text demo menu-text fw-bolder ms-2">LibroLink</span>
             <span class="app-brand-logo demo">
                 <img alt="icon" src="{{asset('assets/img/libroLogo.png')}}" style="width:40px; height:40px; margin-right:10px;">
             </span>
@@ -46,6 +51,14 @@
                 <div data-i18n="Analytics">My Subscriptions</div>
             </a>
         </li>
+        
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">Subscriptions</span></li>
+        <li class="menu-item {{ request()->routeIs('author.subscriptions') ? 'active' : '' }}">
+            <a href="{{ route('author.subscriptions') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                <div data-i18n="Analytics">My Subscriptions</div>
+            </a>
+        </li>
         @endif
         @endauth
 
@@ -77,6 +90,7 @@
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Stores Managements</span></li>
         <li class="menu-item {{ request()->routeIs('AjouterMagasin', 'listeMagasin') ? 'open active' : '' }}">
             <a href="javascript:void(0)" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-store"></i>
                 <i class="menu-icon tf-icons bx bx-store"></i>
                 <div data-i18n="User interface">Stores</div>
             </a>
@@ -114,8 +128,27 @@
                 </li>
             </ul>
         </li>
+                <li class="menu-item {{ request()->routeIs('categoryBlog.create', 'categoryBlog.index') ? 'open active' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-copy"></i>
+                <div data-i18n="Form Elements">Category Blogs</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('categoryBlog.create') ? 'active' : '' }}">
+                    <a href="{{ route('categoryBlog.create') }}" class="menu-link">
+                        <div data-i18n="Basic Inputs">Add Category Blog</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('categoryBlog.index') ? 'active' : '' }}">
+                    <a href="{{ route('categoryBlog.index') }}" class="menu-link">
+                        <div data-i18n="Input groups">Category Blog List</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
         <li class="menu-item {{ request()->routeIs('AjouterBlog', 'listeBlog') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-news"></i>
                 <i class="menu-icon tf-icons bx bx-news"></i>
                 <div data-i18n="Form Elements">Blogs</div>
             </a>
@@ -136,10 +169,12 @@
 
         <!-- ✅ Partie visible pour ADMIN ET AUTEUR : Gestion des Livres -->
         @if(auth()->user()->isAdmin())
+        @if(auth()->user()->isAdmin())
         <!-- Gestion des catégories -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Books Managements</span></li>
         <li class="menu-item {{ request()->routeIs('AjouterCategorie', 'listeCategorie') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-category"></i>
                 <i class="menu-icon tf-icons bx bx-category"></i>
                 <div data-i18n="Misc">Categories</div>
             </a>
@@ -160,6 +195,7 @@
         <li class="menu-item {{ request()->routeIs('AjouterLivre', 'listeLivre') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-book"></i>
+                <i class="menu-icon tf-icons bx bx-book"></i>
                 <div data-i18n="Account Settings">Books</div>
             </a>
             <ul class="menu-sub">
@@ -173,6 +209,8 @@
                         <div data-i18n="Notifications">Books List</div>
                     </a>
                 </li>
+
+
 
 
 
@@ -203,6 +241,20 @@
                 <div data-i18n="Account Settings">Subscriptions</div>
             </a>
         </li>
+        
+        <li class="menu-item {{ request()->routeIs('admin.author-subscriptions') ? 'active' : '' }}">
+            <a href="{{ route('admin.author-subscriptions') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user-check"></i>
+                <div data-i18n="Account Settings">Author Subscriptions</div>
+            </a>
+        </li>
+        
+        <li class="menu-item {{ request()->routeIs('admin.author-transactions') ? 'active' : '' }}">
+            <a href="{{ route('admin.author-transactions') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-receipt"></i>
+                <div data-i18n="Account Settings">Author Transactions</div>
+            </a>
+        </li>
 
         @endif
 
@@ -218,7 +270,7 @@
         </a>
         <ul class="menu-sub">
             <li class="menu-item {{ request()->routeIs('AjouterLivre') ? 'active' : '' }}">
-                <a href="{{ route('AjouterLivre') }}" class="menu-link">
+                <a href="#" onclick="checkSubscription()" class="menu-link">
                     <div data-i18n="Account">Add Book</div>
                 </a>
             </li>
@@ -230,16 +282,11 @@
             </li>
         </ul>
     </li>
-    <li class="menu-header small text-uppercase"><span class="menu-header-text">Payments</span></li>
 
-        <li class="menu-item {{ request()->routeIs('transaction') ? 'active' : '' }}">
-            <a href="{{ route('transactions') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-money"></i>
-                <div data-i18n="Account Settings">Transactions</div>
-            </a>
-        </li>
 
         @endif
+  
+
   
 
     </ul>
@@ -251,5 +298,14 @@
         </a>
     </div>
 </li>
+          <li>
+
+    <div class="text-center">
+        <a href="{{ route('accueil') }}" class="btn btn-primary">
+            <i class="bx bx-arrow-back me-1"></i> Go Back Home
+        </a>
+    </div>
+</li>
 </aside>
 <!-- / Menu -->
+
