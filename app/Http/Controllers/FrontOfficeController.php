@@ -19,7 +19,7 @@ public function accueil()
     $subscriptions = Subscription::where('is_active', true)->get();
     
     $livres = Livre::with('categorie', 'user')
-        ->latest('created_at')
+        ->latest('date_ajout')
         ->get();
 
     return view('FrontOffice.Accueil', compact('livres','categories', 'blogs', 'subscriptions','categoriesblogs'));
