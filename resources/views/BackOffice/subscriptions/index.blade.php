@@ -99,6 +99,20 @@
                 </tbody>
             </table>
         </div>
+        
+        <!-- Pagination -->
+        @if($subscriptions->hasPages())
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                        Showing {{ $subscriptions->firstItem() }} to {{ $subscriptions->lastItem() }} of {{ $subscriptions->total() }} subscriptions
+                    </div>
+                    <nav>
+                        {{ $subscriptions->links('pagination::bootstrap-5') }}
+                    </nav>
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 

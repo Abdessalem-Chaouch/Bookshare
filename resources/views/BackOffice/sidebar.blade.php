@@ -30,13 +30,6 @@
 
         {{-- Si l'utilisateur est auteur --}}
         @if(auth()->user()->role === 'auteur')
-        <li class="menu-item {{ request()->routeIs('dashboardAuteur') ? 'active' : '' }}">
-            <a href="{{ route('dashboardAuteur') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                <div data-i18n="Analytics">Author Dashboard</div>
-            </a>
-        </li>
-        
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Subscriptions</span></li>
         <li class="menu-item {{ request()->routeIs('author.subscriptions') ? 'active' : '' }}">
             <a href="{{ route('author.subscriptions') }}" class="menu-link">
@@ -65,6 +58,11 @@
                 <li class="menu-item {{ request()->routeIs('listeUtilisateur') ? 'active' : '' }}">
                     <a href="{{ route('listeUtilisateur') }}" class="menu-link">
                         <div data-i18n="Without navbar">Users List</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('users.analytics') ? 'active' : '' }}">
+                    <a href="{{ route('users.analytics') }}" class="menu-link">
+                        <div data-i18n="Analytics">📊 Analytics</div>
                     </a>
                 </li>
             </ul>

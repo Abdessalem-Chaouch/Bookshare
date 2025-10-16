@@ -89,40 +89,40 @@ class SubscriptionMLService
     
     private function generateInsights($data, $predictions)
     {
-        $insights = "🤖 ANALYSE IA PRÉDICTIVE DES ABONNEMENTS\n\n";
+        $insights = "🤖 AI PREDICTIVE SUBSCRIPTION ANALYSIS\n\n";
         
         // Analyse de rétention avec données réelles
         $churn = $predictions['churn_prediction'];
         $retentionRate = 100 - $churn['current_churn_rate'];
         
-        $insights .= "📊 ANALYSE DE RÉTENTION CLIENT\n";
-        $insights .= "• Abonnements totaux : {$data['total']}\n";
-        $insights .= "• Abonnements actifs : {$data['active']}\n";
-        $insights .= "• Taux de rétention : " . round($retentionRate, 1) . "%\n";
-        $insights .= "• Niveau de risque : {$churn['risk_level']}\n";
-        $insights .= "• Prévision 30 jours : {$churn['predicted_churn_rate']}% de désabonnement\n\n";
+        $insights .= "📊 CLIENT RETENTION ANALYSIS\n";
+        $insights .= "• Total subscriptions: {$data['total']}\n";
+        $insights .= "• Active subscriptions: {$data['active']}\n";
+        $insights .= "• Retention rate: " . round($retentionRate, 1) . "%\n";
+        $insights .= "• Risk level: {$churn['risk_level']}\n";
+        $insights .= "• 30-day forecast: {$churn['predicted_churn_rate']}% churn\n\n";
         
         // Analyse de croissance avec données réelles
         $growth = $predictions['growth_forecast'];
-        $insights .= "📈 PROJECTION DE CROISSANCE\n";
-        $insights .= "• Ce mois : {$growth['current_month']} nouveaux abonnements\n";
-        $insights .= "• Mois précédent : {$growth['last_month']} abonnements\n";
-        $insights .= "• Évolution : {$growth['growth_rate']}%\n";
-        $insights .= "• Tendance : " . $this->getTrendEmoji($growth['growth_rate']) . "\n";
-        $insights .= "• Prévision mois prochain : {$growth['next_month']} abonnements\n\n";
+        $insights .= "📈 GROWTH PROJECTION\n";
+        $insights .= "• This month: {$growth['current_month']} new subscriptions\n";
+        $insights .= "• Previous month: {$growth['last_month']} subscriptions\n";
+        $insights .= "• Evolution: {$growth['growth_rate']}%\n";
+        $insights .= "• Trend: " . $this->getTrendEmoji($growth['growth_rate']) . "\n";
+        $insights .= "• Next month forecast: {$growth['next_month']} subscriptions\n\n";
         
         // Performance des plans avec données réelles
         if ($data['plans']->count() > 0) {
             $topPlan = $data['plans']->sortByDesc('count')->first();
             $planPerformance = $data['total'] > 0 ? round(($topPlan->count / $data['total']) * 100, 1) : 0;
             
-            $insights .= "🎯 PERFORMANCE DES OFFRES\n";
-            $insights .= "• Plan le plus populaire : {$topPlan->subscription->name}\n";
-            $insights .= "• Part de marché : {$planPerformance}%\n";
-            $insights .= "• Nombre d'abonnés : {$topPlan->count}\n";
+            $insights .= "🎯 OFFER PERFORMANCE\n";
+            $insights .= "• Most popular plan: {$topPlan->subscription->name}\n";
+            $insights .= "• Market share: {$planPerformance}%\n";
+            $insights .= "• Number of subscribers: {$topPlan->count}\n";
         } else {
-            $insights .= "🎯 PERFORMANCE DES OFFRES\n";
-            $insights .= "• Aucune donnée d'abonnement disponible\n";
+            $insights .= "🎯 OFFER PERFORMANCE\n";
+            $insights .= "• No subscription data available\n";
         }
         
         return $insights;
@@ -135,26 +135,26 @@ class SubscriptionMLService
     
     private function getTrendEmoji($growthRate)
     {
-        if ($growthRate > 10) return "🚀 Forte croissance";
-        if ($growthRate > 0) return "📈 Croissance positive";
-        if ($growthRate == 0) return "📊 Stabilité";
-        if ($growthRate > -10) return "📉 Léger déclin";
-        return "🔻 Déclin important";
+        if ($growthRate > 10) return "🚀 Strong growth";
+        if ($growthRate > 0) return "📈 Positive growth";
+        if ($growthRate == 0) return "📊 Stability";
+        if ($growthRate > -10) return "📉 Slight decline";
+        return "🔻 Significant decline";
     }
     
     private function getRiskLevel($churnRate)
     {
-        if ($churnRate > 30) return 'CRITIQUE';
-        if ($churnRate > 20) return 'ÉLEVÉ';
-        if ($churnRate > 10) return 'MODÉRÉ';
-        return 'FAIBLE';
+        if ($churnRate > 30) return 'CRITICAL';
+        if ($churnRate > 20) return 'HIGH';
+        if ($churnRate > 10) return 'MODERATE';
+        return 'LOW';
     }
     
     private function calculateConfidence($data)
     {
-        if ($data['total'] >= 20) return 'TRÈS ÉLEVÉE';
-        if ($data['total'] >= 10) return 'ÉLEVÉE';
-        if ($data['total'] >= 5) return 'MOYENNE';
-        return 'FAIBLE';
+        if ($data['total'] >= 20) return 'VERY HIGH';
+        if ($data['total'] >= 10) return 'HIGH';
+        if ($data['total'] >= 5) return 'MEDIUM';
+        return 'LOW';
     }
 }

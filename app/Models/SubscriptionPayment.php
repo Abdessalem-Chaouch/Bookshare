@@ -34,6 +34,11 @@ class SubscriptionPayment extends Model
         return $this->belongsTo(Subscription::class);
     }
 
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
     public function isCompleted()
     {
         return $this->payment_status === 'completed';

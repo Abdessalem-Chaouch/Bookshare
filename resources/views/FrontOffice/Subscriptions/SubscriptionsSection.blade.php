@@ -1,8 +1,11 @@
 <section id="subscriptions-section" class="py-5" style="background: #e8e6e1;">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title mb-3">Choose Your Subscription Plan</h2>
-            <p class="text-muted">Become an author and share your books with our community</p>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="text-center flex-grow-1">
+                <h2 class="section-title mb-2">Choose Your Subscription Plan</h2>
+                <p class="text-muted mb-0">Become an author and share your books with our community</p>
+            </div>
+            <x-currency-selector />
         </div>
 
         <div class="subscription-carousel-container position-relative">
@@ -27,8 +30,14 @@
                             
                             <div class="card-body">
                                 <div class="price-section">
-                                    <span class="currency">€</span>
-                                    <span class="price">{{ number_format($subscription->price, 0) }}</span>
+                                    @php
+                                        $currencyService = app(\App\Services\CurrencyService::class);
+                                        $userCurrency = $currencyService->getUserCurrency();
+                                        $convertedPrice = $currencyService->getLocalizedPrice($subscription->price, 'USD', $userCurrency);
+                                        $currencyData = $currencyService->getCurrency($userCurrency);
+                                    @endphp
+                                    <span class="currency">{{ $currencyData['symbol'] ?? '$' }}</span>
+                                    <span class="price">{{ number_format($convertedPrice, 0) }}</span>
                                     <span class="period">/month</span>
                                 </div>
                                 <p class="billing-info">Billed monthly</p>

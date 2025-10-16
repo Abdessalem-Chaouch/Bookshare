@@ -10,30 +10,56 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use App\Services\SubscriptionMLService;
+use App\Services\CurrencyService;
 
 class AuthorSubscriptionController extends Controller
 {
+    protected $currencyService;
+
+    public function __construct(CurrencyService $currencyService)
+    {
+        $this->currencyService = $currencyService;
+    }
+
     public function index()
     {
         try {
             $subscriptions = Subscription::where('is_active', true)->get();
             $currentSubscription = auth()->user()->currentSubscription();
+            $userCurrency = $this->currencyService->getUserCurrency();
             
-            return view('BackOffice.author-subscriptions.index', compact('subscriptions', 'currentSubscription'));
+            // Convert prices to user's currency
+            foreach ($subscriptions as $subscription) {
+                $subscription->display_price = $this->currencyService->getLocalizedPrice(
+                    $subscription->price,
+                    'USD',
+                    $userCurrency
+                );
+                $subscription->display_currency = $userCurrency;
+            }
+            
+            return view('BackOffice/author-subscriptions/index', compact('subscriptions', 'currentSubscription'));
         } catch (\Exception $e) {
-            // Si erreur, rediriger vers dashboard avec message
-            return redirect()->route('dashboardAuteur')
-                ->with('error', 'Erreur lors du chargement des abonnements. Veuillez contacter l\'administrateur.');
+            // If error, redirect to home with message
+            return redirect()->route('accueil')
+                ->with('error', 'Error loading subscriptions. Please contact the administrator.');
         }
     }
 
     public function adminIndex()
     {
-        $authorSubscriptions = AuthorSubscription::with(['user', 'subscription'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-        
-        return view('BackOffice.author-subscriptions.admin-index', compact('authorSubscriptions'));
+        try {
+            // Pagination avec optimisation de la requête
+            $authorSubscriptions = AuthorSubscription::with(['user:id,name,email,photo_profil', 'subscription:id,name,price,duration_days'])
+                ->select('id', 'user_id', 'subscription_id', 'starts_at', 'expires_at', 'is_active', 'created_at')
+                ->orderBy('created_at', 'desc')
+                ->paginate(6); // 6 éléments par page
+            
+            return view('BackOffice/author-subscriptions/admin-index', compact('authorSubscriptions'));
+        } catch (\Exception $e) {
+            \Log::error('Error in adminIndex: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error loading subscriptions.');
+        }
     }
 
     public function destroy($id)
@@ -43,10 +69,10 @@ class AuthorSubscriptionController extends Controller
             $subscription->delete();
             
             return redirect()->route('admin.author-subscriptions')
-                ->with('success', 'Abonnement supprimé avec succès.');
+                ->with('success', 'Subscription deleted successfully.');
         } catch (\Exception $e) {
             return redirect()->route('admin.author-subscriptions')
-                ->with('error', 'Erreur lors de la suppression de l\'abonnement.');
+                ->with('error', 'Error deleting subscription.');
         }
     }
 
@@ -55,13 +81,13 @@ class AuthorSubscriptionController extends Controller
         $user = auth()->user();
         
         if (!$user->isAuteur()) {
-            return redirect()->back()->with('error', 'Seuls les auteurs peuvent s\'abonner.');
+            return redirect()->back()->with('error', 'Only authors can subscribe.');
         }
 
-        // Désactiver l'ancien abonnement s'il existe
+        // Deactivate old subscription if exists
         $user->authorSubscriptions()->where('is_active', true)->update(['is_active' => false]);
 
-        // Créer le nouvel abonnement
+        // Create new subscription
         AuthorSubscription::create([
             'user_id' => $user->id,
             'subscription_id' => $subscription->id,
@@ -70,7 +96,7 @@ class AuthorSubscriptionController extends Controller
             'is_active' => true
         ]);
 
-        return redirect()->route('author.subscriptions')->with('success', 'Abonnement activé avec succès!');
+        return redirect()->route('author.subscriptions')->with('success', 'Subscription activated successfully!');
     }
 
     public function transactions()
@@ -80,9 +106,108 @@ class AuthorSubscriptionController extends Controller
                 $query->where('role', 'auteur');
             })
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(6);
         
-        return view('BackOffice.author-subscriptions.transactions', compact('transactions'));
+        return view('BackOffice/author-subscriptions/transactions', compact('transactions'));
+    }
+
+    public function analyticsPage()
+    {
+        return view('BackOffice/author-subscriptions/analytics');
+    }
+
+    public function transactionsAnalytics(Request $request)
+    {
+        $period = $request->get('period', 12); // Default 12 months
+        
+        // Total revenue
+        $totalRevenue = \App\Models\SubscriptionPayment::where('payment_status', 'completed')
+            ->sum('amount');
+        
+        // This month revenue
+        $monthRevenue = \App\Models\SubscriptionPayment::where('payment_status', 'completed')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('amount');
+        
+        // Last month revenue for trend
+        $lastMonthRevenue = \App\Models\SubscriptionPayment::where('payment_status', 'completed')
+            ->whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->sum('amount');
+        
+        // Calculate trend
+        $revenueTrend = $lastMonthRevenue > 0 ? round((($monthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1) : 0;
+        
+        // Total transactions
+        $totalTransactions = \App\Models\SubscriptionPayment::count();
+        
+        // Average transaction
+        $avgTransaction = $totalTransactions > 0 ? $totalRevenue / $totalTransactions : 0;
+        
+        // Revenue by month with detailed stats
+        $revenueLabels = [];
+        $revenueValues = [];
+        $monthlyDetails = [];
+        
+        for ($i = $period - 1; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            
+            $monthData = \App\Models\SubscriptionPayment::where('payment_status', 'completed')
+                ->whereMonth('created_at', $date->month)
+                ->whereYear('created_at', $date->year)
+                ->selectRaw('SUM(amount) as total_revenue, COUNT(*) as transaction_count')
+                ->first();
+            
+            $revenue = $monthData->total_revenue ?? 0;
+            $transactionCount = $monthData->transaction_count ?? 0;
+            $avgPerTransaction = $transactionCount > 0 ? $revenue / $transactionCount : 0;
+            
+            $revenueLabels[] = $date->format('M Y');
+            $revenueValues[] = (float) $revenue;
+            $monthlyDetails[] = [
+                'month' => $date->format('M Y'),
+                'revenue' => (float) $revenue,
+                'transactions' => $transactionCount,
+                'avg_per_transaction' => (float) $avgPerTransaction
+            ];
+        }
+        
+        // Revenue by plan
+        $plans = \App\Models\Subscription::all();
+        $planLabels = [];
+        $planValues = [];
+        
+        foreach ($plans as $plan) {
+            $revenue = \App\Models\SubscriptionPayment::where('payment_status', 'completed')
+                ->where('subscription_id', $plan->id)
+                ->sum('amount');
+            
+            if ($revenue > 0) {
+                $planLabels[] = $plan->name;
+                $planValues[] = (float) $revenue;
+            }
+        }
+        
+        return response()->json([
+            'success' => true,
+            'stats' => [
+                'totalRevenue' => (float) $totalRevenue,
+                'monthRevenue' => (float) $monthRevenue,
+                'totalTransactions' => $totalTransactions,
+                'avgTransaction' => (float) $avgTransaction,
+                'revenueTrend' => $revenueTrend
+            ],
+            'revenue' => [
+                'labels' => $revenueLabels,
+                'values' => $revenueValues
+            ],
+            'monthlyDetails' => $monthlyDetails,
+            'plans' => [
+                'labels' => $planLabels,
+                'values' => $planValues
+            ]
+        ]);
     }
 
     public function changeSubscription()
@@ -90,13 +215,24 @@ class AuthorSubscriptionController extends Controller
         $user = auth()->user();
         
         if (!$user->isAuteur()) {
-            return redirect()->back()->with('error', 'Seuls les auteurs peuvent gérer leurs abonnements.');
+            return redirect()->back()->with('error', 'Only authors can manage their subscriptions.');
         }
 
         $subscriptions = Subscription::where('is_active', true)->get();
         $currentSubscription = $user->currentSubscription();
+        $userCurrency = $this->currencyService->getUserCurrency();
         
-        return view('BackOffice.author-subscriptions.change', compact('subscriptions', 'currentSubscription'));
+        // Convert prices to user's currency
+        foreach ($subscriptions as $subscription) {
+            $subscription->display_price = $this->currencyService->getLocalizedPrice(
+                $subscription->price,
+                'USD',
+                $userCurrency
+            );
+            $subscription->display_currency = $userCurrency;
+        }
+        
+        return view('BackOffice/author-subscriptions/change', compact('subscriptions', 'currentSubscription'));
     }
 
     public function processChangeSubscription(Request $request, Subscription $subscription)
@@ -104,22 +240,13 @@ class AuthorSubscriptionController extends Controller
         $user = auth()->user();
         
         if (!$user->isAuteur()) {
-            return redirect()->back()->with('error', 'Seuls les auteurs peuvent gérer leurs abonnements.');
+            return redirect()->back()->with('error', 'Only authors can manage their subscriptions.');
         }
 
-        // Désactiver l'ancien abonnement
-        $user->authorSubscriptions()->where('is_active', true)->update(['is_active' => false]);
-
-        // Créer le nouvel abonnement
-        AuthorSubscription::create([
-            'user_id' => $user->id,
-            'subscription_id' => $subscription->id,
-            'starts_at' => now(),
-            'expires_at' => now()->addDays($subscription->duration_days),
-            'is_active' => true
-        ]);
-
-        return redirect()->route('author.subscriptions')->with('success', 'Abonnement changé avec succès!');
+        // Keep old subscription active - it will be deactivated after successful payment
+        // Redirect to payment page for new subscription
+        return redirect()->route('payment.form', $subscription)
+            ->with('info', 'Please complete the payment to activate your new subscription. Your current subscription will remain active until payment is completed.');
     }
 
     public function unsubscribe()
@@ -127,13 +254,13 @@ class AuthorSubscriptionController extends Controller
         $user = auth()->user();
         
         if (!$user->isAuteur()) {
-            return redirect()->back()->with('error', 'Seuls les auteurs peuvent gérer leurs abonnements.');
+            return redirect()->back()->with('error', 'Only authors can manage their subscriptions.');
         }
 
         // Désactiver l'abonnement actuel (désabonnement complet)
         $user->authorSubscriptions()->where('is_active', true)->update(['is_active' => false]);
 
-        return redirect()->route('author.subscriptions')->with('success', 'Vous avez été désabonné avec succès.');
+        return redirect()->route('author.subscriptions')->with('success', 'You have been unsubscribed successfully.');
     }
 
     public function refreshStats()

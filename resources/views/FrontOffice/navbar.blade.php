@@ -70,8 +70,8 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="{{ route('dashboardAuteur') }}">
-                                                <i class="bi bi-gear"></i> Dashboard
+                                            <a class="dropdown-item" href="{{ route('author.subscriptions') }}">
+                                                <i class="bi bi-credit-card"></i> My Subscriptions
                                             </a>
                                         </li>
                                         <li><hr class="dropdown-divider"></li>

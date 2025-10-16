@@ -21,7 +21,7 @@ class SubscriptionController extends Controller
             $query->where('is_active', $request->status === 'active');
         }
 
-        $subscriptions = $query->orderBy('created_at', 'desc')->get();
+        $subscriptions = $query->orderBy('created_at', 'desc')->paginate(6)->appends($request->query());
         return view('BackOffice.subscriptions.index', compact('subscriptions'));
     }
 

@@ -48,7 +48,7 @@ public function mesLivres()
     
     // Vérifier si l'auteur a un abonnement actif (seulement pour l'ajout)
     if ($user->isAuteur() && !$user->hasActiveSubscription()) {
-        return redirect()->route('dashboardAuteur')
+        return redirect()->route('author.subscriptions')
             ->with('error', 'Vous devez avoir un abonnement actif pour ajouter des livres.');
     }
     
@@ -64,7 +64,7 @@ public function mesLivres()
     
     // Vérifier si l'auteur a un abonnement actif
     if ($user->isAuteur() && !$user->hasActiveSubscription()) {
-        return redirect()->route('dashboardAuteur')
+        return redirect()->route('author.subscriptions')
             ->with('error', 'Vous devez avoir un abonnement actif pour ajouter des livres.');
     }
     
