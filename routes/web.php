@@ -9,44 +9,20 @@ use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\LivreController;
-use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\RateController;
-
+use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\LivreControllerF;
-
 use App\Http\Controllers\CategoryController;
-
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\LikesController;
-
 use App\Http\Controllers\BorrowController;
 use App\Http\Controllers\FrontOfficeController;
-
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaypalController;
-
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
- use App\Http\Controllers\NoteController;
-use App\Http\Controllers\VoiceController;
-use App\Http\Controllers\AudioController;
-use App\Http\Controllers\RecommendationController;
-use Illuminate\Support\Facades\Http;
-
-Route::get('/test-recommendation', function () {
-    // Exemple d’articles likés simulés
-    $liked = [1];
-
-    // Envoi à Flask
-    $response = Http::post('http://127.0.0.1:5000/recommend', [
-        'liked_articles' => $liked
-    ]);
-
-    // Retourne la réponse brute pour test
-    return $response->json();
-});
-
+use App\Http\Controllers\NoteController;
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
@@ -56,18 +32,17 @@ Route::get('/category/{id}/books', [FrontOfficeController::class, 'categoryBooks
 Route::get('/livres/{livre}/viewpdf', [LivreController::class, 'viewpdf'])->name('livres.viewpdf');
 Route::get('/livres/{livre}/download', [LivreController::class, 'download'])->name('livres.download');
 
-
 Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
 
-
 Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles');
-// routes/web.php
 Route::get('/articles/search', [BlogController::class, 'search']);
 Route::get('/article/{id}', [BlogController::class, 'show'])->name('articleDetail');
+
 //store routes
 Route::get('/stores', [StoreController::class, 'indexFront'])->name('stores');
 Route::get('/stores/{id}', [StoreController::class, 'show'])->name('stores.show');
 Route::post('/stores/{store}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+
 //edit and delit review store
 Route::post('/reviews/{storeId}', [ReviewController::class, 'store'])->name('reviews.store');
 Route::put('/reviews/{reviewId}', [ReviewController::class, 'update'])->name('reviews.update');
@@ -77,60 +52,58 @@ Route::get('/aboutus', function () {
     return view('FrontOffice.Aboutus.AboutPage');
 })->name('aboutus');
 
-
 Route::middleware('auth')->group(function () {
     Route::post('paypal', [PaypalController::class, 'paypal'])->name('paypal');
     Route::get('paypal', [PaypalController::class, 'paypal'])->name('paypal');
     Route::get('success', [PaypalController::class, 'success'])->name('success');
     Route::get('cancel', [PaypalController::class, 'cancel'])->name('cancel');
 });
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/my-books', [PaypalController::class, 'myBooks'])->name('myBooks');
-
-});
-Route::middleware('auth')->group(function () {
-    Route::post('/bookmark/save', [BookmarkController::class, 'saveBookmark']);
-    Route::get('/bookmark/load', [BookmarkController::class, 'load'])->name('bookmark.load');
-Route::get('/livres/{livre}/reader', [LivreController::class, 'showReader'])->name('livres.reader');
-Route::post('/livres/{id}/update-read-time', [LivreController::class, 'updateReadTime'])->name('livres.updateReadTime');
-Route::post('/livres/{id}/reset-read-time', [LivreController::class, 'resetReadTime']);
-Route::get('/notes-popup', function () {
-    return view('FrontOffice.Livres.notes-popup'); // page blade avec juste le contenu du popup
-});
-Route::get('/reading-popup', function () {
-    return view('FrontOffice.Livres.progress'); // page blade avec juste le contenu du popup
-});
-Route::get('/search-popup', function () {
-    return view('FrontOffice.Livres.search'); // page blade avec juste le contenu du popup
-});
-Route::get('/translate-popup', function () {
-    return view('FrontOffice.Livres.translate'); // page blade avec juste le contenu du popup
-});
-});
-Route::middleware('auth')->group(function () {
-   
-Route::get('/books/{book}/notes', [NoteController::class, 'getBookNotes']);
-Route::post('/save-note', [NoteController::class, 'store']);
-Route::get('/get-note', [NoteController::class, 'getNote']);
-
- 
+    Route::get('/recommendation', [\App\Http\Controllers\RecommendationController::class, 'getSubscriptionRecommendation'])->name('recommendation');
 });
 
-Route::post('/speak', [LivreController::class, 'speak']);
 Route::middleware(['auth'])->group(function () {
     Route::get('/borrows', [BorrowController::class, 'index'])->name('borrows');
     Route::post('/borrows/{livreId}', [BorrowController::class, 'store'])->name('borrows.store');
     Route::post('/borrows/{livreId}/pay', [BorrowController::class, 'payAndBorrow'])->name('borrows.pay');
     Route::get('/borrows/success', [BorrowController::class, 'success'])->name('borrows.success');
-   Route::get('/purchases', [App\Http\Controllers\PaypalController::class, 'transactionsFront'])->name('purchases');
-
+    Route::get('/purchases', [App\Http\Controllers\PaypalController::class, 'transactionsFront'])->name('purchases');
+    
     // web.php
     Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.list');
     Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])->name('notifications.delete');
     Route::post('/notifications/clear', [NotificationController::class, 'clearAll'])->name('notifications.clear');
 });
 
+Route::middleware('auth')->group(function () {
+    Route::post('/bookmark/save', [BookmarkController::class, 'saveBookmark']);
+    Route::get('/bookmark/load', [BookmarkController::class, 'load'])->name('bookmark.load');
+    Route::get('/livres/{livre}/reader', [LivreController::class, 'showReader'])->name('livres.reader');
+    Route::post('/livres/{id}/update-read-time', [LivreController::class, 'updateReadTime'])->name('livres.updateReadTime');
+    Route::post('/livres/{id}/reset-read-time', [LivreController::class, 'resetReadTime']);
+    Route::get('/notes-popup', function () {
+        return view('FrontOffice.Livres.notes-popup');
+    });
+    Route::get('/reading-popup', function () {
+        return view('FrontOffice.Livres.progress');
+    });
+    Route::get('/search-popup', function () {
+        return view('FrontOffice.Livres.search');
+    });
+    Route::get('/translate-popup', function () {
+        return view('FrontOffice.Livres.translate');
+    });
+});
 
+Route::middleware('auth')->group(function () {
+    Route::get('/books/{book}/notes', [NoteController::class, 'getBookNotes']);
+    Route::post('/save-note', [NoteController::class, 'store']);
+    Route::get('/get-note', [NoteController::class, 'getNote']);
+});
+
+Route::post('/speak', [LivreController::class, 'speak']);
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
@@ -138,7 +111,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/rates', [RateController::class, 'index'])->name('rates.index');
     Route::post('/livres/{id}/rate', [RateController::class, 'store'])->name('rates.store');
-    //Route::post('/rates/{livre}', [RateController::class, 'store'])->name('rates.store')->middleware('auth');
 
     // Paiement des abonnements - accessible à tous les utilisateurs connectés
     Route::get('/payment/{subscription}', [\App\Http\Controllers\SubscriptionPaymentController::class, 'showPaymentForm'])->name('payment.form');
@@ -170,10 +142,7 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         Route::delete('categoryBlog/{categoryBlog}', [CategoryBlogController::class, 'destroy'])->name('categoryBlog.destroy');
         Route::get('categoryBlog/{categoryBlog}', [CategoryBlogController::class, 'show'])->name('categoryBlog.show');
 
-
-
         // Blog Management
-
         Route::get('/listeBlog', [BlogController::class, 'index'])->name('listeBlog');
         Route::get('/AjouterBlog', [BlogController::class, 'create'])->name('AjouterBlog');
         Route::post('/AjouterBlog', [BlogController::class, 'store'])->name('AjouterBlog.store');
@@ -183,7 +152,6 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         Route::get('/blogs/{id}/comments', [BlogController::class, 'showComments'])->name('blogs.comments');
         Route::get('/blogs/{id}', [BlogController::class, 'show1'])->name('blogs.show1');
 
-
         // Magasin Management
         Route::get('/AjouterMagasin', fn() => view('BackOffice.magasin.ajouterMagasin'))->name('AjouterMagasin');
         Route::post('/AjouterMagasin', [App\Http\Controllers\StoreController::class, 'store'])->name('AjouterMagasin');
@@ -191,24 +159,24 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         Route::resource('stores', StoreController::class)->except(['create', 'index', 'store']);
 
         // Utilisateur Management
-
         Route::get('/AjouterUtilisateur', [UsersController::class, 'createUser'])->name('AjouterUtilisateur');
         Route::post('/AjouterUtilisateur', [UsersController::class, 'addUser'])->name('AjouterUtilisateur.add');
         Route::delete('/listeUtilisateur/{user}', [UsersController::class, 'delete'])->name('users.delete');
         Route::get('/EditUser/{user}', [UsersController::class, 'editUser'])->name('users.edit');
         Route::put('/EditUser/{user}', [UsersController::class, 'updateUser'])->name('users.update');
-        Route::get('/listeUtilisateur', function () {
-            $users = User::all(); // Fetch all users
-            return view('BackOffice.utilisateur.listeUtilisateur', compact('users'));
-        })->name('listeUtilisateur');
-
         Route::get('/listeUtilisateur', [UsersController::class, 'index'])->name('listeUtilisateur');
 
-        Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
         Route::get('/transactions', [App\Http\Controllers\PaypalController::class, 'transactions'])->name('transactions');
 
         // Subscription Management
         Route::resource('subscriptions', \App\Http\Controllers\SubscriptionController::class);
+        
+        // Author Subscriptions Management
+        Route::get('/admin/author-subscriptions', [\App\Http\Controllers\AuthorSubscriptionController::class, 'adminIndex'])->name('admin.author-subscriptions');
+        Route::delete('/admin/author-subscriptions/{id}', [\App\Http\Controllers\AuthorSubscriptionController::class, 'destroy'])->name('admin.author-subscriptions.destroy');
+        Route::get('/admin/author-transactions', [\App\Http\Controllers\AuthorSubscriptionController::class, 'transactions'])->name('admin.author-transactions');
+        Route::post('/admin/author-subscriptions/refresh-stats', [\App\Http\Controllers\AuthorSubscriptionController::class, 'refreshStats'])->name('admin.author-subscriptions.refresh-stats');
+        Route::get('/admin/author-subscriptions/ai-analysis', [\App\Http\Controllers\AuthorSubscriptionController::class, 'aiAnalysis'])->name('admin.author-subscriptions.ai-analysis');
     });
 
     // ========================
@@ -217,26 +185,24 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
     Route::middleware(['role:auteur'])->group(function () {
         // Dashboard Auteur
         Route::get('/mes-livres', [LivreController::class, 'mesLivres'])->name('mesLivres');
-
         Route::get('/dashboardAuteur', fn() => view('BackOffice.dashboardAuteur'))->name('dashboardAuteur');
 
         // Abonnements Auteur
         Route::get('/mes-abonnements', [\App\Http\Controllers\AuthorSubscriptionController::class, 'index'])->name('author.subscriptions');
+        Route::get('/mes-abonnements/change', [\App\Http\Controllers\AuthorSubscriptionController::class, 'changeSubscription'])->name('author.subscriptions.change');
+        Route::post('/mes-abonnements/change/{subscription}', [\App\Http\Controllers\AuthorSubscriptionController::class, 'processChangeSubscription'])->name('author.subscriptions.process-change');
+        Route::post('/mes-abonnements/unsubscribe', [\App\Http\Controllers\AuthorSubscriptionController::class, 'unsubscribe'])->name('author.subscriptions.unsubscribe');
     });
 
     // ========================
     // 🔒 Routes accessibles ADMIN + AUTEUR
-    // ========================*
+    // ========================
     Route::middleware(['role:admin,auteur,user'])->group(function () {
         // Livre Management
-        // Routes Livres
         Route::get('/livresf/{livre}', [LivreController::class, 'showf'])->name('livres.showf');
     });
 
-
-
     Route::middleware(['role:admin,auteur'])->group(function () {
-
         // Livre Management (avec vérification d'abonnement pour les auteurs)
         Route::middleware(['App\Http\Middleware\CheckActiveSubscription'])->group(function () {
             Route::get('/AjouterLivre', fn() => view('BackOffice.livre.ajouterLivre'))->name('AjouterLivre');
@@ -244,23 +210,16 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         Route::get('/listeLivre', fn() => view('BackOffice.livre.listeLivre'))->name('listeLivre');
 
         // Livre Management
-        // Routes Livres
         Route::resource('livres', LivreController::class);
 
         // Routes supplémentaires si tu veux des noms plus explicites
         Route::get('/AjouterLivre', [LivreController::class, 'create'])->name('AjouterLivre');
         Route::get('/listeLivre', [LivreController::class, 'index'])->name('listeLivre');
 
-        // PDF - afficher et télécharger
-
-
-
-
         // Categorie Management
         Route::resource('categories', CategoryController::class);
         Route::get('/AjouterCategorie', [CategoryController::class, 'create'])->name('AjouterCategorie');
         Route::get('/listeCategorie', [CategoryController::class, 'index'])->name('listeCategorie');
-        // Route::get('/borrowsBook', fn() => view('BackOffice.Borrows.Borrows'))->name('borrowsBook');
         Route::get('/borrowsBook', [BorrowController::class, 'borrows'])->name('borrowsBook');
     });
 });
@@ -276,8 +235,6 @@ Route::put('/comments/{comment}', [CommentsController::class, 'update'])->name('
 // Supprimer un commentaire
 Route::delete('/comments/{comment}', [CommentsController::class, 'destroy'])->name('comments.destroy')->middleware('auth');
 
-
-
 Route::middleware('auth')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add')->middleware('auth');
@@ -289,8 +246,6 @@ Route::middleware('auth')->group(function () {
     // routes/web.php
     Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
 });
-
-
 
 Route::get('/admin', function () {
     return view('accueil');

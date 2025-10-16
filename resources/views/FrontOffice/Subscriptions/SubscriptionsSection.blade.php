@@ -67,28 +67,7 @@
     </div>
 </section>
 
-<script>
-let currentSlide = 0;
-const totalSlides = {{ count($subscriptions) }};
-const slidesPerView = 3;
-const maxSlide = Math.max(0, totalSlides - slidesPerView);
 
-function slideSubscriptions(direction) {
-    const track = document.getElementById('subscriptionTrack');
-    
-    currentSlide += direction;
-    
-    if (currentSlide < 0) {
-        currentSlide = 0;
-    } else if (currentSlide > maxSlide) {
-        currentSlide = maxSlide;
-    }
-    
-    const slideWidth = 100 / slidesPerView;
-    const translateX = -currentSlide * slideWidth;
-    track.style.transform = `translateX(${translateX}%)`;
-}
-</script>
 
 <style>
 .subscription-carousel-container {
@@ -128,7 +107,7 @@ function slideSubscriptions(direction) {
     color: white;
     font-size: 18px;
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
     z-index: 10;
 }
 
@@ -143,6 +122,7 @@ function slideSubscriptions(direction) {
 .carousel-arrow-right {
     right: -25px;
 }
+
 
 .subscription-card {
     border-radius: 20px;
@@ -304,3 +284,42 @@ function slideSubscriptions(direction) {
     }
 }
 </style>
+
+<script>
+let currentSlide = 0;
+const totalSlides = {{ count($subscriptions) }};
+const slidesPerView = 3;
+const maxSlide = Math.max(0, totalSlides - slidesPerView);
+
+function slideSubscriptions(direction) {
+    const track = document.getElementById('subscriptionTrack');
+    
+    currentSlide += direction;
+    
+    if (currentSlide < 0) {
+        currentSlide = 0;
+    } else if (currentSlide > maxSlide) {
+        currentSlide = maxSlide;
+    }
+    
+    const slideWidth = 100 / slidesPerView;
+    const translateX = -currentSlide * slideWidth;
+    track.style.transform = `translateX(${translateX}%)`;
+    
+    // Update arrow visibility
+    updateArrows();
+}
+
+function updateArrows() {
+    const leftArrow = document.querySelector('.carousel-arrow-left');
+    const rightArrow = document.querySelector('.carousel-arrow-right');
+    
+    leftArrow.style.opacity = currentSlide === 0 ? '0.5' : '1';
+    rightArrow.style.opacity = currentSlide === maxSlide ? '0.5' : '1';
+}
+
+// Initialize arrows on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateArrows();
+});
+</script>
