@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-<<<<<<<< HEAD:database/migrations/2025_09_26_183425_add_facebook_id_to_users_table.php
+        // Ajout d'une colonne facebook_id à la table users
         Schema::table('users', function (Blueprint $table) {
             $table->string('facebook_id')->nullable()->after('email');
-========
-       Schema::table('livres', function (Blueprint $table) {
-            $table->string('reading_time')->nullable();
->>>>>>>> origin/main:database/migrations/2025_10_09_021059_add_reading_time_to_livre_table.php
         });
 
+        // Ajout d'une colonne reading_time à la table livres
+        Schema::table('livres', function (Blueprint $table) {
+            $table->string('reading_time')->nullable();
+        });
     }
 
     /**
@@ -27,13 +27,14 @@ return new class extends Migration
      */
     public function down(): void
     {
-<<<<<<<< HEAD:database/migrations/2025_09_26_183425_add_facebook_id_to_users_table.php
+        // Suppression de la colonne facebook_id
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('facebook_id');
-========
-        Schema::table('livre', function (Blueprint $table) {
-            //
->>>>>>>> origin/main:database/migrations/2025_10_09_021059_add_reading_time_to_livre_table.php
+        });
+
+        // Suppression de la colonne reading_time
+        Schema::table('livres', function (Blueprint $table) {
+            $table->dropColumn('reading_time');
         });
     }
 };
