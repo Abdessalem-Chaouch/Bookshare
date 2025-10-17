@@ -59,6 +59,7 @@
                 <!-- Navbar -->
                 <!-- Content wrapper -->
                 @yield('content')
+                 @yield('scripts')
                 <!-- Content wrapper -->
             </div>
             <!-- / Layout page -->
@@ -92,7 +93,7 @@
 
     <!-- GitHub Buttons (optional) -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
-    
+
     @if(auth()->user()->isAuteur())
     <!-- Modal pour abonnement requis -->
     <div class="modal fade" id="subscriptionModal" tabindex="-1">
@@ -116,7 +117,7 @@
             </div>
         </div>
     </div>
-    
+
     <script>
     function checkSubscription() {
         @if(!auth()->user()->hasActiveSubscription())

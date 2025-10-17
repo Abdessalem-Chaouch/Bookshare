@@ -23,6 +23,8 @@ use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NoteController;
+use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\RecommendationController;
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
@@ -31,8 +33,16 @@ Route::get('/nos-categories', [FrontOfficeController::class, 'categories'])->nam
 Route::get('/category/{id}/books', [FrontOfficeController::class, 'categoryBooks'])->name('category.books');
 Route::get('/livres/{livre}/viewpdf', [LivreController::class, 'viewpdf'])->name('livres.viewpdf');
 Route::get('/livres/{livre}/download', [LivreController::class, 'download'])->name('livres.download');
-
+Route::get('/livres/recommendations/{titre}', function($titre) {
+    $response = Http::get("http://127.0.0.1:5000/recommend/" . urlencode($titre));
+    return $response->json();
+});
+Route::get('/books/recommend', [RecommendationController::class, 'recommend'])->middleware('auth');
+Route::get('/livres/recommendations/{titre}', [LivreController::class, 'recommendationsByTitle']);
+Route::get('/livres/search', [LivreController::class, 'search'])->name('livres.search');
+Route::get('/livres/sort', [LivreController::class, 'sort'])->name('livres.sort');
 Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
+Route::get('/livres/{id}/whatsapp', [LivreController::class, 'partagerSurWhatsapp'])->name('livres.whatsapp');
 
 Route::get('/articles', [BlogController::class, 'indexFront'])->name('articles');
 Route::get('/articles/search', [BlogController::class, 'search']);
@@ -70,7 +80,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/borrows/{livreId}/pay', [BorrowController::class, 'payAndBorrow'])->name('borrows.pay');
     Route::get('/borrows/success', [BorrowController::class, 'success'])->name('borrows.success');
     Route::get('/purchases', [App\Http\Controllers\PaypalController::class, 'transactionsFront'])->name('purchases');
-    
+
     // web.php
     Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.list');
     Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])->name('notifications.delete');
@@ -170,7 +180,7 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
 
         // Subscription Management
         Route::resource('subscriptions', \App\Http\Controllers\SubscriptionController::class);
-        
+
         // Author Subscriptions Management
         Route::get('/admin/author-subscriptions', [\App\Http\Controllers\AuthorSubscriptionController::class, 'adminIndex'])->name('admin.author-subscriptions');
         Route::delete('/admin/author-subscriptions/{id}', [\App\Http\Controllers\AuthorSubscriptionController::class, 'destroy'])->name('admin.author-subscriptions.destroy');
@@ -201,6 +211,8 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         // Livre Management
         Route::get('/livresf/{livre}', [LivreController::class, 'showf'])->name('livres.showf');
     });
+Route::get('/livres/search', [LivreController::class, 'search'])->name('livres.search');
+Route::get('/livres/sort', [LivreController::class, 'sort'])->name('livres.sort');
 
     Route::middleware(['role:admin,auteur'])->group(function () {
         // Livre Management (avec vérification d'abonnement pour les auteurs)
