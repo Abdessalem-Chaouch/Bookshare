@@ -30,6 +30,9 @@ use App\Http\Controllers\RecommendationController;
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
 Route::get('/nos-categories', [FrontOfficeController::class, 'categories'])->name('front.categories');
 
+// Currency change - accessible to everyone
+Route::post('/currency/change', [\App\Http\Controllers\CurrencyController::class, 'changeCurrency'])->name('currency.change');
+
 Route::get('/category/{id}/books', [FrontOfficeController::class, 'categoryBooks'])->name('category.books');
 Route::get('/livres/{livre}/viewpdf', [LivreController::class, 'viewpdf'])->name('livres.viewpdf');
 Route::get('/livres/{livre}/download', [LivreController::class, 'download'])->name('livres.download');
@@ -126,6 +129,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payment/{subscription}', [\App\Http\Controllers\SubscriptionPaymentController::class, 'showPaymentForm'])->name('payment.form');
     Route::post('/payment/{subscription}', [\App\Http\Controllers\SubscriptionPaymentController::class, 'processPayment'])->name('payment.process');
     Route::get('/payment-history', [\App\Http\Controllers\SubscriptionPaymentController::class, 'history'])->name('payment.history');
+    
+    // Invoice routes
+    Route::get('/invoice/{id}/download', [\App\Http\Controllers\SubscriptionPaymentController::class, 'downloadInvoice'])->name('invoice.download');
+    Route::get('/invoice/{id}/view', [\App\Http\Controllers\SubscriptionPaymentController::class, 'viewInvoice'])->name('invoice.view');
 });
 
 // Webhook pour les paiements
@@ -175,6 +182,10 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         Route::get('/EditUser/{user}', [UsersController::class, 'editUser'])->name('users.edit');
         Route::put('/EditUser/{user}', [UsersController::class, 'updateUser'])->name('users.update');
         Route::get('/listeUtilisateur', [UsersController::class, 'index'])->name('listeUtilisateur');
+        
+        // User Analytics
+        Route::get('/users/analytics', [UsersController::class, 'analytics'])->name('users.analytics');
+        Route::get('/users/analytics-data', [UsersController::class, 'analyticsData'])->name('users.analytics.data');
 
         Route::get('/transactions', [App\Http\Controllers\PaypalController::class, 'transactions'])->name('transactions');
 
@@ -185,6 +196,8 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         Route::get('/admin/author-subscriptions', [\App\Http\Controllers\AuthorSubscriptionController::class, 'adminIndex'])->name('admin.author-subscriptions');
         Route::delete('/admin/author-subscriptions/{id}', [\App\Http\Controllers\AuthorSubscriptionController::class, 'destroy'])->name('admin.author-subscriptions.destroy');
         Route::get('/admin/author-transactions', [\App\Http\Controllers\AuthorSubscriptionController::class, 'transactions'])->name('admin.author-transactions');
+        Route::get('/admin/author-transactions/analytics', [\App\Http\Controllers\AuthorSubscriptionController::class, 'analyticsPage'])->name('admin.author-transactions.analytics');
+        Route::get('/admin/transactions/analytics', [\App\Http\Controllers\AuthorSubscriptionController::class, 'transactionsAnalytics'])->name('admin.transactions.analytics');
         Route::post('/admin/author-subscriptions/refresh-stats', [\App\Http\Controllers\AuthorSubscriptionController::class, 'refreshStats'])->name('admin.author-subscriptions.refresh-stats');
         Route::get('/admin/author-subscriptions/ai-analysis', [\App\Http\Controllers\AuthorSubscriptionController::class, 'aiAnalysis'])->name('admin.author-subscriptions.ai-analysis');
     });

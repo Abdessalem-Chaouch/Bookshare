@@ -7,9 +7,12 @@
             <h4 class="fw-bold mb-1">My Subscriptions</h4>
             <p class="text-muted mb-0">Manage your subscription plans</p>
         </div>
-        <a href="{{ route('payment.history') }}" class="btn btn-outline-primary">
-            📊 Payment History
-        </a>
+        <div class="d-flex gap-2">
+            <x-currency-selector />
+            <a href="{{ route('payment.history') }}" class="btn btn-outline-primary">
+                📊 Payment History
+            </a>
+        </div>
     </div>
 
     @if(session('success'))
@@ -52,15 +55,21 @@
         </div>
     </div>
     
-    <div id="ai-recommendation" class="alert alert-primary border-0 shadow-sm mb-4">
-        <div class="d-flex align-items-center mb-2">
-            <i class="bx bx-brain text-primary me-2" style="font-size: 20px;"></i>
-            <strong>🤖 Recommandation AI</strong>
+    <div id="ai-recommendation" class="ai-recommendation-card mb-4">
+        <div class="ai-header">
+            <div class="ai-icon-wrapper">
+                <i class="bx bx-brain ai-icon"></i>
+            </div>
+            <div class="ai-title">
+                <span class="ai-badge">🤖 AI Recommendation</span>
+            </div>
         </div>
-        <div id="recommendation-text">
-            <div class="d-flex align-items-center">
-                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                <span>Analyse en cours...</span>
+        <div class="ai-content" id="recommendation-text">
+            <div class="loading-animation">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="ms-2">Analyzing your profile...</span>
             </div>
         </div>
     </div>
@@ -81,7 +90,14 @@
                             <p class="text-muted mb-3">{{ $currentSubscription->subscription->description }}</p>
                             
                             <div class="mb-3">
-                                <span class="display-4 fw-bold text-primary">${{ number_format($currentSubscription->subscription->price, 0) }}</span>
+                                <span class="display-4 fw-bold text-primary">
+                                    @php
+                                        $currencyService = app(\App\Services\CurrencyService::class);
+                                        $userCurrency = $currencyService->getUserCurrency();
+                                        $convertedPrice = $currencyService->getLocalizedPrice($currentSubscription->subscription->price, 'USD', $userCurrency);
+                                        echo $currencyService->format($convertedPrice, $userCurrency);
+                                    @endphp
+                                </span>
                                 <span class="text-muted">/ {{ $currentSubscription->subscription->duration_days }} days</span>
                             </div>
                         </div>
@@ -103,10 +119,10 @@
                             </button>
                             <div class="btn-group" role="group">
                                 <button class="btn btn-outline-warning btn-sm" onclick="confirmChangeSubscription()">
-                                    🔄 Changer
+                                    🔄 Change
                                 </button>
                                 <button class="btn btn-outline-danger btn-sm" onclick="confirmUnsubscribe()">
-                                    ❌ Se désabonner
+                                    ❌ Unsubscribe
                                 </button>
                             </div>
                         </div>
@@ -136,7 +152,12 @@
                                     <p class="text-muted mb-3">{{ $subscription->description }}</p>
                                     
                                     <div class="mb-3">
-                                        <span class="display-4 fw-bold text-primary">${{ number_format($subscription->price, 0) }}</span>
+                                        <span class="display-4 fw-bold text-primary">
+                                            @php
+                                                $currencyService = app(\App\Services\CurrencyService::class);
+                                                echo $currencyService->format($subscription->display_price ?? $subscription->price, $subscription->display_currency ?? 'USD');
+                                            @endphp
+                                        </span>
                                         <span class="text-muted">/ {{ $subscription->duration_days }} days</span>
                                     </div>
                                 </div>
@@ -171,6 +192,164 @@
 </div>
 
 <style>
+/* AI Recommendation Card Styles */
+.ai-recommendation-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-recommendation-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.ai-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.ai-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.ai-icon {
+    font-size: 28px;
+    color: white;
+    animation: brain-pulse 2s ease-in-out infinite;
+}
+
+@keyframes brain-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.ai-badge {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.ai-content {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 1;
+    min-height: 60px;
+}
+
+.loading-animation {
+    display: flex;
+    align-items: center;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    margin: 0 3px;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.dot:nth-child(1) { animation-delay: -0.32s; }
+.dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+
+/* Recommendation Highlight Styles */
+.recommendation-highlight {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+}
+
+.recommendation-highlight::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #fff, #f0f0f0, #fff);
+    border-radius: 16px;
+    z-index: -1;
+    opacity: 0.3;
+    animation: glow 3s ease-in-out infinite;
+}
+
+@keyframes glow {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+}
+
+.recommendation-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    opacity: 0.9;
+    background: rgba(255, 255, 255, 0.2);
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.recommendation-plan {
+    font-size: 32px;
+    font-weight: 800;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    letter-spacing: 0.5px;
+    animation: pulse-text 2s ease-in-out infinite;
+}
+
+@keyframes pulse-text {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
 .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
@@ -234,52 +413,61 @@
 }
 </style>
 
-<!-- Modal pour changer d'abonnement -->
+<!-- Change Subscription Modal -->
 <div class="modal fade" id="changeSubscriptionModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Changer d'abonnement</h5>
+                <h5 class="modal-title">Change Subscription</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div id="ai-recommendation" class="alert alert-info mb-3">
-                    <div class="d-flex align-items-center">
-                        <i class="bx bx-brain" style="font-size: 24px; margin-right: 10px;"></i>
-                        <div>
-                            <strong>🤖 Recommandation AI</strong>
-                            <div id="recommendation-text">Analyse de votre profil en cours...</div>
+                <div id="ai-recommendation" class="ai-recommendation-card mb-4">
+                    <div class="ai-header">
+                        <div class="ai-icon-wrapper">
+                            <i class="bx bx-brain ai-icon"></i>
+                        </div>
+                        <div class="ai-title">
+                            <span class="ai-badge">🤖 AI Recommendation</span>
+                        </div>
+                    </div>
+                    <div class="ai-content" id="recommendation-text">
+                        <div class="loading-animation">
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="ms-2">Analyzing your profile...</span>
                         </div>
                     </div>
                 </div>
-                <p>Voulez-vous changer votre abonnement actuel ?</p>
-                <p class="text-muted">Votre abonnement actuel sera désactivé et vous pourrez choisir un nouveau plan immédiatement.</p>
+                <p class="mb-2"><strong>Do you want to change your current subscription?</strong></p>
+                <p class="text-muted small">Your current subscription will be deactivated and you can choose a new plan immediately.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <a href="{{ route('author.subscriptions.change') }}" class="btn btn-warning">Changer d'abonnement</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="{{ route('author.subscriptions.change') }}" class="btn btn-warning">Change Subscription</a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal pour se désabonner -->
+<!-- Unsubscribe Modal -->
 <div class="modal fade" id="unsubscribeModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Se désabonner</h5>
+                <h5 class="modal-title">Unsubscribe</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Voulez-vous vraiment vous désabonner ?</p>
-                <p class="text-muted">Votre abonnement sera désactivé et vous perdrez l'accès aux fonctionnalités premium.</p>
+                <p>Do you really want to unsubscribe?</p>
+                <p class="text-muted">Your subscription will be deactivated and you will lose access to premium features.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form action="{{ route('author.subscriptions.unsubscribe') }}" method="POST" class="d-inline">
                     @csrf
-                    <button type="submit" class="btn btn-danger">Se désabonner</button>
+                    <button type="submit" class="btn btn-danger">Unsubscribe</button>
                 </form>
             </div>
         </div>
@@ -349,19 +537,29 @@ function loadRecommendation(targetId) {
             if (data.success) {
                 const recommendationText = document.getElementById(targetId);
                 recommendationText.innerHTML = `
-                    <div class="mb-2">
-                        <strong>Historique:</strong> ${Math.round(data.data.current_usage.emprunts_mois)} emprunts/mois | 
-                        <strong>Budget:</strong> ${Math.round(data.data.current_usage.budget_livres)}€/mois
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <div class="small opacity-75 mb-1">History</div>
+                            <div class="fw-bold">${Math.round(data.data.current_usage.emprunts_mois)} borrows/month</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="small opacity-75 mb-1">Budget</div>
+                            <div class="fw-bold">${Math.round(data.data.current_usage.budget_livres)}€/month</div>
+                        </div>
                     </div>
-                    <div class="mb-2">
-                        <strong>Recommandé:</strong> <span class="text-primary">${data.data.recommendation}</span>
+                    <div class="recommendation-highlight mb-3">
+                        <div class="recommendation-label">Recommended</div>
+                        <div class="recommendation-plan">${data.data.recommendation}</div>
                     </div>
-                    <div class="text-success fw-bold">${data.data.action}</div>
+                    <div class="d-flex align-items-center">
+                        <i class="bx bx-rocket me-2" style="font-size: 20px;"></i>
+                        <span class="fw-semibold">${data.data.action}</span>
+                    </div>
                 `;
             }
         })
         .catch(() => {
-            document.getElementById(targetId).innerHTML = 'Impossible de charger la recommandation';
+            document.getElementById(targetId).innerHTML = '<div class="text-center"><i class="bx bx-error-circle me-2"></i>Unable to load recommendation</div>';
         });
 }
 </script>

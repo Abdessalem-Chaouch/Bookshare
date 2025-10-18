@@ -4,12 +4,15 @@
 <div class="min-vh-100 bg-light">
     <div class="container py-5">
         <!-- Header -->
-        <div class="text-center mb-5">
-            <a href="{{ route('author.subscriptions') }}" class="btn btn-outline-primary btn-sm mb-3">
-                <i class="bx bx-arrow-back me-1"></i> Retour aux abonnements
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="{{ route('author.subscriptions') }}" class="btn btn-outline-primary btn-sm">
+                <i class="bx bx-arrow-back me-1"></i> Back to subscriptions
             </a>
-            <h1 class="text-dark fw-bold mb-2">Changer d'abonnement</h1>
-            <p class="text-muted">Sélectionnez le plan qui correspond le mieux à vos besoins</p>
+            <x-currency-selector />
+        </div>
+        <div class="text-center mb-5">
+            <h1 class="text-dark fw-bold mb-2">Change Subscription</h1>
+            <p class="text-muted">Select the plan that best fits your needs</p>
         </div>
 
         @if($currentSubscription)
@@ -19,10 +22,10 @@
                     <i class="bx bx-crown text-white"></i>
                 </div>
                 <div>
-                    <h6 class="mb-1 fw-bold">Abonnement actuel</h6>
+                    <h6 class="mb-1 fw-bold">Current Subscription</h6>
                     <p class="mb-0 text-muted">
                         <strong>{{ $currentSubscription->subscription->name }}</strong> - 
-                        Expire le {{ $currentSubscription->expires_at->format('d/m/Y') }}
+                        Expires on {{ $currentSubscription->expires_at->format('d/m/Y') }}
                     </p>
                 </div>
             </div>
@@ -42,7 +45,7 @@
                     @if($currentSubscription && $currentSubscription->subscription_id == $subscription->id)
                     <div class="position-absolute top-0 end-0 m-3">
                         <span class="badge bg-success rounded-pill px-3 py-2">
-                            <i class="bx bx-check me-1"></i>Actuel
+                            <i class="bx bx-check me-1"></i>Current
                         </span>
                     </div>
                     @endif
@@ -58,9 +61,12 @@
                             
                             <div class="mb-4">
                                 <span class="display-4 fw-bold" style="color: {{ $index == 0 ? '#28a745' : ($index == 1 ? '#007bff' : '#6f42c1') }};">
-                                    ${{ number_format($subscription->price, 0) }}
+                                    @php
+                                        $currencyService = app(\App\Services\CurrencyService::class);
+                                        echo $currencyService->format($subscription->display_price ?? $subscription->price, $subscription->display_currency ?? 'USD');
+                                    @endphp
                                 </span>
-                                <div class="text-muted">/ {{ $subscription->duration_days }} jours</div>
+                                <div class="text-muted">/ {{ $subscription->duration_days }} days</div>
                             </div>
                         </div>
 
@@ -80,7 +86,7 @@
 
                         @if($currentSubscription && $currentSubscription->subscription_id == $subscription->id)
                         <button class="btn btn-success w-100 py-3 rounded-3 fw-bold" disabled>
-                            <i class="bx bx-check me-2"></i>Plan actuel
+                            <i class="bx bx-check me-2"></i>Current Plan
                         </button>
                         @else
                         <form action="{{ route('author.subscriptions.process-change', $subscription) }}" method="POST">
@@ -88,8 +94,8 @@
                             <button type="submit" 
                                     class="btn w-100 py-3 rounded-3 fw-bold"
                                     style="background: {{ $index == 0 ? 'linear-gradient(45deg, #28a745, #20c997)' : ($index == 1 ? 'linear-gradient(45deg, #007bff, #6610f2)' : 'linear-gradient(45deg, #6f42c1, #e83e8c)') }}; border: none; color: white;"
-                                    onclick="return confirm('Êtes-vous sûr de vouloir changer pour ce plan ?')">
-                                <i class="bx bx-refresh me-2"></i>Changer pour ce plan
+                                    onclick="return confirm('Are you sure you want to change to this plan?')">
+                                <i class="bx bx-refresh me-2"></i>Change to this plan
                             </button>
                         </form>
                         @endif
@@ -101,7 +107,7 @@
 
         <div class="text-center mt-5">
             <a href="{{ route('author.subscriptions') }}" class="btn btn-secondary btn-lg rounded-3 px-4">
-                <i class="bx bx-arrow-back me-2"></i>Annuler et retourner
+                <i class="bx bx-arrow-back me-2"></i>Cancel and return
             </a>
         </div>
     </div>

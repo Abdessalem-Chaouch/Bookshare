@@ -1,7 +1,15 @@
-@extends('baseB')
-@section('content')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Payment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
 
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container py-5">
     <div class="text-center mb-5">
         <h3 class="fw-bold text-primary mb-2">💳 Subscription Payment</h3>
         <p class="text-muted">Complete your subscription to unlock all features</p>
@@ -9,6 +17,14 @@
 
     @if(session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+    
+    @if(session('info'))
+        <div class="alert alert-info">{{ session('info') }}</div>
+    @endif
+    
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
     <div class="row justify-content-center">
@@ -28,7 +44,12 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <strong class="text-white">Total:</strong>
-                        <strong class="text-white fs-5">${{ number_format($subscription->price, 2) }}</strong>
+                        <strong class="text-white fs-5">
+                            @php
+                                $currencyService = app(\App\Services\CurrencyService::class);
+                                echo $currencyService->format($subscription->display_price ?? $subscription->price, session()->get('currency') ?? $subscription->display_currency ?? 'USD');
+                            @endphp
+                        </strong>
                     </div>
                 </div>
             </div>
@@ -55,7 +76,11 @@
                                 <i class="bx bx-arrow-back me-1"></i>Back
                             </a>
                             <button type="submit" class="btn btn-primary px-5 py-2 fw-semibold" id="submit-button" style="background: linear-gradient(135deg, #667eea, #764ba2); border: none;">
-                                <i class="bx bx-credit-card me-1"></i>Pay ${{ number_format($subscription->price, 2) }}
+                                <i class="bx bx-credit-card me-1"></i>Pay 
+                                @php
+                                    $currencyService = app(\App\Services\CurrencyService::class);
+                                    echo $currencyService->format($subscription->display_price ?? $subscription->price, $subscription->display_currency ?? 'USD');
+                                @endphp
                             </button>
                         </div>
                     </form>
@@ -113,7 +138,7 @@ form.addEventListener('submit', async (event) => {
 
     if (error) {
         document.getElementById('card-errors').textContent = error.message;
-        submitButton.innerHTML = '<i class="bx bx-credit-card me-1"></i>Pay ${{ number_format($subscription->price, 2) }}';
+        submitButton.innerHTML = '<i class="bx bx-credit-card me-1"></i>Pay {{ $currencyService->format($subscription->display_price ?? $subscription->price, $subscription->display_currency ?? "USD") }}';
         submitButton.disabled = false;
     } else {
         fetch('{{ route("payment.process", $subscription) }}', {
@@ -131,13 +156,13 @@ form.addEventListener('submit', async (event) => {
                 window.location.href = data.redirect;
             } else {
                 document.getElementById('card-errors').textContent = data.error || 'Payment failed. Please try again.';
-                submitButton.innerHTML = '<i class="bx bx-credit-card me-1"></i>Pay ${{ number_format($subscription->price, 2) }}';
+                submitButton.innerHTML = '<i class="bx bx-credit-card me-1"></i>Pay {{ $currencyService->format($subscription->display_price ?? $subscription->price, $subscription->display_currency ?? "USD") }}';
                 submitButton.disabled = false;
             }
         }).catch(error => {
             console.error('Error:', error);
             document.getElementById('card-errors').textContent = 'Network error. Please try again.';
-            submitButton.innerHTML = '<i class="bx bx-credit-card me-1"></i>Pay ${{ number_format($subscription->price, 2) }}';
+            submitButton.innerHTML = '<i class="bx bx-credit-card me-1"></i>Pay {{ $currencyService->format($subscription->display_price ?? $subscription->price, $subscription->display_currency ?? "USD") }}';
             submitButton.disabled = false;
         });
     }
@@ -171,4 +196,6 @@ form.addEventListener('submit', async (event) => {
 }
 </style>
 
-@endsection
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

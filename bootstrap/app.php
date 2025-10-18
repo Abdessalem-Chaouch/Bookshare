@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     $middleware->alias([
         'role' => \App\Http\Middleware\RoleMiddleware::class,
         'dashboard.access' => \App\Http\Middleware\CheckDashboardAccess::class,
-        'cors' => \Illuminate\Http\Middleware\HandleCors::class, // <-- ajoute ça
+        'cors' => \Illuminate\Http\Middleware\HandleCors::class,
     ]);
 
     $middleware->validateCsrfTokens(except: [

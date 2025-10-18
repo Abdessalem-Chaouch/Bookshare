@@ -124,5 +124,113 @@ public function delete(User $user)
     return redirect()->route('listeUtilisateur')->with('success', 'User deleted successfully!');
 }
 
+public function analytics()
+{
+    return view('BackOffice.users.analytics');
+}
+
+public function analyticsData(Request $request)
+{
+    $period = $request->get('period', 12); // Default 12 months
+    
+    // Statistics
+    $totalUsers = User::where('role', '!=', 'admin')->count();
+    $newThisMonth = User::where('role', '!=', 'admin')
+        ->whereMonth('created_at', now()->month)
+        ->whereYear('created_at', now()->year)
+        ->count();
+    $lastMonth = User::where('role', '!=', 'admin')
+        ->whereMonth('created_at', now()->subMonth()->month)
+        ->whereYear('created_at', now()->subMonth()->year)
+        ->count();
+    
+    $activeUsers = User::where('role', '!=', 'admin')
+        ->where('updated_at', '>=', now()->subDays(30))
+        ->count();
+    $totalAuthors = User::where('role', 'auteur')->count();
+    
+    // Calculate trends
+    $totalTrend = $lastMonth > 0 ? round((($newThisMonth - $lastMonth) / $lastMonth) * 100, 1) : 0;
+    $newTrend = $totalTrend;
+    
+    // Registrations by month
+    $registrations = [];
+    $labels = [];
+    $values = [];
+    
+    for ($i = $period - 1; $i >= 0; $i--) {
+        $date = now()->subMonths($i);
+        $count = User::where('role', '!=', 'admin')
+            ->whereMonth('created_at', $date->month)
+            ->whereYear('created_at', $date->year)
+            ->count();
+        
+        $labels[] = $date->format('M Y');
+        $values[] = $count;
+    }
+    
+    $registrations = [
+        'labels' => $labels,
+        'values' => $values
+    ];
+    
+    // Role distribution
+    $lecteurs = User::where('role', 'user')->count();
+    $auteurs = User::where('role', 'auteur')->count();
+    $admins = User::where('role', 'admin')->count();
+    $total = $lecteurs + $auteurs + $admins;
+    
+    $roles = [
+        'labels' => ['Readers', 'Authors', 'Admins'],
+        'values' => [$lecteurs, $auteurs, $admins],
+        'total' => $total
+    ];
+    
+    // Timeline by year
+    $years = User::selectRaw('YEAR(created_at) as year, COUNT(*) as count')
+        ->where('role', '!=', 'admin')
+        ->groupBy('year')
+        ->orderBy('year', 'desc')
+        ->limit(5)
+        ->get();
+    
+    $timeline = [
+        'labels' => $years->pluck('year')->toArray(),
+        'values' => $years->pluck('count')->toArray()
+    ];
+    
+    // Top active users (based on updated_at as activity indicator)
+    $topUsers = User::where('role', '!=', 'admin')
+        ->selectRaw('users.*, 
+            (SELECT COUNT(*) FROM livres WHERE livres.user_id = users.id) as books_count,
+            DATEDIFF(NOW(), users.updated_at) as days_since_active')
+        ->orderByRaw('(books_count * 10) - days_since_active DESC')
+        ->limit(10)
+        ->get()
+        ->map(function($user) {
+            return [
+                'name' => $user->name,
+                'email' => $user->email,
+                'photo' => $user->photo_profil,
+                'activity' => ($user->books_count * 10) - $user->days_since_active
+            ];
+        });
+    
+    return response()->json([
+        'success' => true,
+        'stats' => [
+            'total' => $totalUsers,
+            'newThisMonth' => $newThisMonth,
+            'active' => $activeUsers,
+            'authors' => $totalAuthors,
+            'totalTrend' => $totalTrend,
+            'newTrend' => $newTrend
+        ],
+        'registrations' => $registrations,
+        'roles' => $roles,
+        'timeline' => $timeline,
+        'topUsers' => $topUsers
+    ]);
+}
 
 }
