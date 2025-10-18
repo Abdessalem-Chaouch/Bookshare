@@ -39,7 +39,7 @@
         const context = getRelevantContext(question, allPagesText);
 
         try {
-            const response = await fetch("http://127.0.0.1:5000/ask", {
+            const response = await fetch("http://127.0.0.1:5000⁠    /ask", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -96,7 +96,7 @@ export async function sendQuestion(allPagesText, question, container) {
     container.scrollTop = container.scrollHeight;
 
     try {
-        const response = await fetch('http://127.0.0.1:5000/ask', {
+        const response = await fetch('http://flask:5000/ask', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text: fullText, question })
@@ -137,17 +137,14 @@ export function initChatUI(inputId, buttonId, messagesContainerId, allPagesText)
 
 
 
-async function askBookQuestion(pdfUrl, question) {
-    const formData = new FormData();
-    formData.append("pdf", pdfUrl); // si fichier local, utilisez input[type=file]
-    formData.append("question", question);
-
-    const res = await fetch("http://localhost:5000/ask", {
-        method: "POST",
-        body: formData
+export async function askBookQuestion(question, chunks, embeddings, container) {
+    const response = await fetch('http://127.0.0.1:5000/ask', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({question, chunks, embeddings})
     });
-
-    const data = await res.json();
-    console.log("Réponse du livre :", data.answer);
-    return data.answer;
+    const data = await response.json();
+    container.innerHTML += `<div class="message user"><p>${question}</p></div>`;
+    container.innerHTML += `<div class="message ai"><p>${data.answer}</p></div>`;
 }
+

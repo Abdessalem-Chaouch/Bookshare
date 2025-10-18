@@ -213,8 +213,23 @@
 </div>
 
 
+
+
+   
 </div>
 
+
+<!-- Chat AI & Summary -->
+<div id="askChatBox" class="ask-chatbox">
+    <div class="ask-header">
+        <h3>🤖 AI Chat & Summary</h3>
+    </div>
+    <div id="askMessages" class="ask-messages"></div>
+    <div class="ask-input-area">
+        <input type="text" id="messageInput" placeholder="Posez votre question ici..." />
+        <button id="sendMessageBtn"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+</div>
 
 
 <!-- Summary Chat Sidebar -->
@@ -228,17 +243,17 @@
         <!-- Résumé s’affichera ici -->
     </div>
 </div>
-
-<!--<div id="messagerieContainer" class="messagerie">
+<!--
+<div id="messagerieContainer" class="messagerie">
     <div id="messages" class="messages"></div>
     <input type="text" id="messageInput" placeholder="Posez votre question ici..." />
     <button id="sendMessageBtn">Envoyer</button>
 </div>
 
--->
 
 
- <!-- Chat <button class="chat-toggle-btn" onclick="toggleChat()">
+
+ Chat <button class="chat-toggle-btn" onclick="toggleChat()">
     <i class="fa-solid fa-book-open"></i>
 </button>
 

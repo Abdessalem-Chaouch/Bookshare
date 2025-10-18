@@ -158,49 +158,73 @@ btnPause.addEventListener('click', () => {
     window.openSummary = openSummary;
     window.closeSummary = closeSummary;
  //initChatUI('messageInput', 'sendMessageBtn', 'messages', allPagesText);
-
-
-
-
- async function askBookQuestion(pdfUrl, question) {
-    const res = await fetch("http://127.0.0.1:5000/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pdf: pdfUrl, question: question })
-    });
-    const data = await res.json();
-    return data.answer;
-}
-
-function addMessageToChat(text, sender="bot") {
-    const messagesContainer = document.getElementById("messages");
-    const msgDiv = document.createElement("div");
-    msgDiv.className = sender === "bot" ? "message bot" : "message user";
-    msgDiv.innerText = text;
-    messagesContainer.appendChild(msgDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-}
-
-document.getElementById("sendMessageBtn").addEventListener("click", async () => {
+ const askContainer = document.getElementById("askMessages");
+    const sendBtn = document.getElementById("sendMessageBtn");
     const input = document.getElementById("messageInput");
-    const question = input.value.trim();
-    if (!question) return;
 
-    addMessageToChat(question, "user");
-    input.value = "";
+    let chunks = [];
+    let embeddings = [];
+    let embeddingsReady = false;
 
-    // Utiliser le PDF défini dans BookConfig
-    const pdfUrl = window.BookConfig.pdfUrl;
-
-    try {
-        const answer = await askBookQuestion(pdfUrl, question);
-        addMessageToChat(answer, "bot");
-    } catch (e) {
-        addMessageToChat("❌ Erreur lors de la requête : " + e.message, "bot");
+    function addMessage(text, sender = "ai") {
+        const msg = document.createElement("div");
+        msg.className = `msg ${sender}`;
+        msg.innerHTML = `<p>${text}</p>`;
+        askContainer.appendChild(msg);
+        askContainer.scrollTop = askContainer.scrollHeight;
     }
-});
 
+    async function embedBook(text) {
+        addMessage("⏳ Génération des embeddings...", "ai");
+        try {
+            const response = await fetch('http://127.0.0.1:5000/embed_book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+            const data = await response.json();
+            chunks = data.chunks;
+            embeddings = data.embeddings;
+            embeddingsReady = true;
+            addMessage("✅ Livre chargé et embeddings générés.", "ai");
+        } catch (err) {
+            addMessage(`❌ Erreur lors de la génération des embeddings : ${err.message}`, "ai");
+        }
+    }
 
+    // Génération des embeddings dès que le PDF est chargé
+    await embedBook(allPagesText.join(" "));
+
+    async function askBookQuestion(question) {
+        addMessage("⏳ L'IA réfléchit...", "ai");
+        try {
+            if (!embeddingsReady) {
+                await embedBook(allPagesText.join(" "));
+            }
+
+            const response = await fetch('http://127.0.0.1:5000/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question, chunks, embeddings })
+            });
+            const data = await response.json();
+            askContainer.lastElementChild.innerHTML = `<p>${data.answer}</p>`;
+        } catch (err) {
+            askContainer.lastElementChild.innerHTML = `<p>❌ Erreur : ${err.message}</p>`;
+        }
+    }
+
+    sendBtn.addEventListener("click", async () => {
+        const question = input.value.trim();
+        if (!question) return;
+        addMessage(question, "user");
+        input.value = "";
+        await askBookQuestion(question);
+    });
+
+    input.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendBtn.click();
+    });
 
 
 });

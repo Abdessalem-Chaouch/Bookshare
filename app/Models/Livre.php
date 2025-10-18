@@ -25,7 +25,8 @@ class Livre extends Model
         'stock',
         'pdf_contenu',
         'date_ajout',
-        'prix'
+        'prix',
+        'reading_time'
     ];
 
     protected $casts = [

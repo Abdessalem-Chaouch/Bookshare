@@ -4,6 +4,10 @@ export function initReadingPopup(pdfUrl, coverUrl, livre, totalPages) {
     const readingPopupContent = document.getElementById('readingPopupContent');
     const readingPopupClose = document.getElementById('readingPopupClose');
 
+    // ✅ Ajout récupération CSRF token depuis meta
+    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+
     if (!menuStart || !readingPopup || !readingPopupContent || !readingPopupClose) return;
 
     menuStart.addEventListener('click', async () => {
@@ -32,10 +36,10 @@ export function initReadingPopup(pdfUrl, coverUrl, livre, totalPages) {
             let timerInterval = null;
 
             // Temps initial depuis base
-            console.log("***************secondsspent",livre.reading_time);
+            console.log("***************secondsspent", livre.reading_time);
 
             let secondsSpent = Number(livre.reading_time ? livre.reading_time * 60 : 0) || 0;
-            console.log("***************secondsspent",secondsSpent);
+            console.log("***************secondsspent", secondsSpent);
             // totalMinutes basé sur livre.total_reading_time si existant
             const totalMinutes = Number(livre.total_reading_time || Math.ceil(totalPages * 2));
 
@@ -54,6 +58,7 @@ export function initReadingPopup(pdfUrl, coverUrl, livre, totalPages) {
                 timerInterval = setInterval(() => {
                     secondsSpent++;
                     updateUI();
+                    console.log("Seconds spent:", secondsSpent); // ✅ Debug temps
                     if (secondsSpent % 30 === 0) saveSeconds(30);
                 }, 1000);
             }
@@ -70,17 +75,20 @@ export function initReadingPopup(pdfUrl, coverUrl, livre, totalPages) {
 
             async function saveSeconds(n) {
                 try {
-                    const bookIdProg = encodeURIComponent(pdfUrl);
-                    await fetch(`/livres/${bookIdProg}/update-read-time`, {
+                    const bookIdProg = livre.id;
+                    const res = await fetch(`/livres/${bookIdProg}/update-read-time`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            // ✅ Correction CSRF dynamique
+                            'X-CSRF-TOKEN': csrfToken
                         },
                         body: JSON.stringify({ seconds: n })
                     });
+                    if (!res.ok) throw new Error('Erreur réseau');
                 } catch (e) {
-                    console.warn(e);
+                    console.warn('Erreur en sauvegardant le temps de lecture :', e);
+                    // ✅ On garde le timer actif même si erreur
                 }
             }
 
@@ -88,11 +96,14 @@ export function initReadingPopup(pdfUrl, coverUrl, livre, totalPages) {
                 stopReading();
                 secondsSpent = 0;
                 updateUI();
-                const bookIdProg = encodeURIComponent(pdfUrl);
+                const bookIdProg = livre.id;
                 fetch(`/livres/${bookIdProg}/reset-read-time`, {
                     method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                });
+                    headers: { 
+                        // ✅ Correction CSRF ici aussi
+                        'X-CSRF-TOKEN': csrfToken 
+                    }
+                }).catch(e => console.warn('Erreur reset:', e));
             }
 
             // Boutons

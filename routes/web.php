@@ -21,11 +21,27 @@ use App\Http\Controllers\FrontOfficeController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NoteController;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\RecommendationController;
 
+Route::get('/test-recommendation', function () {
+    // Exemple d’articles likés simulés
+    $liked = [1];
+
+    // Envoi à Flask
+    $response = Http::post('http://flask:5000/recommend', [
+        'liked_articles' => $liked
+    ]);
+
+    // Retourne la réponse brute pour test
+    return $response->json();
+});
+Route::post('/chat', [ChatController::class, 'handleRequest']);
+
+Route::view('/chatbot', 'FrontOffice.chat'); // Pour afficher la page Blade
 use App\Http\Controllers\BookFetchController;
 use App\Http\Controllers\AIController;
 use App\Http\Controllers\PredictionNotificationController;
@@ -79,6 +95,34 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/my-books', [PaypalController::class, 'myBooks'])->name('myBooks');
+
+});
+Route::middleware(['role:admin,auteur,user'])->group(function () {
+    Route::post('/bookmark/save', [BookmarkController::class, 'saveBookmark']);
+    Route::get('/bookmark/load', [BookmarkController::class, 'load'])->name('bookmark.load');
+Route::get('/livres/{livre}/reader', [LivreController::class, 'showReader'])->name('livres.reader');
+Route::post('/livres/{id}/update-read-time', [LivreController::class, 'updateReadTime'])->name('livres.updateReadTime');
+Route::post('/livres/{id}/reset-read-time', [LivreController::class, 'resetReadTime']);
+Route::get('/notes-popup', function () {
+    return view('FrontOffice.Livres.notes-popup'); // page blade avec juste le contenu du popup
+});
+Route::get('/reading-popup', function () {
+    return view('FrontOffice.Livres.progress'); // page blade avec juste le contenu du popup
+});
+Route::get('/search-popup', function () {
+    return view('FrontOffice.Livres.search'); // page blade avec juste le contenu du popup
+});
+Route::get('/translate-popup', function () {
+    return view('FrontOffice.Livres.translate'); // page blade avec juste le contenu du popup
+});
+});
+Route::middleware('auth')->group(function () {
+   
+Route::get('/books/{book}/notes', [NoteController::class, 'getBookNotes']);
+Route::post('/save-note', [NoteController::class, 'store']);
+Route::get('/get-note', [NoteController::class, 'getNote']);
+
+ 
     Route::get('/recommendation', [\App\Http\Controllers\RecommendationController::class, 'getSubscriptionRecommendation'])->name('recommendation');
 });
 

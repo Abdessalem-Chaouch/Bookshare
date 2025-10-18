@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-
+ 
                 <!-- Section Header -->
                 <div class="section-header align-center">
                     <div class="title"><span>Read our articles</span></div>

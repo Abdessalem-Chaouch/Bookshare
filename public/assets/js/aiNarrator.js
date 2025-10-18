@@ -22,7 +22,7 @@ export function initAINarrator(allPagesText, pageFlip) {
             }
 
             // Sinon, fetch le TTS et joue
-            const res = await fetch('http://127.0.0.1:5000/speak', {
+            const res = await fetch('http://127.0.0.1:5000⁠/speak', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text })
@@ -245,9 +245,8 @@ function cleanText(text) {
 export async function summarizeCurrentPage(pageFlip, allPagesText, container) {
     const currentIndex = pageFlip.getCurrentPageIndex();
 
-    // Prendre la page actuelle + la suivante pour simuler une double page
     const page1 = cleanText(allPagesText[currentIndex] || '');
-    const page2 = cleanText(allPagesText[currentIndex + 1] || ''); // peut être vide si fin du livre
+    const page2 = cleanText(allPagesText[currentIndex + 1] || '');
     const text = (page1 + ' ' + page2).trim();
 
     if (!text) {
@@ -256,6 +255,8 @@ export async function summarizeCurrentPage(pageFlip, allPagesText, container) {
     }
 
     try {
+        // ❌ Avant : await fetch(...)
+        // ✅ Correction : stocker la réponse dans une variable
         const response = await fetch('http://127.0.0.1:5000/summarize', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -274,8 +275,6 @@ export async function summarizeCurrentPage(pageFlip, allPagesText, container) {
         container.innerHTML = `<p style="color:red;">❌ Error: ${err.message}</p>`;
     }
 }
-
-
 export async function summarizeWholeBook(allPagesText, container) {
     if (!allPagesText || allPagesText.length === 0) {
         container.innerHTML = `<p>No text found for the full summary.</p>`;
@@ -283,33 +282,57 @@ export async function summarizeWholeBook(allPagesText, container) {
     }
 
     try {
+        // 1️⃣ Message initial
         container.innerHTML = `<div class="message ai"><p>⏳ Generating summary for the full book...</p></div>`;
 
-        const blockSize = 5; // Nombre de pages par bloc
+        const blockSize = 5;  // nombre de pages regroupées par bloc
         let partialSummaries = [];
 
         for (let i = 0; i < allPagesText.length; i += blockSize) {
             const blockText = cleanText(allPagesText.slice(i, i + blockSize).join(' '));
 
-            const response = await fetch('http://127.0.0.1:5000/summarize', {
+            // 2️⃣ Appel au backend Flask
+            const response = await fetch('http://127.0.0.1:5000/summarize', { // URL complète vers Flask
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: blockText })
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({text: blockText})
             });
 
-            if (!response.ok) throw new Error(`Flask error: ${response.status}`);
+            // 3️⃣ Vérification de la réponse
+            if (!response.ok) {
+                throw new Error(`Flask server error: ${response.status}`);
+            }
+
             const data = await response.json();
+
+            if (!data.summary) {
+                throw new Error("No summary returned from server");
+            }
+
             partialSummaries.push(data.summary);
+
+            // 4️⃣ Affichage progressif
+            container.innerHTML = `
+                <div class="message ai">
+                    <h4>📄 Partial Summary (${partialSummaries.length}/${Math.ceil(allPagesText.length / blockSize)})</h4>
+                    <p>${partialSummaries.join(' ')}</p>
+                </div>
+            `;
         }
 
+        // 5️⃣ Résumé complet
         const fullSummary = partialSummaries.join(' ');
 
         container.innerHTML = `
             <div class="message ai">
                 <h4>📚 Full Book Summary</h4>
                 <p>${fullSummary}</p>
-            </div>`;
+            </div>
+        `;
+
     } catch (err) {
         container.innerHTML = `<p style="color:red;">❌ Error: ${err.message}</p>`;
+        console.error(err);
     }
 }
+

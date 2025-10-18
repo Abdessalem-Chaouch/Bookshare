@@ -218,7 +218,52 @@ public function showf(Livre $livre)
 
     return view('FrontOffice.livres.showf', compact('livre'));
 }
-public function search(Request $request)
+
+public function showReader($id)
+    {
+        $livre = Livre::findOrFail($id);
+
+            $pdfUrl = asset('storage/' . $livre->pdf_contenu);
+            $title = $livre->titre ?? 'Lecture du livre';
+
+            // Temps de lecture existant dans la base (en minutes)
+            $readingTimeMinutes = $livre->reading_time ?? 0;
+            $readingTimeSeconds = $readingTimeMinutes * 60; // convertir en secondes pour JS
+
+            // Format lisible pour affichage
+            if ($readingTimeMinutes < 60) {
+                $readingTimeReadable = $readingTimeMinutes . ' min';
+            } else {
+                $hours = floor($readingTimeMinutes / 60);
+                $minutes = $readingTimeMinutes % 60;
+                $readingTimeReadable = $hours . ' h ' . $minutes . ' min';
+            }
+
+            // Nombre de pages (approximation)
+            $totalPages = 0;
+            try {
+                $pdf = \Spatie\PdfToText\Pdf::getText(storage_path('app/public/' . $livre->pdf_contenu));
+                $totalPages = substr_count($pdf, '%PDF') ?? 0; // approximation
+            } catch (\Exception $e) {
+                $totalPages = 0;
+            }
+                    $livre->last_read = now();
+                        $livre->save();
+    
+            return view('FrontOffice.Livres.reader', compact(
+                'pdfUrl',
+                'title',
+                'readingTimeReadable',
+                'readingTimeSeconds',
+                'totalPages',
+                'livre' // pour récupérer l'id si nécessaire en JS
+            ));
+        
+
+       
+    }
+
+public function updateReadTime(Request $request, $id)
 {
     $query = $request->get('query', '');
 
@@ -311,9 +356,10 @@ public function recommendationsByTitle($titre)
         return dd($response->json());
     }
 
-public function partagerSurWhatsapp($id)
-{
-    $livre = Livre::findOrFail($id);
+            $response = Http::timeout(20)->post('http://localhost:5000/speak', [
+                'text' => $text,
+                'lang' => $lang,
+            ]);
 
     // Crée le texte du message
     $texte = "Je recommande ce livre !\n\n";

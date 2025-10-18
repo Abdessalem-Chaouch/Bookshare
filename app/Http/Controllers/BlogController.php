@@ -31,23 +31,17 @@ class BlogController extends Controller
 
     public function indexFront(Request $request)
     {
-        // Récupérer toutes les catégories
         $categoriesblogs = CategoryBlog::all();
 
-        // Préparer la query des blogs (avec relations)
         $query = Blog::with(['category', 'likes', 'comments'])->latest();
 
-        // Filtrer par catégorie si demandé
         if ($request->has('category') && $request->category != '') {
             $query->where('category_id', $request->category);
         }
 
         $blogs = $query->get();
-
-        // Par défaut, collection vide pour recommandations
         $recommendedArticles = collect();
 
-        // Si utilisateur connecté -> appel Flask pour recommandations
         if (Auth::check()) {
             try {
                 $response = Http::timeout(5)->post('http://127.0.0.1:5000/recommend', [
