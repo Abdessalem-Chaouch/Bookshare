@@ -27,6 +27,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaypalController;
 
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\NotificationController;
  use App\Http\Controllers\NoteController;
 use App\Http\Controllers\VoiceController;
@@ -39,15 +40,16 @@ Route::get('/test-recommendation', function () {
     $liked = [1];
 
     // Envoi à Flask
-    $response = Http::post('http://127.0.0.1:5000/recommend', [
+    $response = Http::post('http://flask:5000/recommend', [
         'liked_articles' => $liked
     ]);
 
     // Retourne la réponse brute pour test
     return $response->json();
 });
+Route::post('/chat', [ChatController::class, 'handleRequest']);
 
-
+Route::view('/chatbot', 'FrontOffice.chat'); // Pour afficher la page Blade
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
 Route::get('/nos-categories', [FrontOfficeController::class, 'categories'])->name('front.categories');
@@ -88,7 +90,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/my-books', [PaypalController::class, 'myBooks'])->name('myBooks');
 
 });
-Route::middleware('auth')->group(function () {
+Route::middleware(['role:admin,auteur,user'])->group(function () {
     Route::post('/bookmark/save', [BookmarkController::class, 'saveBookmark']);
     Route::get('/bookmark/load', [BookmarkController::class, 'load'])->name('bookmark.load');
 Route::get('/livres/{livre}/reader', [LivreController::class, 'showReader'])->name('livres.reader');

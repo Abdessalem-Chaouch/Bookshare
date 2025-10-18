@@ -1,0 +1,146 @@
+pipeline {
+    agent any
+
+    environment {
+        // 🔐 Variables et secrets Jenkins (à définir dans les credentials Jenkins)
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials') 
+        SONARQUBE_ENV = credentials('sonarqube-token')
+        NEXUS_CREDENTIALS = credentials('nexus-credentials')
+        DOCKER_HUB_USER = 'votre_username_dockerhub' // À modifier
+        PROJECT_NAME = 'bookshare'
+        SONAR_HOST_URL = 'http://sonarqube:9000'
+        NEXUS_URL = 'http://nexus:8081/repository/maven-releases/'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                echo "🔍 Cloning repository..."
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies & Test') {
+            parallel {
+                stage('Laravel Tests') {
+                    steps {
+                        dir('laravel') {
+                            sh '''
+                                composer install
+                                php artisan test
+                            '''
+                        }
+                    }
+                }
+                stage('Flask Tests') {
+                    steps {
+                        dir('flask') {
+                            sh '''
+                                pip install -r requirements.txt
+                                pytest
+                            '''
+                        }
+                    }
+                }
+                stage('Vite Build') {
+                    steps {
+                        dir('vite') {
+                            sh '''
+                                npm ci
+                                npm run build
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                echo "🔎 Running SonarQube analysis..."
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                        sonar-scanner \
+                        -Dsonar.projectKey=${PROJECT_NAME} \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                        -Dsonar.login=${SONARQUBE_ENV}
+                    """
+                }
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                echo "🐳 Building Docker images..."
+                sh '''
+                    docker build -t ${PROJECT_NAME}_laravel ./laravel
+                    docker build -t ${PROJECT_NAME}_flask ./flask
+                    docker build -t ${PROJECT_NAME}_vite ./vite
+                '''
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                echo "☁️ Pushing images to Docker Hub..."
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+                        docker tag ${PROJECT_NAME}_laravel ${DOCKER_USER}/${PROJECT_NAME}_laravel:latest
+                        docker tag ${PROJECT_NAME}_flask ${DOCKER_USER}/${PROJECT_NAME}_flask:latest
+                        docker tag ${PROJECT_NAME}_vite ${DOCKER_USER}/${PROJECT_NAME}_vite:latest
+
+                        docker push ${DOCKER_USER}/${PROJECT_NAME}_laravel:latest
+                        docker push ${DOCKER_USER}/${PROJECT_NAME}_flask:latest
+                        docker push ${DOCKER_USER}/${PROJECT_NAME}_vite:latest
+
+                        docker logout
+                    '''
+                }
+            }
+        }
+
+        stage('Publish Artifacts to Nexus') {
+            steps {
+                echo "📦 Publishing to Nexus..."
+                withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                    sh '''
+                        tar -czf laravel.tar.gz laravel/
+                        curl -v -u ${NEXUS_USER}:${NEXUS_PASS} --upload-file laravel.tar.gz ${NEXUS_URL}/${PROJECT_NAME}_laravel_1.0.0.tar.gz
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy using Docker Compose') {
+            steps {
+                echo "🚀 Deploying stack with Docker Compose..."
+                sh '''
+                    docker-compose down
+                    docker-compose up -d
+                '''
+            }
+        }
+
+        stage('Monitoring Setup (Prometheus & Grafana)') {
+            steps {
+                echo "📊 Starting monitoring services..."
+                sh '''
+                    docker-compose up -d prometheus grafana
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Pipeline completed successfully!"
+        }
+        failure {
+            echo "❌ Pipeline failed! Please check the logs."
+        }
+    }
+}

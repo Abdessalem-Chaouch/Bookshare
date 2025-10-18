@@ -194,7 +194,6 @@ public function showReader($id)
     {
         $livre = Livre::findOrFail($id);
 
-        if ($livre->pdf_contenu && Storage::disk('public')->exists($livre->pdf_contenu)) {
             $pdfUrl = asset('storage/' . $livre->pdf_contenu);
             $title = $livre->titre ?? 'Lecture du livre';
 
@@ -230,9 +229,9 @@ public function showReader($id)
                 'totalPages',
                 'livre' // pour récupérer l'id si nécessaire en JS
             ));
-        }
+        
 
-        return abort(404, 'Le fichier PDF de ce livre est introuvable.');
+       
     }
 
 public function updateReadTime(Request $request, $id)
@@ -279,7 +278,7 @@ public function resetReadTime($id)
         try {
             Log::info("Sending text to Flask: " . substr($text, 0, 50));
 
-            $response = Http::timeout(20)->post('http://127.0.0.1:5000/speak', [
+            $response = Http::timeout(20)->post('http://localhost:5000/speak', [
                 'text' => $text,
                 'lang' => $lang,
             ]);

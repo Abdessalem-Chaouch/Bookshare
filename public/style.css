@@ -2634,3 +2634,87 @@ footer#footer {
 
 .message.user { background: #d1e7ff; text-align: right; }
 .message.ai { background: #e2e2e2; text-align: left; }
+.ask-chatbox {
+    position: fixed;
+    bottom: 20px;
+    right: 25px;
+    width: 340px;
+    background: #fffaf4;
+    border: 2px solid #d1a085;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(209,160,133,0.2);
+    font-family: 'SF Pro Display', sans-serif;
+    overflow: hidden;
+    z-index: 9999;
+}
+
+.ask-header {
+    background: #d1a085;
+    color: #fff;
+    padding: 10px 15px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.ask-messages {
+    height: 300px;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.msg {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 15px;
+    line-height: 1.4;
+    font-size: 14px;
+}
+
+.msg.user {
+    align-self: flex-end;
+    background: #d1a085;
+    color: white;
+}
+
+.msg.ai {
+    align-self: flex-start;
+    background: #f5ebe3;
+    color: #3b2c26;
+}
+
+.ask-input-area {
+    display: flex;
+    padding: 10px;
+    background: #fff6ef;
+    border-top: 1px solid #d1a085;
+}
+
+.ask-input-area input {
+    flex: 1;
+    border: none;
+    padding: 10px 12px;
+    border-radius: 10px;
+    outline: none;
+    font-size: 14px;
+    background: #fff;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.ask-input-area button {
+    background: #d1a085;
+    border: none;
+    color: #fff;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    margin-left: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.ask-input-area button:hover {
+    background: #b87c56;
+}
