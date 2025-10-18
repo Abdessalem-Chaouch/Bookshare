@@ -38,16 +38,17 @@ class PaymentController extends Controller
 
         // Créer l'enregistrement de paiement
         $payment = Payment::create([
+            'payment_id' => 'TXN_' . Str::random(10),
+            'livre_id' => null, // Null pour les abonnements
             'user_id' => $user->id,
-            'subscription_id' => $subscription->id,
+            'product_name' => $subscription->name,
+            'quantity' => 1, // Quantité par défaut pour les abonnements
             'amount' => $subscription->price,
-            'payment_method' => 'card',
-            'transaction_id' => 'TXN_' . Str::random(10),
-            'status' => 'pending',
-            'payment_data' => [
-                'cardholder_name' => $request->cardholder_name,
-                'card_last_four' => substr(str_replace(' ', '', $request->card_number), -4)
-            ]
+            'currency' => 'TND',
+            'payer_name' => $request->cardholder_name,
+            'payer_email' => $user->email,
+            'payment_status' => 'pending',
+            'payment_method' => 'card'
         ]);
 
         // Simulation du paiement (remplacer par vraie intégration Stripe/PayPal)
@@ -55,7 +56,7 @@ class PaymentController extends Controller
 
         if ($paymentSuccess) {
             // Mettre à jour le statut du paiement
-            $payment->update(['status' => 'completed']);
+            $payment->update(['payment_status' => 'completed']);
 
             // Changer le rôle de l'utilisateur en auteur
             $user->update(['role' => 'auteur']);
@@ -76,7 +77,7 @@ class PaymentController extends Controller
         }
 
         // Mettre à jour le statut du paiement en cas d'échec
-        $payment->update(['status' => 'failed']);
+        $payment->update(['payment_status' => 'failed']);
         
         return redirect()->back()->with('error', 'Échec du paiement. Veuillez réessayer.');
     }

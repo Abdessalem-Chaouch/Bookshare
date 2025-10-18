@@ -17,7 +17,9 @@
                         <th>Owner</th>
                         <th>Location</th>
                         <th>Contact</th>
+                        {{-- <th>Books Count</th> --}}
                         <th>Created At</th>
+                        <th>AI Prediction</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -28,7 +30,21 @@
                             <td>{{ $store->owner_name }}</td>
                             <td>{{ $store->location }}</td>
                             <td>{{ $store->contact }}</td>
+                            {{-- <td>{{ $store->livres_count ?? 0 }}</td> --}}
                             <td>{{ $store->created_at ? $store->created_at->format('d/m/Y H:i') : '-' }}</td>
+                            <td>
+    @php
+        $prediction = \App\Models\PredictionNotification::where('store_id', $store->id)->latest()->first();
+    @endphp
+
+    @if($prediction)
+        <span class="badge bg-danger">{{ $prediction->title }}</span>
+        <small class="text-muted d-block">{{ $prediction->message }}</small>
+    @else
+        <span class="badge bg-success">✅ Stable</span>
+    @endif
+</td>
+
                             <td>
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
@@ -72,7 +88,7 @@
                     @endforeach
                     @if($stores->isEmpty())
                         <tr>
-                            <td colspan="6" class="text-center py-4">No stores found.</td>
+                            <td colspan="7" class="text-center py-4">No stores found.</td>
                         </tr>
                     @endif
                 </tbody>

@@ -28,13 +28,17 @@ use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
 
+use App\Http\Controllers\BookFetchController;
+use App\Http\Controllers\AIController;
+use App\Http\Controllers\PredictionNotificationController;
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
 Route::get('/nos-categories', [FrontOfficeController::class, 'categories'])->name('front.categories');
 
 Route::get('/category/{id}/books', [FrontOfficeController::class, 'categoryBooks'])->name('category.books');
-
+  Route::get('/livres/{livre}/viewpdf', [LivreController::class, 'viewpdf'])->name('livres.viewpdf');
+        Route::get('/livres/{livre}/download', [LivreController::class, 'download'])->name('livres.download');
 
 
 Route::get('/livresf', [LivreController::class, 'indexf'])->name('livresf');
@@ -52,6 +56,7 @@ Route::post('/stores/{store}/reviews', [ReviewController::class, 'store'])->name
 Route::post('/reviews/{storeId}', [ReviewController::class, 'store'])->name('reviews.store');
 Route::put('/reviews/{reviewId}', [ReviewController::class, 'update'])->name('reviews.update');
 Route::delete('/reviews/{reviewId}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+Route::post('/generate-description', [AIController::class, 'generateDescription']);
 
 Route::get('/aboutus', function () {
     return view('FrontOffice.Aboutus.AboutPage');
@@ -59,10 +64,10 @@ Route::get('/aboutus', function () {
 
 
 Route::middleware('auth')->group(function () {
-  Route::post('paypal', [PaypalController::class, 'paypal'])->name('paypal');
-Route::get('paypal', [PaypalController::class, 'paypal'])->name('paypal');
-Route::get('success', [PaypalController::class, 'success'])->name('success');
-Route::get('cancel', [PaypalController::class, 'cancel'])->name('cancel');
+    Route::post('paypal', [PaypalController::class, 'paypal'])->name('paypal');
+    Route::get('paypal', [PaypalController::class, 'paypal'])->name('paypal');
+    Route::get('success', [PaypalController::class, 'success'])->name('success');
+    Route::get('cancel', [PaypalController::class, 'cancel'])->name('cancel');
 
 });
 Route::middleware(['auth'])->group(function () {
@@ -73,12 +78,12 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/borrows', [BorrowController::class, 'index'])->name('borrows');
     Route::post('/borrows/{livreId}', [BorrowController::class, 'store'])->name('borrows.store');
-   Route::post('/borrows/{livreId}/pay', [BorrowController::class, 'payAndBorrow'])->name('borrows.pay');
+    Route::post('/borrows/{livreId}/pay', [BorrowController::class, 'payAndBorrow'])->name('borrows.pay');
     Route::get('/borrows/success', [BorrowController::class, 'success'])->name('borrows.success');
-// web.php
-Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.list');
-Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])->name('notifications.delete');
-Route::post('/notifications/clear', [NotificationController::class, 'clearAll'])->name('notifications.clear');
+    // web.php
+    Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.list');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])->name('notifications.delete');
+    Route::post('/notifications/clear', [NotificationController::class, 'clearAll'])->name('notifications.clear');
 
 });
 
@@ -89,13 +94,17 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/rates', [RateController::class, 'index'])->name('rates.index');
     Route::post('/livres/{id}/rate', [RateController::class, 'store'])->name('rates.store');
-//Route::post('/rates/{livre}', [RateController::class, 'store'])->name('rates.store')->middleware('auth');
+    //Route::post('/rates/{livre}', [RateController::class, 'store'])->name('rates.store')->middleware('auth');
 
     // Paiement des abonnements - accessible à tous les utilisateurs connectés
-    Route::get('/payment/{subscription}', [\App\Http\Controllers\PaymentController::class, 'showPaymentForm'])->name('payment.form');
-    Route::post('/payment/{subscription}', [\App\Http\Controllers\PaymentController::class, 'processPayment'])->name('payment.process');
-    Route::get('/payment-history', [\App\Http\Controllers\PaymentController::class, 'history'])->name('payment.history');
+    Route::get('/payment/{subscription}', [\App\Http\Controllers\SubscriptionPaymentController::class, 'showPaymentForm'])->name('payment.form');
+    Route::post('/payment/{subscription}', [\App\Http\Controllers\SubscriptionPaymentController::class, 'processPayment'])->name('payment.process');
+    Route::get('/payment-history', [\App\Http\Controllers\SubscriptionPaymentController::class, 'history'])->name('payment.history');
 });
+
+// Webhook pour les paiements
+Route::post('/webhook/payment', [\App\Http\Controllers\SubscriptionPaymentController::class, 'webhook'])->name('payment.webhook');
+
 // ========================
 // 🔒 Routes du Back Office
 // ========================
@@ -129,11 +138,21 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         Route::delete('/DeleteBlog/{blog}', [BlogController::class, 'destroy'])->name('blogs.delete');
 
         // Magasin Management
-        Route::get('/AjouterMagasin', fn() => view('BackOffice.magasin.ajouterMagasin'))->name('AjouterMagasin');
+        // Route::get('/AjouterMagasin', fn() => view('BackOffice.magasin.ajouterMagasin'))->name('AjouterMagasin');
+        Route::get('/AjouterMagasin', [StoreController::class, 'create'])->name('AjouterMagasin');
         Route::post('/AjouterMagasin', [App\Http\Controllers\StoreController::class, 'store'])->name('AjouterMagasin');
         Route::get('/listeMagasin', [StoreController::class, 'index'])->name('listeMagasin');
-        Route::resource('stores', StoreController::class)->except(['create','index','store']);
-        
+        // Route::resource('stores', StoreController::class)->except(['create', 'index', 'store']);
+        Route::resource('stores', StoreController::class)->except(['create', 'index']);
+        Route::middleware(['auth'])->group(function () {
+        Route::post('/stores/{store}/book-fetch', [BookFetchController::class, 'store'])->name('bookfetch.store');
+        Route::put('/book-fetch/{bookFetch}', [BookFetchController::class, 'update'])->name('bookfetch.update');
+        Route::delete('/book-fetch/{bookFetch}', [BookFetchController::class, 'destroy'])->name('bookfetch.destroy');
+        Route::get('/notifications', [PredictionNotificationController::class, 'index'])->name('notifications.index');
+});
+
+
+
         // Utilisateur Management
 
         Route::get('/AjouterUtilisateur', [UsersController::class, 'createUser'])->name('AjouterUtilisateur');
@@ -146,11 +165,11 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
             return view('BackOffice.utilisateur.listeUtilisateur', compact('users'));
         })->name('listeUtilisateur');
 
-       Route::get('/listeUtilisateur', [UsersController::class, 'index'])->name('listeUtilisateur');   
+        Route::get('/listeUtilisateur', [UsersController::class, 'index'])->name('listeUtilisateur');
 
         Route::get('/transactions', fn() => view('BackOffice.Transactions.Transactions'))->name('transactions');
         Route::get('/transactions', [App\Http\Controllers\PaypalController::class, 'transactions'])->name('transactions');
-        
+
         // Subscription Management
         Route::resource('subscriptions', \App\Http\Controllers\SubscriptionController::class);
 
@@ -161,25 +180,26 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
     // ========================
     Route::middleware(['role:auteur'])->group(function () {
         // Dashboard Auteur
-Route::get('/mes-livres', [LivreController::class, 'mesLivres'])->name('mesLivres');
+        Route::get('/mes-livres', [LivreController::class, 'mesLivres'])->name('mesLivres');
 
         Route::get('/dashboardAuteur', fn() => view('BackOffice.dashboardAuteur'))->name('dashboardAuteur');
-        
+
         // Abonnements Auteur
         Route::get('/mes-abonnements', [\App\Http\Controllers\AuthorSubscriptionController::class, 'index'])->name('author.subscriptions');
-        
+
 
     });
 
     // ========================
     // 🔒 Routes accessibles ADMIN + AUTEUR
     // ========================*
-     Route::middleware(['role:admin,auteur,user'])->group(function () {
+    Route::middleware(['role:admin,auteur,user'])->group(function () {
         // Livre Management
 // Routes Livres
-    Route::get('/livresf/{livre}', [LivreController::class, 'showf'])->name('livres.showf');
+        Route::get('/livresf/{livre}', [LivreController::class, 'showf'])->name('livres.showf');
+        
 
-});
+    });
 
 
 
@@ -193,15 +213,14 @@ Route::get('/mes-livres', [LivreController::class, 'mesLivres'])->name('mesLivre
 
         // Livre Management
 // Routes Livres
-Route::resource('livres', LivreController::class);
+        Route::resource('livres', LivreController::class);
 
-// Routes supplémentaires si tu veux des noms plus explicites
-Route::get('/AjouterLivre', [LivreController::class, 'create'])->name('AjouterLivre');
-Route::get('/listeLivre', [LivreController::class, 'index'])->name('listeLivre');
+        // Routes supplémentaires si tu veux des noms plus explicites
+        Route::get('/AjouterLivre', [LivreController::class, 'create'])->name('AjouterLivre');
+        Route::get('/listeLivre', [LivreController::class, 'index'])->name('listeLivre');
 
-    // PDF - afficher et télécharger
-Route::get('/livres/{livre}/viewpdf', [LivreController::class, 'viewpdf'])->name('livres.viewpdf');
-Route::get('/livres/{livre}/download', [LivreController::class, 'download'])->name('livres.download');
+        // PDF - afficher et télécharger
+      
 
 
 
@@ -209,8 +228,8 @@ Route::get('/livres/{livre}/download', [LivreController::class, 'download'])->na
         Route::resource('categories', CategoryController::class);
         Route::get('/AjouterCategorie', [CategoryController::class, 'create'])->name('AjouterCategorie');
         Route::get('/listeCategorie', [CategoryController::class, 'index'])->name('listeCategorie');
-       // Route::get('/borrowsBook', fn() => view('BackOffice.Borrows.Borrows'))->name('borrowsBook');
-     Route::get('/borrowsBook', [BorrowController::class, 'borrows'])->name('borrowsBook');
+        // Route::get('/borrowsBook', fn() => view('BackOffice.Borrows.Borrows'))->name('borrowsBook');
+        Route::get('/borrowsBook', [BorrowController::class, 'borrows'])->name('borrowsBook');
     });
 });
 
@@ -229,15 +248,15 @@ Route::delete('/comments/{comment}', [CommentsController::class, 'destroy'])->na
 
 Route::middleware('auth')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-   Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add')->middleware('auth');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add')->middleware('auth');
     Route::patch('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
-// routes/web.php
-Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
- 
+    // routes/web.php
+    Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
+
 });
 
 

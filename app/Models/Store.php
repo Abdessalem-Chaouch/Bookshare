@@ -26,5 +26,10 @@ class Store extends Model
     {
         return $this->reviews()->avg('rating');
     }
+    public function livres()
+    {
+        return $this->belongsToMany(Livre::class)->withPivot('quantity');
+    }
+
 
 }
