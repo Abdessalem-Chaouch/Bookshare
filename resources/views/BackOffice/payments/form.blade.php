@@ -15,6 +15,7 @@
         <p class="text-muted">Complete your subscription to unlock all features</p>
     </div>
 
+
     @if(session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif

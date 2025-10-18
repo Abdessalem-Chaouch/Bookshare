@@ -14,7 +14,8 @@ return new class extends Migration
     Schema::create('livres', function (Blueprint $table) {
         $table->id();
         $table->string('titre');
-  $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();        $table->text('description')->nullable();
+        $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();        
+        $table->text('description')->nullable();
         $table->string('isbn')->nullable();
         $table->string('photo_couverture')->nullable();
         $table->foreignId('categorie_id')->nullable()->constrained('categories')->nullOnDelete();
@@ -23,6 +24,9 @@ return new class extends Migration
         $table->string('pdf_contenu')->nullable();
         $table->timestamp('date_ajout')->useCurrent();
         $table->timestamps();
+        // Store
+        $table->unsignedBigInteger('store_id');
+        $table->foreign('store_id')->references('id')->on('stores')->onDelete('cascade');
     });
 }
 

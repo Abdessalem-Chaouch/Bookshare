@@ -63,4 +63,9 @@ class Livre extends Model
     {
         return $this->hasMany(Borrow::class);
     }
+    public function stores()
+    {
+        return $this->belongsToMany(Store::class)->withPivot('quantity');
+    }
+
 }

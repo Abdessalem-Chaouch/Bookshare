@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Store;
+use App\Models\Livre;
 use Illuminate\Http\Request;
+
 
 class StoreController extends Controller
 {
@@ -13,7 +15,8 @@ class StoreController extends Controller
     public function index()
     {
         $stores = Store::all();
-        return view('BackOffice.magasin.listeMagasin', compact('stores'));
+        $allBooks = Livre::all();
+        return view('BackOffice.magasin.listeMagasin', compact('stores', 'allBooks'));
     }
 
     /**
@@ -21,7 +24,8 @@ class StoreController extends Controller
      */
     public function create()
     {
-        return view('BackOffice.magasin.ajouterMagasin');
+        $allBooks = Livre::all();
+        return view('BackOffice.magasin.ajouterMagasin', compact('allBooks'));
     }
 
     /**
@@ -62,6 +66,8 @@ class StoreController extends Controller
     {
     $store = Store::with('reviews.user')->findOrFail($id);
     $averageRating = round($store->averageRating(), 1);
+    // Load the store and count the books
+    $store = Store::withCount('livres')->with('reviews.user')->findOrFail($id);
 
     return view('FrontOffice.Stores.Show', compact('store', 'averageRating'));
     }
@@ -71,8 +77,10 @@ class StoreController extends Controller
      */
     public function edit(string $id)
     {
-        $store = Store::findOrFail($id);
-        return view('BackOffice.magasin.ajouterMagasin', compact('store'));
+        // $store = Store::findOrFail($id);
+        $store = Store::with('livres')->findOrFail($id); // eager load books
+        $allBooks = Livre::all(); // get all existing books
+        return view('BackOffice.magasin.ajouterMagasin', compact('store', 'allBooks'));
     }
 
     /**
@@ -139,7 +147,15 @@ public function indexFront(Request $request)
     // Execute the query and get the results
     $stores = $query->get();
 
+    // Load stores with their books count
+    $stores = Store::withCount('livres')->get();
+    //$store = Store::withCount('livres')->with('reviews.user')->findOrFail($id);
+    $allBooks = Livre::all(); // get all existing books
     return view('FrontOffice.Stores.StorePage', compact('stores'));
+
+
+
+    // return view('FrontOffice.Stores.StorePage', compact('stores'));
 }
 
     

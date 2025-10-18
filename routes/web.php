@@ -26,6 +26,10 @@ use App\Http\Controllers\NoteController;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\RecommendationController;
 
+use App\Http\Controllers\BookFetchController;
+use App\Http\Controllers\AIController;
+use App\Http\Controllers\PredictionNotificationController;
+
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
 Route::get('/nos-categories', [FrontOfficeController::class, 'categories'])->name('front.categories');
@@ -60,6 +64,7 @@ Route::post('/stores/{store}/reviews', [ReviewController::class, 'store'])->name
 Route::post('/reviews/{storeId}', [ReviewController::class, 'store'])->name('reviews.store');
 Route::put('/reviews/{reviewId}', [ReviewController::class, 'update'])->name('reviews.update');
 Route::delete('/reviews/{reviewId}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+Route::post('/generate-description', [AIController::class, 'generateDescription']);
 
 Route::get('/aboutus', function () {
     return view('FrontOffice.Aboutus.AboutPage');
@@ -83,6 +88,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/borrows/{livreId}/pay', [BorrowController::class, 'payAndBorrow'])->name('borrows.pay');
     Route::get('/borrows/success', [BorrowController::class, 'success'])->name('borrows.success');
     Route::get('/purchases', [App\Http\Controllers\PaypalController::class, 'transactionsFront'])->name('purchases');
+    // web.php
+    Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.list');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])->name('notifications.delete');
+    Route::post('/notifications/clear', [NotificationController::class, 'clearAll'])->name('notifications.clear');
 
     // web.php
     Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.list');
@@ -170,10 +179,22 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         Route::get('/blogs/{id}', [BlogController::class, 'show1'])->name('blogs.show1');
 
         // Magasin Management
-        Route::get('/AjouterMagasin', fn() => view('BackOffice.magasin.ajouterMagasin'))->name('AjouterMagasin');
+        // Route::get('/AjouterMagasin', fn() => view('BackOffice.magasin.ajouterMagasin'))->name('AjouterMagasin');
+        Route::get('/AjouterMagasin', [StoreController::class, 'create'])->name('AjouterMagasin');
         Route::post('/AjouterMagasin', [App\Http\Controllers\StoreController::class, 'store'])->name('AjouterMagasin');
         Route::get('/listeMagasin', [StoreController::class, 'index'])->name('listeMagasin');
-        Route::resource('stores', StoreController::class)->except(['create', 'index', 'store']);
+        // Route::resource('stores', StoreController::class)->except(['create', 'index', 'store']);
+        Route::resource('stores', StoreController::class)->except(['create', 'index']);
+        Route::middleware(['auth'])->group(function () {
+        Route::post('/stores/{store}/book-fetch', [BookFetchController::class, 'store'])->name('bookfetch.store');
+        Route::put('/book-fetch/{bookFetch}', [BookFetchController::class, 'update'])->name('bookfetch.update');
+        Route::delete('/book-fetch/{bookFetch}', [BookFetchController::class, 'destroy'])->name('bookfetch.destroy');
+        Route::get('/notifications', [PredictionNotificationController::class, 'index'])->name('notifications.index');
+});
+
+
+
+        // Utilisateur Management
 
         // Utilisateur Management
         Route::get('/AjouterUtilisateur', [UsersController::class, 'createUser'])->name('AjouterUtilisateur');
@@ -208,6 +229,7 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
     Route::middleware(['role:auteur'])->group(function () {
         // Dashboard Auteur
         Route::get('/mes-livres', [LivreController::class, 'mesLivres'])->name('mesLivres');
+
         Route::get('/dashboardAuteur', fn() => view('BackOffice.dashboardAuteur'))->name('dashboardAuteur');
 
         // Abonnements Auteur
