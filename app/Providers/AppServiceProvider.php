@@ -16,15 +16,12 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Composer pour injecter les notifications dans la navbar
-        View::composer('FrontOffice.navbar', function ($view) {
-            $user = Auth::user();
-            $notifications = $user ? $user->notifications()->latest()->take(5)->get() : collect();
-            $view->with('notifications', $notifications);
-        });
-         view()->composer('*', function ($view) {
-        BorrowNotificationService::handle();
-    });
+        // Temporairement désactivé pour résoudre les problèmes de performance
+        // View::composer('FrontOffice.navbar', function ($view) {
+        //     $user = Auth::user();
+        //     $notifications = $user ? $user->notifications()->latest()->take(5)->get() : collect();
+        //     $view->with('notifications', $notifications);
+        // });
     }
 
     public function register(): void

@@ -8,24 +8,23 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Spatie\PdfToImage\Pdf;
 use Illuminate\Support\Facades\Http;
-// ou une autre librairie pour compter les pages
+use App\Http\Controllers\encodeURIComponent;
 class LivreController extends Controller
 {
-    
+
   public function index()
 {
     // Récupérer les livres avec leur catégorie
-    $livres = Livre::with('categorie')->latest('date_ajout')->get();
+    $livres = Livre::with('categorie')->latest('created_at')->get();
 
     return view('BackOffice.livre.listeLivre', compact('livres'));
 }
 public function indexf()
 {
-    $livres = Livre::with('categorie', 'user')
-                   ->latest('date_ajout')
-                   ->get();
+    $livres = Livre::with(['categorie', 'auteur'])
+        ->latest('date_ajout')
+        ->paginate(12);
 
     return view('FrontOffice.livres.LivrePage', compact('livres'));
 }
@@ -33,15 +32,14 @@ public function indexf()
 
 public function mesLivres()
 {
-    
+
     $user = Auth::user();
 
     if (!$user) {
         return redirect()->route('login')->with('error', 'Vous devez être connecté.');
     }
 
-    $livres = Livre::where('user_id', $user->id)
-                   ->with('categorie')
+    $livres = Livre::with('categorie')
                    ->get();
 
     return view('BackOffice.livre.mesLivres', compact('livres'));
@@ -50,6 +48,14 @@ public function mesLivres()
 
   public function create()
 {
+    $user = auth()->user();
+
+    // Vérifier si l'auteur a un abonnement actif (seulement pour l'ajout)
+    if ($user->isAuteur() && !$user->hasActiveSubscription()) {
+        return redirect()->route('author.subscriptions')
+            ->with('error', 'Vous devez avoir un abonnement actif pour ajouter des livres.');
+    }
+
     $categories = Category::all();
     $auteurs = User::where('role', 'auteur')->get();
 
@@ -58,6 +64,14 @@ public function mesLivres()
 
    public function store(Request $request)
 {
+    $user = auth()->user();
+
+    // Vérifier si l'auteur a un abonnement actif
+    if ($user->isAuteur() && !$user->hasActiveSubscription()) {
+        return redirect()->route('author.subscriptions')
+            ->with('error', 'Vous devez avoir un abonnement actif pour ajouter des livres.');
+    }
+
   $validated = $request->validate([
     'titre' => 'required|string|max:255',
     'user_id' => 'required|exists:users,id',
@@ -66,8 +80,8 @@ public function mesLivres()
     'categorie_id' => 'required|exists:categories,id',
     'prix' => 'required|numeric|min:0',
     'stock' => 'required|integer|min:0',
-    'photo_couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:200048',
-    'pdf_contenu' => 'nullable|mimes:pdf|max:2000480', 
+    'photo_couverture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20048',
+    'pdf_contenu' => 'nullable|mimes:pdf|max:20480',
 ]);
 
 
@@ -88,14 +102,29 @@ return redirect()->route('livres.index')->with('success', 'Livre ajouté avec su
 
     public function edit(Livre $livre)
     {
-         $auteurs = User::where('role', 'auteur')->get();
+        $user = auth()->user();
 
+        // Vérifier si l'auteur a un abonnement actif pour éditer
+        if ($user->isAuteur() && !$user->hasActiveSubscription()) {
+            return redirect()->route('dashboardAuteur')
+                ->with('error', 'Vous devez avoir un abonnement actif pour modifier des livres.');
+        }
+
+        $auteurs = User::where('role', 'auteur')->get();
         $categories = Category::all();
         return view('BackOffice.livre.editLivre', compact('livre', 'categories','auteurs'));
     }
 
  public function update(Request $request, Livre $livre)
 {
+    $user = auth()->user();
+
+    // Vérifier si l'auteur a un abonnement actif pour modifier
+    if ($user->isAuteur() && !$user->hasActiveSubscription()) {
+        return redirect()->route('dashboardAuteur')
+            ->with('error', 'Vous devez avoir un abonnement actif pour modifier des livres.');
+    }
+
     $data = $request->validate([
         'titre' => 'required|string|max:255',
         'user_id' => 'required|exists:users,id', // remplacer 'auteur'
@@ -104,7 +133,7 @@ return redirect()->route('livres.index')->with('success', 'Livre ajouté avec su
         'categorie_id' => 'nullable|exists:categories,id',
         'stock' => 'required|integer|min:0',
         'photo_couverture' => 'nullable|image|max:2048',
-        'pdf_contenu' => 'nullable|file|mimes:pdf|max:2000480',
+        'pdf_contenu' => 'nullable|file|mimes:pdf|max:20480',
         'prix' => 'nullable|numeric|min:0',
     ]);
 
@@ -236,67 +265,117 @@ public function showReader($id)
 
 public function updateReadTime(Request $request, $id)
 {
-    $livre = Livre::findOrFail($id);
+    $query = $request->get('query', '');
 
-    // secondes passées envoyées depuis le front
-    $seconds = $request->input('seconds', 0);
+    // Recherche dynamique par titre
+    $livres = Livre::with('categorie')
+        ->where('titre', 'like', "%{$query}%")
+        ->orderBy('titre', 'asc')
+        ->get();
 
-    // lecture actuelle en secondes
-    $currentSeconds = ($livre->reading_time ?? 0) * 60;
+    // Préparer les données JSON
+    $livres = $livres->map(function ($livre) {
+        return [
+            'id' => $livre->id,
+            'titre' => $livre->titre,
+            'auteur' => $livre->auteur,
+            'prix' => $livre->prix,
+            'stock' => $livre->stock,
+            'disponibilite' => $livre->disponibilite,
+            'photo_couverture' => $livre->photo_couverture,
+            'categorie' => $livre->categorie ? $livre->categorie->name : null,
+        ];
+    });
 
-    // on ajoute les secondes
-    $newSeconds = $currentSeconds + $seconds;
-
-    // on sauvegarde en minutes arrondies
-    $livre->reading_time = ceil($newSeconds / 60);
-    $livre->save();
-
-    return response()->json(['success' => true, 'reading_time' => $livre->reading_time]);
+    return response()->json(['livres' => $livres]);
 }
-// Nouveau endpoint pour reset
-public function resetReadTime($id)
+public function sort(Request $request)
 {
-    $livre = Livre::findOrFail($id);
+    $column = $request->get('column', 'titre');
+    $order = $request->get('order', 'asc');
 
-    // Remet la lecture à 0 minutes
-    $livre->reading_time = 0;
-    $livre->save();
+    // Sécuriser les colonnes triables
+    $allowed = ['titre', 'prix', 'stock', 'date_ajout'];
+    if (!in_array($column, $allowed)) {
+        $column = 'titre';
+    }
 
-    return response()->json(['success' => true, 'reading_time' => $livre->reading_time]);
+    $livres = Livre::with('categorie')->orderBy($column, $order)->get();
+
+    $livres = $livres->map(function($livre) {
+        return [
+            'id' => $livre->id,
+            'titre' => $livre->titre,
+            'auteur' => $livre->auteur,
+            'prix' => $livre->prix,
+            'stock' => $livre->stock,
+            'disponibilite' => $livre->disponibilite,
+            'photo_couverture' => $livre->photo_couverture,
+            'categorie' => $livre->categorie ? $livre->categorie->name : null,
+        ];
+    });
+
+    return response()->json(['livres' => $livres]);
+}
+public function recommendationsByTitle($titre)
+{
+    try {
+        // ✅ On encode correctement le titre pour l’URL
+        $encodedTitle = rawurlencode($titre);
+
+        // ✅ Appel à ton API Python Flask
+        $response = Http::get("http://127.0.0.1:5000/recommend/{$encodedTitle}");
+
+        // ✅ Vérifie la réponse
+        if ($response->successful()) {
+            $recommendedBooks = $response->json() ?? [];
+        } else {
+            $recommendedBooks = [];
+        }
+    } catch (\Exception $e) {
+        $recommendedBooks = [];
+    }
+
+    return response()->json($recommendedBooks);
 }
 
 
- public function speak(Request $request)
+    public function partagerSurFacebook($id)
     {
-        $text = $request->input('text');
-        $lang = $request->input('lang', null);
+        $livre = Livre::findOrFail($id);
 
-        if (!$text) {
-            return response()->json(['error' => 'No text provided'], 400);
-        }
+        $accessToken = 'EAAc5agRrBukBPmNqWDfSTCovurJ5l5LhOHR71bMM4cylPCp8RKc9ZB7TwWkU1Gx2rLF2M5dopESY6X6SfNn33wr53KxiehEcNvFAt1ZBV5d6rkZBtuZCO4CA5CdeKyZAdazhPkuUAL4VOnEZAlZBukLHTIsxZBZAXVPTyrUi5WLq5sZCcWS91GxHYh9b4r6bxFWE4HNglhmfV0P15JMZAuLu31M73xzBT6FKdSUMeZCZBB1JypHddZCtDLVIj1n4hLkhtHEmSqeOnFscHopYYdFE1Q'; // Remplace par ton token
 
-        try {
-            Log::info("Sending text to Flask: " . substr($text, 0, 50));
+        $response = Http::post('https://graph.facebook.com/me/feed', [
+            'message' => "Je recommande ce livre : {$livre->titre} de {$livre->auteur->name} !\n\n{$livre->description}",
+            'link' => route('livres.showf', $livre->id),
+            'picture' => asset('storage/' . $livre->photo_couverture),
+            'access_token' => $accessToken,
+        ]);
+
+        return dd($response->json());
+    }
 
             $response = Http::timeout(20)->post('http://localhost:5000/speak', [
                 'text' => $text,
                 'lang' => $lang,
             ]);
 
-            if (!$response->ok()) {
-                Log::error("Flask error: " . $response->status());
-                return response()->json(['error' => 'Flask TTS error'], 500);
-            }
+    // Crée le texte du message
+    $texte = "Je recommande ce livre !\n\n";
+    $texte .= "Titre : {$livre->titre}\n";
+    $texte .= "Auteur : " . ($livre->auteur->name ?? 'Auteur inconnu') . "\n";
+    $texte .= "Description : {$livre->description}\n";
+    $texte .= "Voir le livre ici : " . route('livres.showf', $livre->id);
 
-            Log::info("Received audio from Flask ✅");
+    // Encode le texte pour l'URL
+    $texteEncode = urlencode($texte);
 
-            return response($response->body(), 200)
-                ->header('Content-Type', 'audio/mpeg');
+    // Crée le lien WhatsApp
+    $lienWhatsapp = "https://wa.me/?text={$texteEncode}";
 
-        } catch (\Exception $e) {
-            Log::error("Speak failed: " . $e->getMessage());
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
+    // Redirige vers WhatsApp
+    return redirect($lienWhatsapp);
+}
 
 }

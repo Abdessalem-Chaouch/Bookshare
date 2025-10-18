@@ -1,31 +1,26 @@
 @extends('baseF')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 @section('content')
 <section class="store-details py-5">
     <div class="container">
         <div class="row align-items-start">
             <!-- Store Image (Left) -->
-            <div class="col-md-6 mb-3">
+            <div class="text-center mb-4">
                 <img src="{{ $store->store_image ? asset('storage/'.$store->store_image) : asset('images/store-placeholder.png') }}" 
-                     alt="{{ $store->store_name }}" class="img-fluid rounded shadow-sm w-100" style="object-fit: cover; max-height: 400px;">
+                    alt="{{ $store->store_name }}" 
+                    class="img-fluid rounded shadow-sm" 
+                    style="object-fit: cover; max-height: 400px; width: 60%;">
             </div>
 
-            <!-- Store Details (Right) -->
-            <div class="col-md-6">
+            <div class="text-center">
                 <h2 class="mb-3">{{ $store->store_name }}</h2>
                 <p><strong>Owner:</strong> {{ $store->owner_name ?? 'N/A' }}</p>
                 <p><strong>Location:</strong> {{ $store->location }}</p>
                 <p><strong>Contact:</strong> {{ $store->contact ?? 'N/A' }}</p>
-
-                {{-- Future place for books --}}
-                {{-- <h5 class="mt-4">Available Books:</h5>
-                <ul>
-                    @foreach($store->books as $book)
-                        <li>{{ $book->name }} — {{ $book->quantity }} in stock</li>
-                    @endforeach
-                </ul> --}}
+                {{-- <p><strong>Number of Books:</strong> {{ $store->livres_count }}</p> --}}
             </div>
-        </div>
+
 
         {{-- Review Form --}}
         <div class="row mt-5">
@@ -73,15 +68,20 @@
 
                         @if(auth()->check() && auth()->id() == $review->user_id)
                             <div class="mt-2">
-                                {{-- Edit button --}}
-                                <button class="btn btn-sm btn-secondary" onclick="toggleEditForm({{ $review->id }})">Edit</button>
+                        {{-- Edit button --}}
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleEditForm({{ $review->id }})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
 
-                                {{-- Delete button --}}
-                                <form action="{{ route('reviews.destroy', $review->id) }}" method="POST" style="display:inline-block;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-                                </form>
+                        {{-- Delete button --}}
+                        <form action="{{ route('reviews.destroy', $review->id) }}" method="POST" style="display:inline-block;">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+
                             </div>
 
                             {{-- Hidden edit form --}}
@@ -101,6 +101,63 @@
                 @endforelse
             </div>
         </div>
+
+        <!-- Book Fetch Section -->
+        <div class="text-center mt-5">
+            <button class="btn btn-outline-primary px-4 py-2" data-bs-toggle="modal" data-bs-target="#bookFetchModal">
+                📚 Book Fetch: We'll Find It & E-mail You
+            </button>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="bookFetchModal" tabindex="-1" aria-labelledby="bookFetchModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow-lg border-0">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="bookFetchModalLabel">Book Fetch Request</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body text-center p-4">
+                        <p class="mb-4 text-muted">Didn’t find your book? Submit a request and we’ll e-mail you if it turns up 💌</p>
+
+                        <form action="{{ route('bookfetch.store', $store->id) }}" method="POST" class="text-start">
+                            @csrf
+
+                            <div class="mb-3">
+                                <label class="form-label">Your E-mail</label>
+                                <input type="email" name="email" class="form-control" value="{{ auth()->user()->email }}" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Book Title</label>
+                                <input type="text" name="title" class="form-control" placeholder="e.g., The Great Gatsby">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Author</label>
+                                <input type="text" name="author" class="form-control" placeholder="e.g., F. Scott Fitzgerald">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">ISBN</label>
+                                <input type="text" name="isbn" class="form-control" placeholder="e.g., 978-3-16-148410-0">
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input type="checkbox" name="specific_edition" class="form-check-input" id="specificEdition">
+                                <label class="form-check-label" for="specificEdition">
+                                    I’m looking for a specific edition
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Submit Request</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </section>
 

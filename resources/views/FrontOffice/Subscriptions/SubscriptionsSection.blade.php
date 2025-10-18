@@ -1,8 +1,11 @@
 <section id="subscriptions-section" class="py-5" style="background: #e8e6e1;">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title mb-3">Choose Your Subscription Plan</h2>
-            <p class="text-muted">Become an author and share your books with our community</p>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="text-center flex-grow-1">
+                <h2 class="section-title mb-2">Choose Your Subscription Plan</h2>
+                <p class="text-muted mb-0">Become an author and share your books with our community</p>
+            </div>
+            <x-currency-selector />
         </div>
 
         <div class="subscription-carousel-container position-relative">
@@ -27,8 +30,14 @@
                             
                             <div class="card-body">
                                 <div class="price-section">
-                                    <span class="currency">€</span>
-                                    <span class="price">{{ number_format($subscription->price, 0) }}</span>
+                                    @php
+                                        $currencyService = app(\App\Services\CurrencyService::class);
+                                        $userCurrency = $currencyService->getUserCurrency();
+                                        $convertedPrice = $currencyService->getLocalizedPrice($subscription->price, 'USD', $userCurrency);
+                                        $currencyData = $currencyService->getCurrency($userCurrency);
+                                    @endphp
+                                    <span class="currency">{{ $currencyData['symbol'] ?? '$' }}</span>
+                                    <span class="price">{{ number_format($convertedPrice, 0) }}</span>
                                     <span class="period">/month</span>
                                 </div>
                                 <p class="billing-info">Billed monthly</p>
@@ -67,28 +76,7 @@
     </div>
 </section>
 
-<script>
-let currentSlide = 0;
-const totalSlides = {{ count($subscriptions) }};
-const slidesPerView = 3;
-const maxSlide = Math.max(0, totalSlides - slidesPerView);
 
-function slideSubscriptions(direction) {
-    const track = document.getElementById('subscriptionTrack');
-    
-    currentSlide += direction;
-    
-    if (currentSlide < 0) {
-        currentSlide = 0;
-    } else if (currentSlide > maxSlide) {
-        currentSlide = maxSlide;
-    }
-    
-    const slideWidth = 100 / slidesPerView;
-    const translateX = -currentSlide * slideWidth;
-    track.style.transform = `translateX(${translateX}%)`;
-}
-</script>
 
 <style>
 .subscription-carousel-container {
@@ -128,7 +116,7 @@ function slideSubscriptions(direction) {
     color: white;
     font-size: 18px;
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
     z-index: 10;
 }
 
@@ -143,6 +131,7 @@ function slideSubscriptions(direction) {
 .carousel-arrow-right {
     right: -25px;
 }
+
 
 .subscription-card {
     border-radius: 20px;
@@ -304,3 +293,42 @@ function slideSubscriptions(direction) {
     }
 }
 </style>
+
+<script>
+let currentSlide = 0;
+const totalSlides = {{ count($subscriptions) }};
+const slidesPerView = 3;
+const maxSlide = Math.max(0, totalSlides - slidesPerView);
+
+function slideSubscriptions(direction) {
+    const track = document.getElementById('subscriptionTrack');
+    
+    currentSlide += direction;
+    
+    if (currentSlide < 0) {
+        currentSlide = 0;
+    } else if (currentSlide > maxSlide) {
+        currentSlide = maxSlide;
+    }
+    
+    const slideWidth = 100 / slidesPerView;
+    const translateX = -currentSlide * slideWidth;
+    track.style.transform = `translateX(${translateX}%)`;
+    
+    // Update arrow visibility
+    updateArrows();
+}
+
+function updateArrows() {
+    const leftArrow = document.querySelector('.carousel-arrow-left');
+    const rightArrow = document.querySelector('.carousel-arrow-right');
+    
+    leftArrow.style.opacity = currentSlide === 0 ? '0.5' : '1';
+    rightArrow.style.opacity = currentSlide === maxSlide ? '0.5' : '1';
+}
+
+// Initialize arrows on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateArrows();
+});
+</script>

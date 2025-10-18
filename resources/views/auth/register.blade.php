@@ -98,6 +98,8 @@
             </div>
             <x-input-error :messages="$errors->get('password_confirmation')" class="gentle-error" />
         </div>
+
+        <!-- Register Button -->
         <button type="submit" class="comfort-button mt-4">
                     <div class="button-background"></div>
                     <span class="button-text">Register</span>

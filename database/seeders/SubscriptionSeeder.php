@@ -11,50 +11,54 @@ class SubscriptionSeeder extends Seeder
     {
         $subscriptions = [
             [
-                'name' => 'Basique',
+                'name' => 'Basic',
                 'description' => 'Plan de base pour débuter',
                 'price' => 9.99,
                 'duration_days' => 30,
                 'features' => [
-                    'Publier jusqu\'à 5 livres',
+                    'Jusqu\'à 5 emprunts par mois',
                     'Support par email',
-                    'Statistiques de base',
-                    'Accès à la communauté'
+                    'Accès aux livres populaires',
+                    'Recommandations de base'
                 ],
                 'is_active' => true,
             ],
             [
                 'name' => 'Premium',
-                'description' => 'Plan avancé pour auteurs professionnels',
+                'description' => 'Plan avancé pour lecteurs réguliers',
                 'price' => 19.99,
                 'duration_days' => 30,
                 'features' => [
-                    'Livres illimités',
-                    'Support prioritaire 24/7',
-                    'Statistiques avancées',
-                    'Promotion de vos livres',
-                    'Badge auteur vérifié',
-                    'Accès aux événements exclusifs'
+                    'Jusqu\'à 15 emprunts par mois',
+                    'Support prioritaire',
+                    'Accès anticipé aux nouveautés',
+                    'Recommandations personnalisées',
+                    'Téléchargement hors ligne'
                 ],
                 'is_active' => true,
             ],
             [
-                'name' => 'Étudiant',
-                'description' => 'Tarif réduit pour étudiants',
-                'price' => 4.99,
+                'name' => 'VIP',
+                'description' => 'Plan premium pour gros lecteurs',
+                'price' => 39.99,
                 'duration_days' => 30,
                 'features' => [
-                    'Publier jusqu\'à 3 livres',
-                    'Support par email',
-                    'Accès à la communauté',
-                    'Réduction de 50%'
+                    'Emprunts illimités',
+                    'Support 24/7',
+                    'Accès exclusif aux livres rares',
+                    'IA de recommandation avancée',
+                    'Téléchargement illimité',
+                    'Événements exclusifs'
                 ],
                 'is_active' => true,
             ]
         ];
 
         foreach ($subscriptions as $subscription) {
-            Subscription::create($subscription);
+            Subscription::updateOrCreate(
+                ['name' => $subscription['name']],
+                $subscription
+            );
         }
     }
 }

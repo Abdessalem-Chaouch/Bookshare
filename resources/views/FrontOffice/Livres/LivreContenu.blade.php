@@ -31,6 +31,22 @@
             <h3><a href="{{ route('livres.showf', $livre->id) }}"> {{ $livre->titre }}</a></h3>
             <span>{{ $livre->user ? $livre->user->name : 'Auteur inconnu' }}</span>
             <p><strong>Prix :</strong> {{ $livre->prix ? $livre->prix . ' DT' : 'Non spécifié' }}</p>
+            <a href="{{ route('livres.showf', ['livre' => $livre->id]) }}" class="btn btn-outline-primary">
+    📖 Voir détails
+</a>
+    @php
+                $texte = "Je recommande ce livre !\n\n";
+                $texte .= "Titre : {$livre->titre}\n";
+
+                $texte .= "Description : {$livre->description}\n";
+                $texte .= "Image : " . asset('storage/' . $livre->photo_couverture) . "\n";
+                $texte .= "Voir le livre ici : " . route('livres.showf', $livre->id);
+                $texteEncode = urlencode($texte);
+            @endphp
+            <a href="https://wa.me/?text={{ $texteEncode }}" target="_blank" class="btn btn-success mt-2">
+                Partager sur WhatsApp
+            </a>
+            
         </figcaption>
     </div>
 </div>

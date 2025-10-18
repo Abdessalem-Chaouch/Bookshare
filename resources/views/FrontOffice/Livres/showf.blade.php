@@ -1,5 +1,11 @@
 @extends('baseF')
-
+@section('meta')
+    <meta property="og:title" content="{{ $livre->titre }}" />
+    <meta property="og:description" content="{{ Str::limit($livre->description, 150) }}" />
+    <meta property="og:image" content="{{ asset('storage/' . $livre->photo_couverture) }}" />
+    <meta property="og:url" content="{{ route('livres.showf', $livre->id) }}" />
+    <meta property="og:type" content="book" />
+@endsection
 @section('content')
 <section id="book-details" class="leaf-pattern-overlay py-5">
     <div class="corner-pattern-overlay"></div>
@@ -50,7 +56,7 @@
                                     <span class="badge bg-warning">Unavailable</span>
                                 @else
                                     <span class="badge bg-success">Available</span>
-                               
+
                                 @endif
                             </p>
                             <p><strong>Date Added:</strong> {{ $livre->date_ajout ?? '—' }}</p>
@@ -64,13 +70,17 @@
                                 </div>
                                -->
                             </div>
-
+<a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('livres.showf', $livre->id)) }}&quote={{ urlencode($livre->titre . ' - ' . ($livre->description ?? 'Découvrez ce livre incroyable !')) }}"
+       target="_blank"
+       class="btn btn-primary me-2">
+        📘 Partager sur Facebook
+    </a>
                             {{-- Boutons en bas à droite --}}
                             <div class="action-buttons">
-                             
+
                           <form action="{{ route('borrows.pay', $livre->id) }}" method="POST">
                             @csrf
-                            <button type="submit" class="btn btn-outline-primary" 
+                            <button type="submit" class="btn btn-outline-primary"
                                     style="background: #9c9259; color: white; cursor: pointer;">
                                 Borrow $5
                             </button>
@@ -82,7 +92,7 @@
                             <input type="hidden" name="items[0][livre_id]" value="{{ $livre->id }}">
                             <input type="hidden" name="items[0][product_name]" value="{{ $livre->titre }}">
                             <input type="hidden" name="items[0][amount]" value="{{ $livre->prix }}">
-                            
+
                             <button type="submit" class="btn btn-outline-success">Buy</button>
                         </form>
 

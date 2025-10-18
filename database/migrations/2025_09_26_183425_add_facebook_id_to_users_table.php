@@ -11,8 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Ajout d'une colonne facebook_id à la table users
         Schema::table('users', function (Blueprint $table) {
             $table->string('facebook_id')->nullable()->after('email');
+        });
+
+        // Ajout d'une colonne reading_time à la table livres
+        Schema::table('livres', function (Blueprint $table) {
+            $table->string('reading_time')->nullable();
         });
     }
 
@@ -21,8 +27,14 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Suppression de la colonne facebook_id
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('facebook_id');
+        });
+
+        // Suppression de la colonne reading_time
+        Schema::table('livres', function (Blueprint $table) {
+            $table->dropColumn('reading_time');
         });
     }
 };

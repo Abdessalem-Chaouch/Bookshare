@@ -18,8 +18,8 @@ class CheckActiveSubscription
         
         // Si l'utilisateur est auteur, vérifier l'abonnement
         if ($user->isAuteur() && !$user->hasActiveSubscription()) {
-            return redirect()->route('author.subscriptions')
-                ->with('error', 'Vous devez avoir un abonnement actif pour ajouter des livres.');
+            return redirect()->route('dashboardAuteur')
+                ->with('error', 'Vous devez avoir un abonnement actif pour ajouter des livres. Veuillez vous abonner à un plan.');
         }
         
         return $next($request);
