@@ -1,5 +1,6 @@
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
+import pandas as pd
 from gtts import gTTS
 import io, re
 from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline
@@ -13,7 +14,8 @@ import pymysql
 from pymysql.err import MySQLError
 from dotenv import load_dotenv
 from sklearn.metrics.pairwise import cosine_similarity
-
+import pickle
+from transformers import AutoTokenizer
 # Charger les variables d'environnement depuis .env
 load_dotenv()
 
@@ -39,7 +41,57 @@ summarizer = pipeline("summarization", model=model, tokenizer=tokenizer, device=
 #embed_model = SentenceTransformer('all-MiniLM-L6-v2')  # ou un autre modèle de votre choix
 embed_model = SentenceTransformer('all-mpnet-base-v2')
 
+qa_pipeline = pipeline("question-answering", model="deepset/roberta-base-squad2")
 
+
+
+qa_tokenizer = AutoTokenizer.from_pretrained("deepset/roberta-base-squad2")
+
+def split_for_qa(text, max_tokens=450):
+    """Découpe le texte en chunks ≤ max_tokens pour Roberta."""
+    words = text.split()
+    chunks = []
+    current = []
+    for w in words:
+        current.append(w)
+        # Compter les tokens via le tokenizer
+        token_count = len(qa_tokenizer.encode(" ".join(current), add_special_tokens=True))
+        if token_count > max_tokens:
+            current.pop()  # retirer le mot qui dépasse
+            chunks.append(" ".join(current))
+            current = [w]
+    if current:
+        chunks.append(" ".join(current))
+    return chunks
+
+def summarize_large_text(text, chunk_size=1500, max_tokens_per_chunk=250):
+    """Résumé hiérarchique pour gros textes."""
+    chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
+    partial_summaries = []
+
+    for chunk in chunks:
+        summary = summarizer(
+            chunk,
+            max_new_tokens=max_tokens_per_chunk,
+            do_sample=False
+        )[0]['summary_text'].strip()
+        partial_summaries.append(summary)
+
+    while len(partial_summaries) > 1:
+        new_summaries = []
+        for i in range(0, len(partial_summaries), 3):
+            block = " ".join(partial_summaries[i:i+3])
+            summary = summarizer(
+                block,
+                max_new_tokens=max_tokens_per_chunk,
+                do_sample=False
+            )[0]['summary_text'].strip()
+            new_summaries.append(summary)
+        partial_summaries = new_summaries
+
+    return partial_summaries[0] if partial_summaries else "Je ne sais pas"
+
+# ------------------------- Routes -------------------------
 @app.route('/embed_book', methods=['POST'])
 def embed_book():
     data = request.get_json()
@@ -47,34 +99,46 @@ def embed_book():
     if not text:
         return jsonify({"error": "No text provided"}), 400
 
-    chunks = [text[i:i+800] for i in range(0, len(text), 800)]
+    # Découper en gros chunks pour embeddings
+    chunks = [text[i:i+3000] for i in range(0, len(text), 3000)]
     embeddings = [embed_model.encode(c).tolist() for c in chunks]
     return jsonify({"chunks": chunks, "embeddings": embeddings})
-
 
 @app.route('/ask', methods=['POST'])
 def ask_question():
     data = request.get_json()
-    print("Data reçue:", data)
-    question = data.get('question', '')
+    question = data.get('question', '').lower()
     chunks = data.get('chunks', [])
     embeddings = data.get('embeddings', [])
-
-    print("Shapes embeddings:", np.array(embeddings).shape)  # debug
 
     if not question or not chunks or not embeddings:
         return jsonify({"error": "Missing data"}), 400
 
-    question_embedding = embed_model.encode(question).reshape(1, -1)
-    similarities = cosine_similarity(question_embedding, np.array(embeddings))
-    top_idx = similarities.argmax()
-    relevant_text = chunks[top_idx]
+    # Détecter si la question est précise
+    precise_keywords = ["page", "quel", "combien", "qui", "où", "quand", "?"]
+    is_precise = any(k in question for k in precise_keywords)
 
-    answer = summarizer(
-        f"Question: {question}\nContext: {relevant_text}\nAnswer:",
-        max_new_tokens=120,
-        do_sample=False
-    )[0]['summary_text'].strip()
+    if is_precise:
+        # QA sur les 3 chunks les plus pertinents
+        question_embedding = embed_model.encode(question).reshape(1, -1)
+        similarities = cosine_similarity(question_embedding, np.array(embeddings))
+        top_indices = similarities.argsort()[0][-3:]
+
+        answers = []
+        for idx in top_indices:
+            context = chunks[idx]
+        small_chunks = split_for_qa(context)
+        for sc in small_chunks:
+            ans = qa_pipeline({'question': question, 'context': sc})['answer']
+            if ans.strip():
+                answers.append(ans.strip())
+
+        answer = answers[0] if answers else "Je ne sais pas"
+
+    else:
+        # Résumé global
+        full_text = " ".join(chunks)
+        answer = summarize_large_text(full_text)
 
     return jsonify({"answer": answer})
 
@@ -316,6 +380,42 @@ def recommend():
 @app.route('/', methods=['GET'])
 def home():
     return jsonify({"message": "Serveur Flask actif. Utiliser POST /recommend avec JSON."})
+
+
+with open("C:/Bookshare/Ai/books_model.pkl", "rb") as f:
+    data = pickle.load(f)
+
+books_df = data['books_df']
+cosine_sim = data['cosine_sim']
+
+@app.route('/recommendBook/<title>', methods=['GET'])
+def recommendBook(title):
+    title = title.replace('+', ' ').strip()
+    # 🔍 Trouver le livre
+    indices = books_df[books_df['title'].str.lower() == title.lower()].index
+    if len(indices) == 0:
+        return jsonify({"error": "Livre non trouvé"}), 404
+
+    idx = indices[0]
+    sim_scores = list(enumerate(cosine_sim[idx]))
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+    top_indices = [i for i, score in sim_scores[1:6]]
+
+    results = []
+    for i in top_indices:
+        book = books_df.iloc[i]
+        results.append({
+            "id": int(book['id']),
+            "title": str(book['title']),
+            "isbn13": str(book['isbn13']),
+            "categories": str(book['categories']),
+            "thumbnail": str(book['thumbnail']),
+            "description": str(book['description']),
+            "prix": float(book['prix']) if pd.notna(book['prix']) else None
+        })
+
+    return jsonify(results)
+
 
 
 # -------------------------

@@ -25,33 +25,30 @@
                 </div>
             </div>
 
-            @foreach($cartItems as $item)
-                <div class="row border-top border-bottom">
-                    <div class="row main align-items-center">
-                        <div class="col-2">
-                            <img class="img-fluid" src="{{ asset('storage/' . $item->livre->photo_couverture) }}">
-                        </div>
-                        <div class="col">
-                            <div class="row text-muted">{{ $item->livre->auteur }}</div>
-                            <div class="row">{{ $item->livre->titre }}</div>
-                        </div>
-                        <div class="col">
-                          
+       @foreach($cartItems as $item)
+    <div class="row border-top border-bottom">
+        <div class="row main align-items-center">
+            <div class="col-2">
+                <img class="img-fluid" src="{{ asset('storage/' . $item->livre->photo_couverture) }}">
+            </div>
+            <div class="col">
+                <!-- Ici on affiche juste le nom de l'auteur -->
+                <div class="row text-muted">{{ $item->livre->auteur->name ?? 'Auteur inconnu' }}</div>
+                <div class="row">{{ $item->livre->titre }}</div>
+            </div>
+            <div class="col">
+                {{ $item->livre->prix * $item->quantite }} DT
+                <form action="{{ route('cart.remove', $item->id) }}" method="POST" style="display:inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="close" style="border:none;background:none;">&#10005;</button>
+                </form>
+            </div>
+        </div>
+    </div>
+@endforeach
 
-                        
 
-                        </div>
-                        <div class="col">
-                            {{ $item->livre->prix * $item->quantite }} DT
-                            <form action="{{ route('cart.remove', $item->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="close" style="border:none;background:none;">&#10005;</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
 
           
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -83,7 +80,7 @@
             <div class="row" style="border-top: 1px solid rgba(0,0,0,.1); padding: 2vh 0;">
                 <div class="col">TOTAL PRICE</div>
                 <div class="col text-right">
-                    {{ $cartItems->sum(fn($i) => $i->livre->prix * $i->quantite) + 5 }} DT
+                    {{ $cartItems->sum(fn($i) => $i->livre->prix * $i->quantite)  }} DT
                 </div>
             </div>
 

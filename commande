@@ -1,0 +1,16 @@
+// EYA Predication kol wahda fe terminal
+php artisan schedule:work
+php artisan check:low-review-notifications
+
+//yosr  & abd
+py Ai/train_booksum.py
+py Ai/load_booksum.py
+py Ai/app.py
+
+//douaa
+cd ai_model  
+python train_model.py
+ python predict.py 5 25   
+
+ //aymen 
+ py Ai/train_books_model.py

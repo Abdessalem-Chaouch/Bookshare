@@ -37,7 +37,7 @@ class StoreController extends Controller
             'store_name' => 'required|string|max:255',
             'owner_name' => 'nullable|string|max:255',
             'location'   => 'required|string|max:255',
-            'contact'    => 'nullable|string|max:255',
+            'contact'    => 'required|string|max:255',
             'store_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20048',
         ]);
 

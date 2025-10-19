@@ -9,7 +9,8 @@ conn = mysql.connector.connect(
     host="localhost",
     user="root",
     password="",  # ton mot de passe MySQL
-    database="bookshare"  # remplace par le nom réel
+    database="bookshare",  # remplace par le nom réel
+    port="3308"
 )
 
 # ✅ Charger les données depuis la table `livres` (et éventuellement `categories`)

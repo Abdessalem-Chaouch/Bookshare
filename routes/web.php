@@ -26,7 +26,9 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NoteController;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\RecommendationController;
-
+use App\Http\Controllers\BookFetchController;
+use App\Http\Controllers\AIController;
+use App\Http\Controllers\PredictionNotificationController;
 Route::get('/test-recommendation', function () {
     // Exemple d’articles likés simulés
     $liked = [1];
@@ -42,9 +44,11 @@ Route::get('/test-recommendation', function () {
 Route::post('/chat', [ChatController::class, 'handleRequest']);
 
 Route::view('/chatbot', 'FrontOffice.chat'); // Pour afficher la page Blade
-use App\Http\Controllers\BookFetchController;
-use App\Http\Controllers\AIController;
-use App\Http\Controllers\PredictionNotificationController;
+        Route::put('/book-fetch/{bookFetch}', [BookFetchController::class, 'update'])->name('bookfetch.update');
+        Route::delete('/book-fetch/{bookFetch}', [BookFetchController::class, 'destroy'])->name('bookfetch.destroy');
+        Route::post('/stores/{store}/book-fetch', [BookFetchController::class, 'store'])->name('bookfetch.store');
+       
+  
 
 // Front Office Routes - Accessibles à tous (visiteurs, auteurs, admins)
 Route::get('/', [FrontOfficeController::class, 'accueil'])->name('accueil');
@@ -230,13 +234,10 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         // Route::resource('stores', StoreController::class)->except(['create', 'index', 'store']);
         Route::resource('stores', StoreController::class)->except(['create', 'index']);
         Route::middleware(['auth'])->group(function () {
-        Route::post('/stores/{store}/book-fetch', [BookFetchController::class, 'store'])->name('bookfetch.store');
-        Route::put('/book-fetch/{bookFetch}', [BookFetchController::class, 'update'])->name('bookfetch.update');
-        Route::delete('/book-fetch/{bookFetch}', [BookFetchController::class, 'destroy'])->name('bookfetch.destroy');
         Route::get('/notifications', [PredictionNotificationController::class, 'index'])->name('notifications.index');
 });
 
-
+      
 
         // Utilisateur Management
 
@@ -252,7 +253,6 @@ Route::middleware(['auth', 'dashboard.access'])->group(function () {
         Route::get('/users/analytics', [UsersController::class, 'analytics'])->name('users.analytics');
         Route::get('/users/analytics-data', [UsersController::class, 'analyticsData'])->name('users.analytics.data');
 
-        Route::get('/transactions', [App\Http\Controllers\PaypalController::class, 'transactions'])->name('transactions');
 
         // Subscription Management
         Route::resource('subscriptions', \App\Http\Controllers\SubscriptionController::class);
@@ -312,6 +312,8 @@ Route::get('/livres/sort', [LivreController::class, 'sort'])->name('livres.sort'
         Route::get('/AjouterCategorie', [CategoryController::class, 'create'])->name('AjouterCategorie');
         Route::get('/listeCategorie', [CategoryController::class, 'index'])->name('listeCategorie');
         Route::get('/borrowsBook', [BorrowController::class, 'borrows'])->name('borrowsBook');
+        Route::get('/transactions', [App\Http\Controllers\PaypalController::class, 'transactions'])->name('transactions');
+        
     });
 });
 

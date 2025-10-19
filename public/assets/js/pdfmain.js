@@ -158,6 +158,7 @@ btnPause.addEventListener('click', () => {
     window.openSummary = openSummary;
     window.closeSummary = closeSummary;
  //initChatUI('messageInput', 'sendMessageBtn', 'messages', allPagesText);
+ 
  const askContainer = document.getElementById("askMessages");
     const sendBtn = document.getElementById("sendMessageBtn");
     const input = document.getElementById("messageInput");
@@ -195,24 +196,42 @@ btnPause.addEventListener('click', () => {
     // Génération des embeddings dès que le PDF est chargé
     await embedBook(allPagesText.join(" "));
 
-    async function askBookQuestion(question) {
-        addMessage("⏳ L'IA réfléchit...", "ai");
-        try {
-            if (!embeddingsReady) {
-                await embedBook(allPagesText.join(" "));
-            }
+   async function askBookQuestion(question) {
+    showTyping(); // ➤ AJOUT ICI : montrer le typing pendant le fetch
 
-            const response = await fetch('http://127.0.0.1:5000/ask', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question, chunks, embeddings })
-            });
-            const data = await response.json();
-            askContainer.lastElementChild.innerHTML = `<p>${data.answer}</p>`;
-        } catch (err) {
-            askContainer.lastElementChild.innerHTML = `<p>❌ Erreur : ${err.message}</p>`;
+    try {
+        if (!embeddingsReady) {
+            await embedBook(allPagesText.join(" "));
         }
+
+        const response = await fetch('http://127.0.0.1:5000/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question, chunks, embeddings })
+        });
+
+        const data = await response.json();
+        
+        hideTyping(); // ➤ AJOUT : cacher typing après réponse
+        
+        addMessage(data.answer, "ai"); // On affiche proprement la réponse
+    } catch (err) {
+        hideTyping(); // ➤ AJOUT en cas d'erreur aussi
+        addMessage(`❌ Erreur : ${err.message}`, "ai");
     }
+}
+
+// ➤ AJOUT : fonctions showTyping et hideTyping (à coller en haut)
+function showTyping() {
+    const typingIndicator = document.getElementById('typingIndicator');
+    typingIndicator.style.display = 'flex';
+    askContainer.scrollTop = askContainer.scrollHeight;
+}
+
+function hideTyping() {
+    const typingIndicator = document.getElementById('typingIndicator');
+    typingIndicator.style.display = 'none';
+}
 
     sendBtn.addEventListener("click", async () => {
         const question = input.value.trim();

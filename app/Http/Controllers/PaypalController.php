@@ -130,7 +130,6 @@ public function success(Request $request)
                 'livre_id'       => $item['livre_id'],
                 'user_id'        => $userId,
                 'product_name'   => $item['product_name'],
-                'quantity'       => 1, // quantité par défaut
                 'amount'         => $item['amount'] , // prix unitaire
                 'currency'       => $response['purchase_units'][0]['payments']['captures'][0]['amount']['currency_code'],
                 'payer_name'     => $response['payer']['name']['given_name'],
@@ -156,6 +155,7 @@ public function success(Request $request)
 
     return view('FrontOffice.Payments.cancel');
 }
+
 
 public function cancel()
 {

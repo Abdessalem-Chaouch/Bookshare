@@ -227,6 +227,12 @@
                 </li>
             </ul>
         </li>
+           <li class="menu-item {{ request()->routeIs('transactions') ? 'active' : '' }}">
+            <a href="{{ route('transactions') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-money"></i>
+                <div data-i18n="Account Settings">Transactions</div>
+            </a>
+        </li>
         @endif
     </ul>
     

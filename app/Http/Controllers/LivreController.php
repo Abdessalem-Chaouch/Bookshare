@@ -324,7 +324,7 @@ public function recommendationsByTitle($titre)
         $encodedTitle = rawurlencode($titre);
 
         // ✅ Appel à ton API Python Flask
-        $response = Http::get("http://127.0.0.1:5000/recommend/{$encodedTitle}");
+        $response = Http::get("http://127.0.0.1:5000/recommendBook/{$encodedTitle}");
 
         // ✅ Vérifie la réponse
         if ($response->successful()) {
@@ -340,26 +340,58 @@ public function recommendationsByTitle($titre)
 }
 
 
-    public function partagerSurFacebook($id)
-    {
-        $livre = Livre::findOrFail($id);
+public function partagerSurFacebook($id)
+{
+   $livre = Livre::findOrFail($id);
 
-        $accessToken = 'EAAc5agRrBukBPmNqWDfSTCovurJ5l5LhOHR71bMM4cylPCp8RKc9ZB7TwWkU1Gx2rLF2M5dopESY6X6SfNn33wr53KxiehEcNvFAt1ZBV5d6rkZBtuZCO4CA5CdeKyZAdazhPkuUAL4VOnEZAlZBukLHTIsxZBZAXVPTyrUi5WLq5sZCcWS91GxHYh9b4r6bxFWE4HNglhmfV0P15JMZAuLu31M73xzBT6FKdSUMeZCZBB1JypHddZCtDLVIj1n4hLkhtHEmSqeOnFscHopYYdFE1Q'; // Remplace par ton token
+  $accessToken = 'EAAc5agRrBukBPmNqWDfSTCovurJ5l5LhOHR71bMM4cylPCp8RKc9ZB7TwWkU1Gx2rLF2M5dopESY6X6SfNn33wr53KxiehEcNvFAt1ZBV5d6rkZBtuZCO4CA5CdeKyZAdazhPkuUAL4VOnEZAlZBukLHTIsxZBZAXVPTyrUi5WLq5sZCcWS91GxHYh9b4r6bxFWE4HNglhmfV0P15JMZAuLu31M73xzBT6FKdSUMeZCZBB1JypHddZCtDLVIj1n4hLkhtHEmSqeOnFscHopYYdFE1Q'; // Remplace par ton token
 
-        $response = Http::post('https://graph.facebook.com/me/feed', [
+    $response = Http::post('https://graph.facebook.com/me/feed', [
             'message' => "Je recommande ce livre : {$livre->titre} de {$livre->auteur->name} !\n\n{$livre->description}",
             'link' => route('livres.showf', $livre->id),
             'picture' => asset('storage/' . $livre->photo_couverture),
             'access_token' => $accessToken,
-        ]);
+   ]);
 
-        return dd($response->json());
-    }
+ return dd($response->json());
+}
+
+ public function speak(Request $request)
+    {
+        $text = $request->input('text');
+        $lang = $request->input('lang', null);
+
+        if (!$text) {
+            return response()->json(['error' => 'No text provided'], 400);
+        }
+
+        try {
+            Log::info("Sending text to Flask: " . substr($text, 0, 50));
 
             $response = Http::timeout(20)->post('http://localhost:5000/speak', [
                 'text' => $text,
                 'lang' => $lang,
             ]);
+
+            if (!$response->ok()) {
+                Log::error("Flask error: " . $response->status());
+                return response()->json(['error' => 'Flask TTS error'], 500);
+            }
+
+            Log::info("Received audio from Flask ✅");
+
+            return response($response->body(), 200)
+                ->header('Content-Type', 'audio/mpeg');
+
+        } catch (\Exception $e) {
+            Log::error("Speak failed: " . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+  public function partagerSurWhatsapp($id)
+{
+    $livre = Livre::findOrFail($id);
 
     // Crée le texte du message
     $texte = "Je recommande ce livre !\n\n";
@@ -377,5 +409,4 @@ public function recommendationsByTitle($titre)
     // Redirige vers WhatsApp
     return redirect($lienWhatsapp);
 }
-
 }

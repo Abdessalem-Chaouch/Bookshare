@@ -1,11 +1,16 @@
 @extends('baseF')
 @section('meta')
-    <meta property="og:title" content="{{ $livre->titre }}" />
-    <meta property="og:description" content="{{ Str::limit($livre->description, 150) }}" />
-    <meta property="og:image" content="{{ asset('storage/' . $livre->photo_couverture) }}" />
-    <meta property="og:url" content="{{ route('livres.showf', $livre->id) }}" />
-    <meta property="og:type" content="book" />
+<meta property="og:title" content="Je recommande ce livre ! - {{ $livre->titre }}" />
+<meta property="og:description" content="{{ Str::limit($livre->description, 200) }} | Voir le livre ici : {{ route('livres.showf', $livre->id) }}" />
+<meta property="og:image" content="{{ asset('storage/'.$livre->photo_couverture) }}" />
+<meta property="og:url" content="{{ route('livres.showf', $livre->id) }}" />
+<meta property="og:type" content="book" />
+
+
 @endsection
+
+@yield('meta')
+
 @section('content')
 <section id="book-details" class="leaf-pattern-overlay py-5">
     <div class="corner-pattern-overlay"></div>
@@ -70,11 +75,7 @@
                                 </div>
                                -->
                             </div>
-<a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('livres.showf', $livre->id)) }}&quote={{ urlencode($livre->titre . ' - ' . ($livre->description ?? 'Découvrez ce livre incroyable !')) }}"
-       target="_blank"
-       class="btn btn-primary me-2">
-        📘 Partager sur Facebook
-    </a>
+
                             {{-- Boutons en bas à droite --}}
                             <div class="action-buttons">
 
@@ -119,6 +120,15 @@
             @endif
         </p>
     </div>
+<a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode('https://superinnocently-unsummarizable-anneliese.ngrok-free.dev/livresf/' . $livre->id) }}"
+   target="_blank"
+   rel="noopener noreferrer"
+   class="btn btn-primary"
+   style="background-color:#3b5998; color:white;">
+    📘 Partager sur Facebook
+</a>
+
+
 
     {{-- Display all ratings --}}
 <div class="mt-3">

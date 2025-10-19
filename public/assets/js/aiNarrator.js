@@ -60,7 +60,6 @@ export function initVoiceAssistant(pageFlip, allPagesText, currentLang) {
         return;
     }
 
-    // === 🎙️ Initialisation ===
     const recognition = new SpeechRecognition();
     recognition.lang = currentLang || 'fr-FR';
     recognition.continuous = true;
@@ -71,7 +70,6 @@ export function initVoiceAssistant(pageFlip, allPagesText, currentLang) {
     let listening = false;
     let currentUtterance = null;
 
-    // === 🗣️ Commandes reconnues ===
     const commands = {
         read: ['lire', 'lecture', 'commencer lecture', 'lancer lecture', 'lis la page'],
         pause: ['pause', 'pause lecture', 'mets en pause', 'arrête un peu'],
@@ -87,7 +85,7 @@ export function initVoiceAssistant(pageFlip, allPagesText, currentLang) {
         sound: ['activer son', 'désactiver son', 'couper le son', 'remettre le son', 'son']
     };
 
-    // === 🧩 Fonctions d’actions ===
+    // === ACTIONS ===
     function readCurrentPage() {
         const currentIndex = pageFlip.getCurrentPageIndex();
         const text = (allPagesText[currentIndex] || '').replace(/[^\p{L}\p{N}\s.,;:!?'-]/gu, '');
@@ -98,18 +96,15 @@ export function initVoiceAssistant(pageFlip, allPagesText, currentLang) {
         currentUtterance.rate = 1.1;
         speechSynthesis.speak(currentUtterance);
     }
+    const pauseSpeech = () => { if (speechSynthesis.speaking && !speechSynthesis.paused) speechSynthesis.pause(); };
+    const stopSpeech = () => { if (speechSynthesis.speaking || speechSynthesis.paused) speechSynthesis.cancel(); };
+    const flipNext = () => pageFlip.flipNext();
+    const flipPrev = () => pageFlip.flipPrev();
+    const zoomIn = () => document.getElementById('btnZoomIn')?.click();
+    const zoomOut = () => document.getElementById('btnZoomOut')?.click();
+    const toggleFullscreen = () => document.getElementById('btnFullscreen')?.click();
+    const toggleSound = () => document.getElementById('btnSound')?.click();
 
-    function pauseSpeech() { if (speechSynthesis.speaking && !speechSynthesis.paused) speechSynthesis.pause(); }
-    function stopSpeech() { if (speechSynthesis.speaking || speechSynthesis.paused) speechSynthesis.cancel(); }
-
-    function toggleFullscreen() { document.getElementById('btnFullscreen')?.click(); }
-    function zoomIn() { document.getElementById('btnZoomIn')?.click(); }
-    function zoomOut() { document.getElementById('btnZoomOut')?.click(); }
-    function toggleSound() { document.getElementById('btnSound')?.click(); }
-    function flipNext() { pageFlip.flipNext(); }
-    function flipPrev() { pageFlip.flipPrev(); }
-
-    // === 🎨 Thèmes ===
     function activateDarkTheme() {
         const btn = document.getElementById('btnTheme');
         if (btn && !document.body.classList.contains('dark')) btn.click();
@@ -119,43 +114,70 @@ export function initVoiceAssistant(pageFlip, allPagesText, currentLang) {
         if (btn && document.body.classList.contains('dark')) btn.click();
     }
 
-    // === 📝 Gestion des notes vocales ===
-    function handleVoiceNote(transcript) {
-        let pageIndex = pageFlip.getCurrentPageIndex();
-        const pageMatch = transcript.match(/page\s*(\d+)/i);
-        if (pageMatch) pageIndex = parseInt(pageMatch[1], 10) - 1;
+    // === 📝 NOTE VOCALE ===
+function handleVoiceNote(transcript) {
+    // 1️⃣ Déterminer la page cible
+    let pageIndex = pageFlip.getCurrentPageIndex();
+    const pageMatch = transcript.match(/page\s*(\d+)/i);
+    if (pageMatch) pageIndex = parseInt(pageMatch[1], 10) - 1;
 
-        let noteText = transcript.replace(/.*note(s)?( à la page \d+)?/i, '').trim();
-        if (!noteText) return alert("Aucun texte de note détecté. Dictez : 'mettre une note ...'");
-
-        if (!allPagesText[pageIndex]) return alert(`Page ${pageIndex + 1} inexistante.`);
-        if (typeof addNote === 'function') addNote(pageIndex, noteText);
-
-        const metaCsrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-        const livreId = window.BookConfig?.livreId || 1;
-
-        fetch('/save-note', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': metaCsrf
-            },
-            body: JSON.stringify({
-                livre_id: livreId,
-                page_number: pageIndex + 1,
-                text: noteText,
-                date: (new Date()).toISOString().slice(0, 10)
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) console.log('📝 Note sauvegardée ✅', data);
-            else console.warn('Erreur sauvegarde note:', data);
-        })
-        .catch(err => console.error('Erreur fetch note:', err));
+    // 2️⃣ Extraire le texte de la note uniquement
+    let noteMatch = transcript.match(/(?:mettre|ajouter)\s+une\s+note(?:\s+(?:de\s+la\s+page|page)\s+\d+)?\s*(.*)/i);
+    if (!noteMatch || !noteMatch[1].trim()) {
+        return alert("⚠️ Aucun texte de note détecté. Dictez : 'mettre une note ...'");
     }
 
-    // === 🧠 Fonction de correspondance ===
+    let noteText = noteMatch[1].trim();
+
+    // Nettoyage : supprimer "page X" si le début du texte contient encore ça
+    noteText = noteText.replace(/^page\s*\d+\s*/i, '');
+
+    // Supprimer espaces multiples et capitaliser
+    noteText = noteText.replace(/\s+/g, ' ');
+    noteText = noteText.charAt(0).toUpperCase() + noteText.slice(1);
+
+    // 3️⃣ Vérifier que la page existe
+    if (!allPagesText[pageIndex]) {
+        return alert(`⚠️ Page ${pageIndex + 1} inexistante.`);
+    }
+
+    // 4️⃣ Ajouter localement sans préfixe automatique
+    if (typeof addNote === 'function') addNote(pageIndex, noteText);
+
+    // 5️⃣ Préparer les données pour le serveur
+    const metaCsrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const livreId = window.BookConfig?.livreId || 1;
+
+    // 6️⃣ Envoyer au backend
+    fetch('/save-note', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': metaCsrf
+        },
+        body: JSON.stringify({
+            livre_id: livreId,
+            page_number: pageIndex + 1,
+            text: noteText,
+            date: (new Date()).toISOString().slice(0, 10)
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            console.log(`📝 Note sauvegardée pour la page ${pageIndex + 1}:`, noteText);
+            alert(`✅ Note sauvegardée avec succès pour la page ${pageIndex + 1}`);
+        } else {
+            console.warn('⚠️ Erreur sauvegarde note:', data);
+            alert('⚠️ Erreur lors de la sauvegarde de la note.');
+        }
+    })
+    .catch(err => {
+        console.error('⚠️ Erreur fetch note:', err);
+        alert('⚠️ Impossible de sauvegarder la note (connexion perdue).');
+    });
+}
+    // === UTILITAIRE ===
     function matchCommand(transcript, keywords) {
         return keywords.some(keyword => {
             const normKeyword = keyword.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -163,48 +185,52 @@ export function initVoiceAssistant(pageFlip, allPagesText, currentLang) {
         });
     }
 
-    // === 🎧 Résultat vocal ===
+    // === 🎧 RECONNAISSANCE VOCALE ===
     recognition.onresult = (event) => {
-        const transcript = Array.from(event.results)
-            .map(r => r[0].transcript)
-            .join(' ')
-            .toLowerCase()
-            .trim();
+        // 🧠 On ne garde que le dernier segment (pas tout l’historique)
+        const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
 
-        let clean = transcript
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        const clean = transcript.normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
             .replace(/[^\w\s]/g, "")
             .trim();
 
         console.log('[🎤 Input]', transcript);
         console.log('🧹 Cleaned:', clean);
 
-        // === 🎯 Actions ===
+        // 🔁 On traite toutes les commandes dans la phrase
         if (matchCommand(clean, commands.stop)) { console.log("🎯 stop"); stopSpeech(); }
-        else if (matchCommand(clean, commands.pause)) { console.log("🎯 pause"); pauseSpeech(); }
-        else if (matchCommand(clean, commands.read)) { console.log("🎯 lecture"); readCurrentPage(); }
-        else if (matchCommand(clean, commands.next)) { console.log("🎯 suivante"); flipNext(); }
-        else if (matchCommand(clean, commands.prev)) { console.log("🎯 précédente"); flipPrev(); }
-        else if (matchCommand(clean, commands.zoomin)) { console.log("🎯 zoom avant"); zoomIn(); }
-        else if (matchCommand(clean, commands.zoomout)) { console.log("🎯 zoom arrière"); zoomOut(); }
-        else if (matchCommand(clean, commands.fullscreen)) { console.log("🎯 plein écran"); toggleFullscreen(); }
-        else if (matchCommand(clean, commands.themeDark)) { console.log("🎯 mode sombre"); activateDarkTheme(); }
-        else if (matchCommand(clean, commands.themeLight)) { console.log("🎯 mode clair"); activateLightTheme(); }
-        else if (matchCommand(clean, commands.sound)) { console.log("🎯 son"); toggleSound(); }
-        else if (matchCommand(clean, commands.note)) { console.log("🎯 note"); handleVoiceNote(transcript); }
+        if (matchCommand(clean, commands.pause)) { console.log("🎯 pause"); pauseSpeech(); }
+        if (matchCommand(clean, commands.read)) { console.log("🎯 lecture"); readCurrentPage(); }
+        if (matchCommand(clean, commands.next)) { console.log("🎯 suivante"); flipNext(); }
+        if (matchCommand(clean, commands.prev)) { console.log("🎯 précédente"); flipPrev(); }
+        if (matchCommand(clean, commands.zoomin)) { console.log("🎯 zoom avant"); zoomIn(); }
+        if (matchCommand(clean, commands.zoomout)) { console.log("🎯 zoom arrière"); zoomOut(); }
+        if (matchCommand(clean, commands.fullscreen)) { console.log("🎯 plein écran"); toggleFullscreen(); }
+        if (matchCommand(clean, commands.themeDark)) { console.log("🎯 mode sombre"); activateDarkTheme(); }
+        if (matchCommand(clean, commands.themeLight)) { console.log("🎯 mode clair"); activateLightTheme(); }
+        if (matchCommand(clean, commands.sound)) { console.log("🎯 son"); toggleSound(); }
+        if (matchCommand(clean, commands.note)) { console.log("🎯 note"); handleVoiceNote(transcript); }
     };
 
-    // === ⚠️ Gestion erreurs ===
     recognition.onerror = (e) => {
         if (e.error !== 'no-speech') console.error('Voice error:', e);
     };
 
     recognition.onend = () => {
-        // 🔇 Ne redémarre pas automatiquement
-        console.log("🎙️ Reconnaissance arrêtée (attente d’un clic utilisateur)");
+        // 🔇 Ne redémarre plus automatiquement
+        if (listening) {
+            try {
+                recognition.start(); // relance auto si le micro est encore activé
+            } catch (err) {
+                console.warn("⚠️ Redémarrage de la reconnaissance échoué:", err);
+            }
+        } else {
+            console.log("🎙️ Reconnaissance arrêtée (contrôlée par le bouton)");
+        }
     };
 
-    // === 🎙️ Bouton d’activation manuelle ===
+    // === 🎙️ BOUTON MICRO ===
     voiceBtn?.addEventListener('click', () => {
         listening = !listening;
         if (listening) {
@@ -217,15 +243,12 @@ export function initVoiceAssistant(pageFlip, allPagesText, currentLang) {
             }
         } else {
             recognition.stop();
-            stopSpeech(); // 🛑 Stoppe aussi la lecture audio
+            stopSpeech(); // 🛑 Arrête aussi la lecture vocale
             voiceIcon.className = 'fa-solid fa-microphone-slash';
             console.log("🛑 Assistant vocal désactivé (écoute + synthèse arrêtées)");
         }
     });
 }
-
-
-
 
 // aiSummary.js
 

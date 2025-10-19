@@ -218,18 +218,29 @@
    
 </div>
 
+<!-- Bouton pour ouvrir le chat -->
+<button class="chat-toggle-btn" onclick="toggleChat()">
+    <i class="fa-solid fa-book-open"></i>
+</button>
 
-<!-- Chat AI & Summary -->
-<div id="askChatBox" class="ask-chatbox">
-    <div class="ask-header">
-        <h3>🤖 AI Chat & Summary</h3>
+<!-- Chatbot -->
+<div id="askChatBox" class="ask-chatbox hidden">
+   <div class="ask-header">
+    <h3>⚡ AI Chat</h3><button class="close-chat-btn" onclick="toggleChat()">✖</button>
+   </div>
+   <div id="askMessages" class="ask-messages">
+    <div class="msg ai">
+     Bonjour! Je suis votre assistant IA. Comment puis-je vous aider aujourd'hui?
     </div>
-    <div id="askMessages" class="ask-messages"></div>
-    <div class="ask-input-area">
-        <input type="text" id="messageInput" placeholder="Posez votre question ici..." />
-        <button id="sendMessageBtn"><i class="fa-solid fa-paper-plane"></i></button>
+   </div>
+   <div class="typing-indicator" id="typingIndicator">
+    <div class="typing-dots"><span></span> <span></span> <span></span>
     </div>
-</div>
+   </div>
+   <div class="ask-input-area"><input type="text" id="messageInput" placeholder="Posez votre question ici..." onkeypress="handleEnter(event)"> <button id="sendMessageBtn" onclick="sendMessage()">➤</button>
+   </div>
+  </div>
+
 
 
 <!-- Summary Chat Sidebar -->
@@ -346,6 +357,11 @@ Sidebar -->
         coverUrl:'{{ $livre->photo_couverture ? asset('storage/' . $livre->photo_couverture) : '' }}',
        flipAudioUrl: "{{ asset('assets/video/flipAudio.m4a') }}",
   };
+  function toggleChat() {
+    const chatBox = document.getElementById("askChatBox");
+    chatBox.classList.toggle("hidden");
+}
+
 </script>
 
 <link rel="stylesheet" href="{{ asset('BookView.css') }}">

@@ -18,7 +18,6 @@
                             <th>Currency</th>
                             <th>Payer Email</th>
                             <th>Status</th>
-                            <th>Payment Method</th>
                             <th>Date</th>
                         </tr>
                     </thead>
@@ -37,7 +36,6 @@
                                     <span class="badge bg-label-warning">{{ $payment->payment_status }}</span>
                                 @endif
                             </td>
-                            <td>{{ $payment->payment_method }}</td>
                             <td>{{ $payment->created_at->format('d/m/Y H:i') }}</td>
                         </tr>
                         @endforeach

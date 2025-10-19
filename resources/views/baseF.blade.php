@@ -56,7 +56,7 @@
 
     <!-- Contenu principal -->
     @yield('content')
-
+@yield('meta')
     <!-- Alertes -->
     @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3"

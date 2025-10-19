@@ -52,7 +52,6 @@ class GoogleAuthController extends Controller
                 'photo_profil' => $googleUser->getAvatar(),
                 'password' => bcrypt(Str::random(16)),
             ]);
-            
             Auth::login($user);
             return redirect()->route('accueil');
             
