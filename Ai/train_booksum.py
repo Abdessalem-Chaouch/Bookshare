@@ -2,7 +2,10 @@ from transformers import T5ForConditionalGeneration, Trainer, TrainingArguments,
 from datasets import load_from_disk
 
 # Charger le dataset
-dataset = load_from_disk("C:/Bookshare/Ai/load_booksum")
+# dataset = load_from_disk("C:/Bookshare/Ai/load_booksum")
+dataset_path = os.path.join(os.path.dirname(__file__), "load_booksum")
+dataset = load_from_disk(dataset_path)
+
 print(dataset)  # vérifier colonnes : doit inclure "text" et "summary"
 
 # Charger le tokenizer
