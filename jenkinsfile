@@ -95,7 +95,7 @@ pipeline {
             }
         }
 
-  stage('Run Laravel Schedule & Python AI Scripts') {
+ stage('Run Laravel Schedule & Python AI Scripts') {
     steps {
         echo '⏱️ Exécution du schedule Laravel et des scripts Python...'
         sh '''
@@ -104,6 +104,7 @@ pipeline {
                 echo "📦 Installation des dépendances Python..."
                 python3 -m pip install --upgrade pip
                 python3 -m pip install -r Ai/requirements.txt
+                python3 -m pip install --upgrade accelerate
             else
                 echo "⚠️ Aucun fichier requirements.txt trouvé dans Ai/"
             fi
@@ -132,6 +133,7 @@ pipeline {
         '''
     }
 }
+
 
     }
 
