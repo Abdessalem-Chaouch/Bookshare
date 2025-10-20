@@ -100,12 +100,16 @@ books_df['description'] = books_df['description'].fillna('').astype(str)
 books_df['categories'] = books_df['categories'].fillna('').astype(str)
 books_df['combined_features'] = (books_df['categories'] + ' ' + books_df['description']).str.strip()
 
-# ✅ Vérification avant TF-IDF
-if books_df['combined_features'].str.len().sum() == 0:
-    raise ValueError("🚨 Aucun texte à analyser : vérifie que ta table 'livres' contient des descriptions ou des catégories non vides.")
-
 print("✅ Nombre total de livres :", len(books_df))
-print("📘 Exemple de features :", books_df['combined_features'].head(5).tolist())
+
+# 🚨 Si la table est vide, on continue sans erreur
+if len(books_df) == 0 or books_df['combined_features'].str.len().sum() == 0:
+    print("⚠️ Aucun livre trouvé ou pas de texte à analyser. Le modèle vide sera sauvegardé.")
+    os.makedirs("Ai/models", exist_ok=True)
+    with open("Ai/models/books_model.pkl", "wb") as f:
+        pickle.dump({"books_df": books_df, "cosine_sim": None}, f)
+    print("✅ Modèle vide sauvegardé avec succès.")
+    exit(0)
 
 # ✅ TF-IDF (désactiver stop_words pour éviter le vidage FR)
 tfidf = TfidfVectorizer(stop_words=None)
