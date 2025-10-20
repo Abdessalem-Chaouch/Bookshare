@@ -33,12 +33,27 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 # -------------------------
 # Modèles et pipelines
 # -------------------------
-model_path = "Ai/models/booksum_t5_final"
+
+
+local_model_dir = os.path.join(os.path.dirname(__file__), "models/booksum_t5_final")
+local_model_dir = os.path.abspath(local_model_dir)
+
+print(f"🔍 Vérification du modèle local dans : {local_model_dir}")
+
+# 🔹 Vérifier si le dossier existe et contient les fichiers essentiels
+if os.path.exists(local_model_dir) and os.path.isfile(os.path.join(local_model_dir, "config.json")):
+    print("✅ Modèle local trouvé, chargement depuis le dossier local...")
+    model_path = local_model_dir
+else:
+    print("⚠️ Modèle local introuvable, basculement vers le modèle Hugging Face 't5-small'")
+    model_path = "t5-small"  # modèle de secours
+
+# model_path = "Ai/models/booksum_t5_final"
 tokenizer = T5Tokenizer.from_pretrained(model_path)
 model = T5ForConditionalGeneration.from_pretrained(model_path)
 summarizer = pipeline("summarization", model=model, tokenizer=tokenizer, device=-1)
 # Ajouter quelque part après les imports et avant vos routes
-#embed_model = SentenceTransformer('all-MiniLM-L6-v2')  # ou un autre modèle de votre choix
+# embed_model = SentenceTransformer('all-MiniLM-L6-v2')  # ou un autre modèle de votre choix
 embed_model = SentenceTransformer('all-mpnet-base-v2')
 
 qa_pipeline = pipeline("question-answering", model="deepset/roberta-base-squad2")
