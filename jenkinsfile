@@ -95,30 +95,40 @@ pipeline {
             }
         }
 
-        stage('Run Laravel Schedule & Python AI Scripts') {
-            steps {
-                echo '⏱️ Exécution du schedule Laravel et des scripts Python...'
-                sh '''
-                    # Lancer le scheduler Laravel en arrière-plan
-                    nohup ${PHP_PATH} artisan schedule:work >/dev/null 2>&1 &
+     stage('Run Laravel Schedule & Python AI Scripts') {
+    steps {
+        echo '⏱️ Exécution du schedule Laravel et des scripts Python...'
+        sh '''
+            # Installer les dépendances Python du projet Ai
+            if [ -f Ai/requirements.txt ]; then
+                echo "📦 Installation des dépendances Python..."
+                python3 -m pip install --upgrade pip
+                python3 -m pip install -r Ai/requirements.txt
+            else
+                echo "⚠️ Aucun fichier requirements.txt trouvé dans Ai/"
+            fi
 
-                    # Exécuter les commandes artisan
-                    ${PHP_PATH} artisan check:low-review-notifications
+            # Lancer le scheduler Laravel en arrière-plan
+            nohup ${PHP_PATH} artisan schedule:work >/dev/null 2>&1 &
 
-                    # Lancer les scripts Python AI
-                    ${PYTHON_PATH} Ai/train_booksum.py
-                    ${PYTHON_PATH} Ai/load_booksum.py
-                    ${PYTHON_PATH} Ai/train_books_model.py
-                    ${PYTHON_PATH} Ai/app.py
+            # Lancer les commandes artisan
+            ${PHP_PATH} artisan check:low-review-notifications
 
-                    # Aller dans le dossier ai_model et lancer les scripts
-                    cd ai_model
-                    ${PYTHON_PATH} train_model.py
-                    ${PYTHON_PATH} predict.py 5 25
-                '''
-            }
-        }
+            # Lancer les scripts Python AI
+            python3 Ai/train_booksum.py
+            python3 Ai/load_booksum.py
+            python3 Ai/train_books_model.py
+            python3 Ai/app.py
+
+            # Aller dans le dossier ai_model et lancer les scripts
+            cd ai_model
+            python3 train_model.py
+            python3 predict.py 5 25
+        '''
     }
+}
+    }
+
 
     post {
         success {
