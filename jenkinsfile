@@ -1,13 +1,82 @@
 pipeline {
     agent any
 
-       stages {
+    environment {
+        # Variables Laravel & DB
+        APP_ENV = "local"
+        APP_DEBUG = "true"
+        APP_KEY = ""
+        DB_CONNECTION = "mysql"
+        DB_HOST = "127.0.0.1"
+        DB_PORT = "3306"
+        DB_DATABASE = "bookshare"
+        DB_USERNAME = "root"
+        DB_PASSWORD = ""
+
+        PHP_PATH = "/usr/bin/php"
+        COMPOSER_PATH = "/usr/local/bin/composer"
+        NODE_PATH = "/usr/bin/npm"
+    }
+
+    stages {
+
         stage('Checkout') {
             steps {
-                script {
-                    git branch: 'main', url: 'https://github.com/Abdessalem-Chaouch/Bookshare.git'
-                }
+                echo '📦 Checkout du code depuis GitHub...'
+                git branch: 'main', url: 'https://github.com/Abdessalem-Chaouch/Bookshare.git'
             }
         }
-}
+
+        stage('Install Dependencies') {
+            steps {
+                echo '📦 Installation des dépendances Laravel...'
+                sh '${COMPOSER_PATH} install --no-interaction --prefer-dist --no-progress'
+                echo '📦 Installation des dépendances NPM...'
+                sh '${NODE_PATH} install'
+            }
+        }
+
+        stage('Setup Environment') {
+            steps {
+                echo '⚙️ Configuration du fichier .env et clé Laravel...'
+                sh '''
+                    cp .env.example .env || true
+                    ${PHP_PATH} artisan key:generate
+                '''
+            }
+        }
+
+        stage('Run Migrations & Storage') {
+            steps {
+                echo '🗄️ Migration de la base de données et configuration du stockage...'
+                sh '''
+                    ${PHP_PATH} artisan migrate --force
+                    ${PHP_PATH} artisan storage:link || true
+                '''
+            }
+        }
+
+        stage('Build Vite') {
+            steps {
+                echo '⚙️ Compilation du projet Laravel avec Vite...'
+                sh '${NODE_PATH} run build'
+            }
+        }
+
+        stage('Run Dev Server') {
+            steps {
+                echo '🚀 Lancement du serveur de développement...'
+                sh 'nohup ${NODE_PATH} run dev &'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Pipeline exécutée avec succès ! Application Laravel opérationnelle 🎉'
+        }
+        failure {
+            echo '❌ Échec de la pipeline ! Vérifie les logs Jenkins pour plus de détails.'
+        }
+    }
 }
