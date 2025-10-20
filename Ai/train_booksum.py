@@ -1,6 +1,6 @@
 from transformers import T5ForConditionalGeneration, Trainer, TrainingArguments, AutoTokenizer
 from datasets import load_from_disk
-
+import os 
 # Charger le dataset
 # dataset = load_from_disk("C:/Bookshare/Ai/load_booksum")
 dataset_path = os.path.join(os.path.dirname(__file__), "load_booksum")
