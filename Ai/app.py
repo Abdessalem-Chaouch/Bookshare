@@ -396,8 +396,8 @@ def recommend():
 def home():
     return jsonify({"message": "Serveur Flask actif. Utiliser POST /recommend avec JSON."})
 
-
-with open("C:/Bookshare/Ai/books_model.pkl", "rb") as f:
+with open(os.path.join(os.path.dirname(__file__), "books_model.pkl"), "rb") as f:
+# with open("C:/Bookshare/Ai/books_model.pkl", "rb") as f:
     data = pickle.load(f)
 
 books_df = data['books_df']
