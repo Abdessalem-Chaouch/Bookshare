@@ -7,11 +7,16 @@ PyPDF2
 numpy
 pymysql
 python-dotenv
-sentencepiece   
+sentencepiece
+
+# 🔹 Connecteur MySQL requis pour ton script train_books_model.py
+mysql-connector-python
+
 # 🔽 Pour ton IA (version CPU légère)
 transformers==4.42.3
 sentence-transformers==3.0.1
 torch==2.3.0+cpu
 torchaudio==2.3.0+cpu
 datasets
+
 --extra-index-url https://download.pytorch.org/whl/cpu
