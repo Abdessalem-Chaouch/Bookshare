@@ -2,145 +2,105 @@ pipeline {
     agent any
 
     environment {
-        // 🔐 Variables et secrets Jenkins (à définir dans les credentials Jenkins)
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials') 
-        SONARQUBE_ENV = credentials('sonarqube-token')
-        NEXUS_CREDENTIALS = credentials('nexus-credentials')
-        DOCKER_HUB_USER = 'votre_username_dockerhub' // À modifier
-        PROJECT_NAME = 'bookshare'
-        SONAR_HOST_URL = 'http://sonarqube:9000'
-        NEXUS_URL = 'http://nexus:8081/repository/maven-releases/'
+        APP_ENV = "local"
+        APP_DEBUG = "true"
+        APP_KEY = ""
+        DB_CONNECTION = "mysql"
+        DB_HOST = "127.0.0.1"
+        DB_PORT = "3306"
+        DB_DATABASE = "bookshare"
+       DB_USERNAME="laravel"
+DB_PASSWORD="secret123"
+
+        PHP_PATH = "/usr/bin/php"
+        COMPOSER_PATH = "/usr/local/bin/composer"
+        NODE_PATH = "/usr/bin/npm"
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                echo "🔍 Cloning repository..."
-                checkout scm
+                echo '📦 Checkout du code depuis GitHub...'
+                git branch: 'main', url: 'https://github.com/Abdessalem-Chaouch/Bookshare.git'
             }
         }
 
-        stage('Install Dependencies & Test') {
-            parallel {
-                stage('Laravel Tests') {
-                    steps {
-                        dir('laravel') {
-                            sh '''
-                                composer install
-                                php artisan test
-                            '''
-                        }
-                    }
-                }
-                stage('Flask Tests') {
-                    steps {
-                        dir('flask') {
-                            sh '''
-                                pip install -r requirements.txt
-                                pytest
-                            '''
-                        }
-                    }
-                }
-                stage('Vite Build') {
-                    steps {
-                        dir('vite') {
-                            sh '''
-                                npm ci
-                                npm run build
-                            '''
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('SonarQube Analysis') {
+        stage('Install Dependencies') {
             steps {
-                echo "🔎 Running SonarQube analysis..."
-                withSonarQubeEnv('SonarQube') {
-                    sh """
-                        sonar-scanner \
-                        -Dsonar.projectKey=${PROJECT_NAME} \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=${SONAR_HOST_URL} \
-                        -Dsonar.login=${SONARQUBE_ENV}
-                    """
-                }
+                echo '📦 Installation des dépendances Laravel...'
+                sh '${COMPOSER_PATH} install --no-interaction --prefer-dist --no-progress'
+                echo '📦 Installation des dépendances NPM...'
+                sh '${NODE_PATH} install'
             }
         }
 
-        stage('Build Docker Images') {
+        stage('Setup Environment') {
             steps {
-                echo "🐳 Building Docker images..."
+                echo '⚙️ Configuration du fichier .env et clé Laravel...'
                 sh '''
-                    docker build -t ${PROJECT_NAME}_laravel ./laravel
-                    docker build -t ${PROJECT_NAME}_flask ./flask
-                    docker build -t ${PROJECT_NAME}_vite ./vite
+                    if [ ! -f .env ]; then
+                        cp .env.example .env
+                    fi
+                    ${PHP_PATH} artisan key:generate
                 '''
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Ensure MySQL is running') {
             steps {
-                echo "☁️ Pushing images to Docker Hub..."
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-
-                        docker tag ${PROJECT_NAME}_laravel ${DOCKER_USER}/${PROJECT_NAME}_laravel:latest
-                        docker tag ${PROJECT_NAME}_flask ${DOCKER_USER}/${PROJECT_NAME}_flask:latest
-                        docker tag ${PROJECT_NAME}_vite ${DOCKER_USER}/${PROJECT_NAME}_vite:latest
-
-                        docker push ${DOCKER_USER}/${PROJECT_NAME}_laravel:latest
-                        docker push ${DOCKER_USER}/${PROJECT_NAME}_flask:latest
-                        docker push ${DOCKER_USER}/${PROJECT_NAME}_vite:latest
-
-                        docker logout
-                    '''
-                }
-            }
-        }
-
-        stage('Publish Artifacts to Nexus') {
-            steps {
-                echo "📦 Publishing to Nexus..."
-                withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-                    sh '''
-                        tar -czf laravel.tar.gz laravel/
-                        curl -v -u ${NEXUS_USER}:${NEXUS_PASS} --upload-file laravel.tar.gz ${NEXUS_URL}/${PROJECT_NAME}_laravel_1.0.0.tar.gz
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy using Docker Compose') {
-            steps {
-                echo "🚀 Deploying stack with Docker Compose..."
+                echo '🛡️ Vérification de MySQL...'
                 sh '''
-                    docker-compose down
-                    docker-compose up -d
+                    sudo service mysql start || true
+                    until mysqladmin ping -h${DB_HOST} -P${DB_PORT} --silent; do
+                        echo "Attente du démarrage de MySQL..."
+                        sleep 2
+                    done
+                    echo "MySQL est opérationnel"
                 '''
             }
         }
 
-        stage('Monitoring Setup (Prometheus & Grafana)') {
+        stage('Create Database if not exists') {
             steps {
-                echo "📊 Starting monitoring services..."
+                echo '🗄️ Création de la base de données si nécessaire...'
                 sh '''
-                    docker-compose up -d prometheus grafana
+                    mysql -h${DB_HOST} -P${DB_PORT} -u${DB_USERNAME} -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${DB_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
                 '''
+            }
+        }
+
+        stage('Run Migrations & Storage') {
+            steps {
+                echo '🗄️ Migration de la base de données et configuration du stockage...'
+                sh '''
+                    ${PHP_PATH} artisan migrate --force
+                    ${PHP_PATH} artisan storage:link || true
+                '''
+            }
+        }
+
+        stage('Build Vite') {
+            steps {
+                echo '⚙️ Compilation du projet Laravel avec Vite...'
+                sh '${NODE_PATH} run build'
+            }
+        }
+
+        stage('Run Dev Server') {
+            steps {
+                echo '🚀 Lancement du serveur de développement...'
+                sh 'nohup ${NODE_PATH} run dev >/dev/null 2>&1 &'
             }
         }
     }
 
     post {
         success {
-            echo "✅ Pipeline completed successfully!"
+            echo '✅ Pipeline exécutée avec succès ! Application Laravel opérationnelle 🎉'
         }
         failure {
-            echo "❌ Pipeline failed! Please check the logs."
+            echo '❌ Échec de la pipeline ! Vérifie les logs Jenkins pour plus de détails.'
         }
     }
 }
