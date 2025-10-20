@@ -61,17 +61,16 @@ import pickle
 import os
 from dotenv import load_dotenv
 
-# ✅ Charger les variables depuis le .env Laravel
+# ✅ Charger les variables depuis .env Laravel
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "../.env"))
 
-# ✅ Récupérer les infos de connexion MySQL depuis le .env
 DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
 DB_PORT = os.getenv("DB_PORT", "3306")
 DB_DATABASE = os.getenv("DB_DATABASE", "bookshare")
 DB_USERNAME = os.getenv("DB_USERNAME", "root")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 
-# ✅ Connexion à la base MySQL Laravel
+# ✅ Connexion MySQL
 conn = mysql.connector.connect(
     host=DB_HOST,
     user=DB_USERNAME,
@@ -80,7 +79,7 @@ conn = mysql.connector.connect(
     port=DB_PORT
 )
 
-# ✅ Charger les données depuis la table `livres` (et `categories`)
+# ✅ Charger les données
 query = """
 SELECT
     l.id,
@@ -96,21 +95,26 @@ LEFT JOIN categories c ON l.categorie_id = c.id
 books_df = pd.read_sql(query, conn)
 conn.close()
 
-# ✅ Nettoyage des champs
-books_df['description'] = books_df['description'].fillna('')
-books_df['categories'] = books_df['categories'].fillna('')
+# ✅ Nettoyage
+books_df['description'] = books_df['description'].fillna('').astype(str)
+books_df['categories'] = books_df['categories'].fillna('').astype(str)
+books_df['combined_features'] = (books_df['categories'] + ' ' + books_df['description']).str.strip()
 
-# ✅ Combiner les features
-books_df['combined_features'] = books_df['categories'] + ' ' + books_df['description']
+# ✅ Vérification avant TF-IDF
+if books_df['combined_features'].str.len().sum() == 0:
+    raise ValueError("🚨 Aucun texte à analyser : vérifie que ta table 'livres' contient des descriptions ou des catégories non vides.")
 
-# ✅ TF-IDF
-tfidf = TfidfVectorizer(stop_words='english')
+print("✅ Nombre total de livres :", len(books_df))
+print("📘 Exemple de features :", books_df['combined_features'].head(5).tolist())
+
+# ✅ TF-IDF (désactiver stop_words pour éviter le vidage FR)
+tfidf = TfidfVectorizer(stop_words=None)
 tfidf_matrix = tfidf.fit_transform(books_df['combined_features'])
 
-# ✅ Calcul de similarité cosinus
+# ✅ Similarité cosinus
 cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 
-# ✅ Sauvegarde du modèle
+# ✅ Sauvegarde modèle
 os.makedirs("Ai/models", exist_ok=True)
 with open("Ai/models/books_model.pkl", "wb") as f:
     pickle.dump({
@@ -118,4 +122,4 @@ with open("Ai/models/books_model.pkl", "wb") as f:
         "cosine_sim": cosine_sim
     }, f)
 
-print("✅ Modèle entraîné à partir de la base MySQL Laravel et sauvegardé avec succès !")
+print("✅ Modèle entraîné avec succès et sauvegardé dans Ai/models/books_model.pkl")
