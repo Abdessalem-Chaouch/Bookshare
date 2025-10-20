@@ -56,7 +56,6 @@ print("✅ Entraînement terminé et modèle + tokenizer sauvegardés !")
 """
 
 
-
 from transformers import T5ForConditionalGeneration, Trainer, TrainingArguments, AutoTokenizer
 from datasets import load_from_disk
 import os
@@ -76,7 +75,7 @@ print("Colonnes disponibles dans le dataset :")
 for split, ds in dataset.items():
     print(f"{split}: {ds.column_names}")
 
-# 🔹 Si le dataset contient déjà 'input_ids', 'attention_mask', 'labels', on n'a pas besoin de tokenizer
+# 🔹 Si le dataset contient 'text' et 'summary', on doit tokeniser
 if 'text' in dataset[list(dataset.keys())[0]].column_names and 'summary' in dataset[list(dataset.keys())[0]].column_names:
     # Charger le tokenizer
     tokenizer = AutoTokenizer.from_pretrained("t5-small")
@@ -96,6 +95,10 @@ else:
     # Dataset déjà tokenisé
     print("⚡ Dataset déjà tokenisé, utilisation directe")
     tokenized_dataset = dataset
+
+# 🔹 Sélection du split train pour Trainer
+train_dataset = tokenized_dataset["train"]
+eval_dataset = tokenized_dataset.get("validation", None)
 
 # Charger le modèle
 model = T5ForConditionalGeneration.from_pretrained("t5-small")
@@ -117,8 +120,8 @@ training_args = TrainingArguments(
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=tokenized_dataset,
-    eval_dataset=None
+    train_dataset=train_dataset,
+    eval_dataset=eval_dataset
 )
 
 # Lancer l’entraînement
@@ -130,4 +133,3 @@ if 'tokenizer' in locals():
     tokenizer.save_pretrained("Ai/models/booksum_t5_final")
 
 print("✅ Entraînement terminé et modèle + tokenizer sauvegardés !")
-
