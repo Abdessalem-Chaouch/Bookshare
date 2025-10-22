@@ -133,6 +133,34 @@ stage('Run Laravel Schedule & Python AI Scripts') {
     }
 }
 
+stage('SonarQube Analysis') {
+    environment {
+        SCANNER_HOME = tool 'SonarQubeScanner'
+    }
+    steps {
+        echo '🔍 Analyse du code avec SonarQube...'
+        withSonarQubeEnv('SonarQube') {
+            sh '''
+                ${SCANNER_HOME}/bin/sonar-scanner \
+                    -Dsonar.projectKey=bookshare_project \
+                    -Dsonar.projectName="BookShare" \
+                    -Dsonar.projectVersion=1.0 \
+                    -Dsonar.sources=. \
+                    -Dsonar.language=php \
+                    -Dsonar.sourceEncoding=UTF-8 \
+                    -Dsonar.host.url=$SONAR_HOST_URL \
+                    -Dsonar.login=$SONAR_AUTH_TOKEN \
+                    -Dsonar.exclusions=node_modules/**,vendor/**,storage/**,public/**,Ai/models/**
+            '''
+        }
+
+        // Attendre la qualité avant de continuer
+        timeout(time: 2, unit: 'MINUTES') {
+            waitForQualityGate abortPipeline: true
+        }
+    }
+}
+
 
     }
 
