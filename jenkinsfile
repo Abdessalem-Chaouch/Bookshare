@@ -95,7 +95,7 @@ pipeline {
             }
         }
 
- stage('Run Laravel Schedule & Python AI Scripts') {
+stage('Run Laravel Schedule & Python AI Scripts') {
     steps {
         echo '⏱️ Exécution du schedule Laravel et des scripts Python...'
         sh '''
@@ -112,19 +112,18 @@ pipeline {
             # Lancer le scheduler Laravel en arrière-plan
             nohup ${PHP_PATH} artisan schedule:work >/dev/null 2>&1 &
 
-            # Lancer les commandes artisan
-            ${PHP_PATH} artisan check:low-review-notifications
-
-            # Vérifier si le dataset existe, sinon le générer
+            # Vérifier le dataset
             if [ ! -d Ai/load_booksum ]; then
                 echo "📦 Dataset manquant. Génération du dataset..."
                 python3 Ai/load_booksum.py
             fi
 
-            # Lancer les scripts Python AI
+            # Lancer les scripts Python AI (séquentiels)
             python3 Ai/train_booksum.py
             python3 Ai/train_books_model.py
-            python3 Ai/app.py
+
+            # Lancer le serveur Flask en arrière-plan ✅
+            nohup python3 Ai/app.py >/dev/null 2>&1 &
 
             # Aller dans le dossier ai_model et lancer les scripts
             cd ai_model
