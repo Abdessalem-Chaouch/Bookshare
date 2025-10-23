@@ -12,7 +12,7 @@ pipeline {
         DB_USERNAME = "laravel"
         DB_PASSWORD = "secret123"
 registryCredentials = "nexus" 
-registry = "192.168.33.10:8083" 
+registry = "192.168.33.10:5000" 
         PHP_PATH = "/usr/bin/php"
         COMPOSER_PATH = "/usr/local/bin/composer"
         NODE_PATH = "/usr/bin/npm"
