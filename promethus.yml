@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'laravel_app'
+    static_configs:
+      - targets: ['laravel:8000']
+
+  - job_name: 'flask_ai'
+    static_configs:
+      - targets: ['flask:5000']
