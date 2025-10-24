@@ -1,1 +1,219 @@
+pipeline {
+    agent any
 
+    environment {
+        APP_ENV = "local"
+        APP_DEBUG = "true"
+        APP_KEY = ""
+        DB_CONNECTION = "mysql"
+        DB_HOST = "127.0.0.1"
+        DB_PORT = "3306"
+        DB_DATABASE = "bookshare"
+        DB_USERNAME = "laravel"
+        DB_PASSWORD = "secret123"
+registryCredentials = "c9e556bb-7b93-4c3f-9058-2c2ab7cd8b68" 
+registry = "192.168.33.10:8083" 
+        PHP_PATH = "/usr/bin/php"
+        COMPOSER_PATH = "/usr/local/bin/composer"
+        NODE_PATH = "/usr/bin/npm"
+        PYTHON_PATH = "/usr/bin/python3"  // chemin python
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                echo '📦 Checkout du code depuis GitHub...'
+                git branch: 'main', url: 'https://github.com/Abdessalem-Chaouch/Bookshare.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                echo '📦 Installation des dépendances Laravel...'
+                sh '${COMPOSER_PATH} install --no-interaction --prefer-dist --no-progress'
+                echo '📦 Installation des dépendances NPM...'
+                sh '${NODE_PATH} install'
+            }
+        }
+
+        stage('Setup Environment') {
+            steps {
+                echo '⚙️ Configuration du fichier .env et clé Laravel...'
+                sh '''
+                    if [ ! -f .env ]; then
+                        cp .env.example .env
+                    fi
+                    ${PHP_PATH} artisan key:generate
+                '''
+            }
+        }
+
+        stage('Ensure MySQL is running') {
+            steps {
+                echo '🛡️ Vérification de MySQL...'
+                sh '''
+                    sudo service mysql start || true
+                    until mysqladmin ping -h${DB_HOST} -P${DB_PORT} --silent; do
+                        echo "Attente du démarrage de MySQL..."
+                        sleep 2
+                    done
+                    echo "MySQL est opérationnel"
+                '''
+            }
+        }
+
+        stage('Create Database if not exists') {
+            steps {
+                echo '🗄️ Création de la base de données si nécessaire...'
+                sh '''
+                    mysql -h${DB_HOST} -P${DB_PORT} -u${DB_USERNAME} -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${DB_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+                '''
+            }
+        }
+
+        stage('Run Migrations & Storage') {
+            steps {
+                echo '🗄️ Migration de la base de données et configuration du stockage...'
+                sh '''
+                    ${PHP_PATH} artisan migrate --force
+                    ${PHP_PATH} artisan storage:link || true
+                '''
+            }
+        }
+
+        stage('Build Vite') {
+            steps {
+                echo '⚙️ Compilation du projet Laravel avec Vite...'
+                sh '${NODE_PATH} run build'
+            }
+        }
+
+        stage('Run Dev Server') {
+            steps {
+                echo '🚀 Lancement du serveur de développement...'
+                sh 'nohup ${NODE_PATH} run dev >/dev/null 2>&1 &'
+            }
+        }
+
+stage('Run Laravel Schedule & Python AI Scripts') {
+    steps {
+        echo '⏱️ Exécution du schedule Laravel et des scripts Python...'
+        sh '''
+            # Installer les dépendances Python du projet Ai
+            if [ -f Ai/requirements.txt ]; then
+                echo "📦 Installation des dépendances Python..."
+                python3 -m pip install --upgrade pip
+                python3 -m pip install -r Ai/requirements.txt
+                python3 -m pip install --upgrade accelerate
+            else
+                echo "⚠️ Aucun fichier requirements.txt trouvé dans Ai/"
+            fi
+
+            # Lancer le scheduler Laravel en arrière-plan
+            nohup ${PHP_PATH} artisan schedule:work >/dev/null 2>&1 &
+
+            # Vérifier le dataset
+            if [ ! -d Ai/load_booksum ]; then
+                echo "📦 Dataset manquant. Génération du dataset..."
+                python3 Ai/load_booksum.py
+            fi
+
+            # Lancer les scripts Python AI (séquentiels)
+            python3 Ai/train_booksum.py
+            python3 Ai/train_books_model.py
+
+            # Lancer le serveur Flask en arrière-plan ✅
+            nohup python3 Ai/app.py >/dev/null 2>&1 &
+
+            # Aller dans le dossier ai_model et lancer les scripts
+            cd ai_model
+            python3 train_model.py
+            python3 predict.py 5 25
+        '''
+    }
+}
+
+ stage('SonarQube Analysis') {
+            environment { SONAR_TOKEN = credentials('sonar-token-id') }
+            steps {
+                echo '🔍 SonarQube analysis'
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                        sonar-scanner \
+                          -Dsonar.projectKey=Bookshare \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=http://192.168.33.10:9000 \
+                          -Dsonar.login=${SONAR_TOKEN}
+                    """
+                }
+            }
+        }
+
+stage('Deploy to Nexus') {
+    steps {
+        script {
+            echo "Building Docker image..."
+          
+        }
+    }
+}
+stage('SonarQube Analysis') {
+   
+    steps {
+        echo '🔍 Analyse du code avec SonarQube...'
+       
+
+    }
+}
+
+  stage('Build Docker Images') {
+            steps {
+                echo '🐳 Build Docker Laravel (app) & AI service...'
+                sh """
+                    docker build -t ${IMAGE_NAME}:app-${TAG} -f Dockerfile .
+                    docker build -t ${IMAGE_NAME}:ai-${TAG} -f Ai/Dockerfile Ai/
+                """
+            }
+        }
+
+        stage('Push Docker Images to Nexus') {
+            steps {
+                script {
+                    echo '📤 Push des images vers Nexus...'
+                    docker.withRegistry("http://${REGISTRY}", REGISTRY_CREDENTIALS) {
+                        sh "docker push ${IMAGE_NAME}:app-${TAG}"
+                        sh "docker push ${IMAGE_NAME}:ai-${TAG}"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy with Docker Compose') {
+            steps {
+                echo '🚀 Déploiement docker-compose...'
+                sh '''
+                    docker-compose down --remove-orphans || true
+                    docker-compose pull || true
+                    docker-compose up -d --build
+                '''
+            }
+        }
+
+        stage('Prometheus / Grafana (Placeholder)') {
+            steps {
+                echo '📊 Prometheus & Grafana seront lancés via docker-compose (si configurés dans le fichier)'
+            }
+        }
+    }
+
+
+    post {
+        success {
+            echo '✅ Pipeline exécutée avec succès ! Application Laravel + AI opérationnelle 🎉'
+        }
+        failure {
+            echo '❌ Échec de la pipeline ! Vérifie les logs Jenkins pour plus de détails.'
+        }
+    }
+}
