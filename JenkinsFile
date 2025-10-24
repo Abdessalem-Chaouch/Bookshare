@@ -198,7 +198,7 @@ stage('Deploy to Nexus') {
                 echo '📊 Prometheus & Grafana seront lancés via docker-compose (si configurés dans le fichier)'
             }
         }
-    }
+    
 
 
     post {
