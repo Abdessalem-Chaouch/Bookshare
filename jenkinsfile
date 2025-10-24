@@ -131,42 +131,34 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            environment { SONAR_TOKEN = credentials('sonar-token-id') }
-            steps {
-                echo '🔍 SonarQube analysis (placeholder)'
-                // Exemple d'appel (décommenter si sonar-scanner est disponible)
-                // sh "sonar-scanner -Dsonar.login=${SONAR_TOKEN}"
-            }
-        }
+    steps {
+        echo '✅ SonarQube Analysis exécutée avec succès (placeholder)'
+    }
+}
 
-        stage('Build Docker Images') {
-            steps {
-                echo '🐳 Build Docker image for app...'
-                
-            }
-        }
+stage('Build Docker Images') {
+    steps {
+        echo '✅ Build Docker Images terminée (placeholder)'
+    }
+}
 
-        stage('Push Docker Images to Nexus') {
-            steps {
-                script {
-                    echo '📤 Push images to Nexus (using credentials id)...'
-                   
-                }
-            }
-        }
+stage('Push Docker Images to Nexus') {
+    steps {
+        echo '✅ Push Docker Images vers Nexus effectué (placeholder)'
+    }
+}
 
-        stage('Deploy with Docker Compose') {
-            steps {
-                echo '🚀 Deploy with docker-compose (if docker-compose.yml present)...'
-               
-            }
-        }
+stage('Deploy with Docker Compose') {
+    steps {
+        echo '✅ Déploiement docker-compose simulé (placeholder)'
+    }
+}
 
-        stage('Prometheus / Grafana (Placeholder)') {
-            steps {
-                echo '📊 Placeholder: Prometheus & Grafana via docker-compose (si configurés)'
-            }
-        }
+stage('Prometheus / Grafana (Placeholder)') {
+    steps {
+        echo '✅ Prometheus & Grafana simulés (placeholder)'
+    }
+}
     }
 
     post {
