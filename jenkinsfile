@@ -200,6 +200,18 @@ stage('Push New Docker Image') {
             }
          
           }
+  stage('Promethus') {
+                    steps {
+                        echo '🔍 Analyse du code avec prom...'
+                    }
+                }
+  stage('Grafana') {
+                    steps {
+                       echo '🔍 Analyse du code avec Grafana...'
+                    }
+                }
+
+
     }
 
 
