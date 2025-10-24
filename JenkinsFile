@@ -158,14 +158,7 @@ stage('Deploy to Nexus') {
         }
     }
 }
-stage('SonarQube Analysis') {
-   
-    steps {
-        echo '🔍 Analyse du code avec SonarQube...'
-       
 
-    }
-}
 
   stage('Build Docker Images') {
             steps {
