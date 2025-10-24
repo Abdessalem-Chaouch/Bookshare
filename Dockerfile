@@ -1,4 +1,3 @@
-
 # Utiliser PHP 8.2 avec Apache
 FROM php:8.2-apache
 
@@ -29,20 +28,20 @@ WORKDIR /var/www/html
 COPY composer.json composer.lock ./
 
 # Installer les dépendances PHP
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
 
 # Copier le reste du projet (sans vendor ni node_modules)
-COPY . ./
+COPY . .
 
 # Ajuster les permissions pour Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Modifier le DocumentRoot d'Apache pour Laravel
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/sites-available/000-default.conf \
+    && sed -i 's|<Directory /var/www/>|<Directory /var/www/html/public>|g' /etc/apache2/apache2.conf
 
 # Exposer le port 80
 EXPOSE 80
 
 # Lancer Apache en foreground
 CMD ["apache2-foreground"]
-
