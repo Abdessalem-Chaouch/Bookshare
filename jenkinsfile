@@ -12,6 +12,7 @@ pipeline {
         DB_USERNAME = "laravel"
         DB_PASSWORD = "secret123"
 
+        // Jenkins credentials id should reference a username/password credential for the registry
         registryCredentials = "c9e556bb-7b93-4c3f-9058-2c2ab7cd8b68"
         registry = "192.168.33.10:8083"
 
@@ -22,7 +23,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 echo '📦 Checkout du code depuis GitHub...'
@@ -32,16 +32,15 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                echo '📦 Installation des dépendances Laravel...'
+                echo '📦 Installation des dépendances Laravel & NPM...'
                 sh '${COMPOSER_PATH} install --no-interaction --prefer-dist --no-progress'
-                echo '📦 Installation des dépendances NPM...'
                 sh '${NODE_PATH} install'
             }
         }
 
         stage('Setup Environment') {
             steps {
-                echo '⚙️ Configuration du fichier .env et génération de la clé Laravel...'
+                echo '⚙️ Configuration du .env et génération de la clé...'
                 sh '''
                     if [ ! -f .env ]; then
                         cp .env.example .env
@@ -70,14 +69,14 @@ pipeline {
                 echo '🗄️ Création de la base de données si nécessaire...'
                 sh '''
                     mysql -h${DB_HOST} -P${DB_PORT} -u${DB_USERNAME} -p${DB_PASSWORD} \
-                    -e "CREATE DATABASE IF NOT EXISTS ${DB_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+                      -e "CREATE DATABASE IF NOT EXISTS ${DB_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
                 '''
             }
         }
 
         stage('Run Migrations & Storage') {
             steps {
-                echo '🗄️ Migration de la base de données et configuration du stockage...'
+                echo '🗄️ Migrations & storage link...'
                 sh '''
                     ${PHP_PATH} artisan migrate --force
                     ${PHP_PATH} artisan storage:link || true
@@ -87,14 +86,14 @@ pipeline {
 
         stage('Build Vite') {
             steps {
-                echo '⚙️ Compilation du projet Laravel avec Vite...'
+                echo '⚙️ Build Vite...'
                 sh '${NODE_PATH} run build'
             }
         }
 
         stage('Run Laravel Schedule & Python AI Scripts') {
             steps {
-                echo '🤖 Exécution du scheduler Laravel et des scripts Python...'
+                echo '🤖 Scheduler & AI scripts...'
                 sh '''
                     # Installer les dépendances Python
                     if [ -f Ai/requirements.txt ]; then
@@ -103,54 +102,46 @@ pipeline {
                         ${PYTHON_PATH} -m pip install -r Ai/requirements.txt
                         ${PYTHON_PATH} -m pip install --upgrade accelerate
                     else
-                        echo "⚠️ Aucun fichier requirements.txt trouvé dans Ai/"
+                        echo "⚠️ Aucun requirements.txt dans Ai/"
                     fi
 
-                    # Lancer le scheduler Laravel en arrière-plan
+                    # Lancer scheduler Laravel en arrière-plan
                     nohup ${PHP_PATH} artisan schedule:work >/dev/null 2>&1 &
 
-                    # Vérifier ou générer le dataset
+                    # Dataset & entraînements
                     if [ ! -d Ai/load_booksum ]; then
                         echo "📦 Dataset manquant. Génération..."
                         ${PYTHON_PATH} Ai/load_booksum.py
                     fi
 
-                    # Entraînement des modèles AI
                     ${PYTHON_PATH} Ai/train_booksum.py
                     ${PYTHON_PATH} Ai/train_books_model.py
 
-                    # Lancer le serveur Flask en arrière-plan
+                    # Lancer Flask en arrière-plan
                     nohup ${PYTHON_PATH} Ai/app.py >/dev/null 2>&1 &
 
-                    # Aller dans le dossier ai_model et exécuter les scripts
-                    cd ai_model
-                    ${PYTHON_PATH} train_model.py
-                    ${PYTHON_PATH} predict.py 5 25
+                    # ai_model scripts (optionnel)
+                    if [ -d ai_model ]; then
+                        cd ai_model
+                        ${PYTHON_PATH} train_model.py || true
+                        ${PYTHON_PATH} predict.py 5 25 || true
+                    fi
                 '''
             }
         }
 
-         stage('SonarQube Analysis') {
+        stage('SonarQube Analysis') {
             environment { SONAR_TOKEN = credentials('sonar-token-id') }
             steps {
-                echo '🔍 SonarQube analysis'
-                
+                echo '🔍 SonarQube analysis (placeholder)'
+                // Exemple d'appel (décommenter si sonar-scanner est disponible)
+                // sh "sonar-scanner -Dsonar.login=${SONAR_TOKEN}"
             }
         }
 
-stage('Deploy to Nexus') {
-    steps {
-        script {
-            echo "Building Docker image..."
-          
-        }
-    }
-}
-
-
-  stage('Build Docker Images') {
+        stage('Build Docker Images') {
             steps {
-                echo '🐳 Build Docker Laravel (app) & AI service...'
+                echo '🐳 Build Docker image for app...'
                 
             }
         }
@@ -158,28 +149,24 @@ stage('Deploy to Nexus') {
         stage('Push Docker Images to Nexus') {
             steps {
                 script {
-                    echo '📤 Push des images vers Nexus...'
-                 
+                    echo '📤 Push images to Nexus (using credentials id)...'
+                   
                 }
             }
         }
 
         stage('Deploy with Docker Compose') {
             steps {
-                echo '🚀 Déploiement docker-compose...'
-                
+                echo '🚀 Deploy with docker-compose (if docker-compose.yml present)...'
+               
             }
         }
 
         stage('Prometheus / Grafana (Placeholder)') {
             steps {
-                echo '📊 Prometheus & Grafana seront lancés via docker-compose (si configurés dans le fichier)'
+                echo '📊 Placeholder: Prometheus & Grafana via docker-compose (si configurés)'
             }
         }
-    }
-
-
-      
     }
 
     post {
