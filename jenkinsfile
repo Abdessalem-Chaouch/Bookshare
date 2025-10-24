@@ -28,7 +28,7 @@ registry = "192.168.33.10:8083"
             }
         }
 
-       """ stage('Install Dependencies') {
+       /* stage('Install Dependencies') {
             steps {
                 echo '📦 Installation des dépendances Laravel...'
                 sh '${COMPOSER_PATH} install --no-interaction --prefer-dist --no-progress'
@@ -132,7 +132,7 @@ stage('Run Laravel Schedule & Python AI Scripts') {
             python3 predict.py 5 25
         '''
     }
-}"""
+}*/
 
 
 stage('Deploy  to Nexus') { 
@@ -145,7 +145,7 @@ sh('docker push $registry/nodemongoapp:5.0 ')
 } 
 } 
 }
-"""
+/*
 stage('SonarQube Analysis') {
     environment {
         SCANNER_HOME = tool 'SonarQubeScanner'
@@ -174,7 +174,7 @@ stage('SonarQube Analysis') {
     }
 }
 
-"""
+*/
     }
 
 
