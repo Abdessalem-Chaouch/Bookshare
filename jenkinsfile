@@ -138,12 +138,17 @@ stage('Run Laravel Schedule & Python AI Scripts') {
 stage('Deploy to Nexus') {
     steps {
         script {
+            echo "Building Docker image..."
+            sh "docker build -t $registry/nexus:latest ."
+            
+            echo "Pushing Docker image to Nexus..."
             docker.withRegistry("http://"+registry, "nexus-admin") {
-                sh('docker push $registry/nexus')
+                sh "docker push $registry/nexus:latest"
             }
         }
     }
 }
+
 /*
 stage('SonarQube Analysis') {
     environment {
