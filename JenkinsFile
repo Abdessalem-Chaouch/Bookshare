@@ -209,4 +209,4 @@ stage('Deploy to Nexus') {
             echo '❌ Échec de la pipeline ! Vérifie les logs Jenkins pour plus de détails.'
         }
     }
-}
+} }
