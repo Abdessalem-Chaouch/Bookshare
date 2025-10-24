@@ -135,15 +135,14 @@ stage('Run Laravel Schedule & Python AI Scripts') {
 }*/
 
 
-stage('Deploy  to Nexus') { 
-steps{   
-script { 
-docker.withRegistry("http://"+registry, 
-registryCredentials ) { 
-sh('docker push $registry/nexus ') 
-} 
-} 
-} 
+stage('Deploy to Nexus') {
+    steps {
+        script {
+            docker.withRegistry("http://"+registry, "nexus-admin") {
+                sh('docker push $registry/nexus')
+            }
+        }
+    }
 }
 /*
 stage('SonarQube Analysis') {
