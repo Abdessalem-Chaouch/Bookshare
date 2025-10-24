@@ -33,7 +33,7 @@ services:
       - "5000:5000"
     volumes:
       - ./Ai:/app
-      - "./Ai/models:/app/models" 
+      - "./Ai/models:/app/models"
     networks:
       - bookshare_network
 
@@ -43,7 +43,7 @@ services:
     container_name: mysql_db
     restart: always
     ports:
-      - "3308:3308"
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ""
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
@@ -53,7 +53,7 @@ services:
     networks:
       - bookshare_network
 
-  # ⚡ Vite (Frontend)
+  # ⚡ Vite (Frontend dev)
   vite:
     image: node:22
     container_name: vite_dev
@@ -73,6 +73,28 @@ services:
       sh -c "rm -rf node_modules package-lock.json &&
              npm install &&
              npm run dev"
+
+  # 📊 Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - bookshare_network
+    restart: unless-stopped
+
+  # 📈 Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - bookshare_network
+    restart: unless-stopped
 
 volumes:
   mysql_data:
